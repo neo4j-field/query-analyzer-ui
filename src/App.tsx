@@ -2,12 +2,30 @@ import { useState } from "react"
 import reactLogo from "./assets/react.svg"
 import viteLogo from "/vite.svg"
 import "./App.css"
+import { BarChart } from "@mui/x-charts"
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
+      <BarChart
+        xAxis={[
+          {
+            id: "barCategories",
+            data: ["bar A", "bar B", "bar C"],
+            scaleType: "band",
+          },
+        ]}
+        series={[
+          {
+            data: [2, 5, 3],
+          },
+        ]}
+        width={500}
+        height={300}
+      />
+
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
