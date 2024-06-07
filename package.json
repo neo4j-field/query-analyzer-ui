@@ -22,7 +22,25 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "prettier": "^3.3.1",
+    "prettier-config-nick": "^1.0.8",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
-  }
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "plugins": [
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": "warn",
+      "react/jsx-no-target-blank": "off",
+      "jest/valid-title": "off",
+      "array-callback-return": "off"
+    }
+  },
+  "prettier": "prettier-config-nick"
 }
