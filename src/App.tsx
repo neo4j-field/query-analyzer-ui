@@ -1,94 +1,198 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import AddIcon from "@mui/icons-material/Add"
 import reactLogo from "./assets/react.svg"
 import viteLogo from "/vite.svg"
-import "./App.css"
+// import "./App.css"
 import { BarChart } from "@mui/x-charts"
-import { Button } from "@mui/material"
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Grid,
+  Typography,
+} from "@mui/material"
+
+import CssBaseline from "@mui/material/CssBaseline"
+import {
+  QUERY_LOG_TIME_WINDOW,
+  QUERY_PERCENTILE,
+  SQLITE_ROOT,
+} from "./util/apiEndpoints"
+import { fetchGetUri } from "./util/helpers"
+import { produce } from "immer"
+
+const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
+
+const BAR_CHART_WIDTH = 400
+const BAR_CHART_HEIGHT = 300
+
+const CARD_PROPERTY = {
+  borderRadius: 3,
+  boxShadow: 0,
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [loading, setLoading] = useState({
+    logDetails: false,
+    percentile: false,
+  })
+  const [firstStartTimestamp, setFirstStartTimestamp] = useState<number>(-1)
+  const [lastStartTimestamp, setLastStartTimestamp] = useState<number>(-1)
+  const [logDuration, setLogDuration] = useState<number>(-1)
 
-  const handleFetchQueryTimestamps = async () => {
-    // const data = await fetch(`${import.meta.env.VITE_API_URL}/` )
-    const username = "admin"
-    const password = "neo4j"
-    const credentials = btoa(`${username}:${password}`)
-
-    // Set up the headers
-    const headers = new Headers({
-      Accept: "application/json; indent=2",
-      Authorization: `Basic ${credentials}`,
-    })
-
-    try {
-      // const params = new URLSearchParams({ param1: 'value1', param2: 'value2' });
-      const url = `${import.meta.env.VITE_API_URI}/read-sqlite/query_db2.db`
-      console.log("awaiting fetch...")
-      const response = await fetch(url, { method: "GET", headers })
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok")
-      }
-
-      const result = await response.json()
-      console.log(result)
-      // setData(result);
-    } catch (error) {
-      // setError(error);
-      alert(error)
-    } finally {
-      // setLoading(false);
+  const handleRefetch = async (uri: string, loadingKey: string) => {
+    if (loadingKey === "logdetails") {
+      fetchLogDetails()
+    } else if (loadingKey === "percentile") {
     }
+  }
+
+  useEffect(() => {
+    ;(async () => {
+      setLoading(
+        produce((draft) => {
+          draft.percentile = true
+        }),
+      )
+      fetchGetUri(`${SQLITE_ROOT}/${QUERY_PERCENTILE}`).then((response) => {
+        setLoading(
+          produce((draft) => {
+            draft.percentile = false
+          }),
+        )
+        console.log(`query percentile response`, response)
+      })
+
+      fetchLogDetails()
+    })()
+  }, [])
+
+  const fetchLogDetails = async () => {
+    setLoading(
+      produce((draft) => {
+        draft.logDetails = true
+      }),
+    )
+    const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_LOG_TIME_WINDOW}`)
+    setLoading(
+      produce((draft) => {
+        draft.logDetails = false
+      }),
+    )
+
+    const logDetails = convertToDataMap(result.data)[0]
+    setFirstStartTimestamp(logDetails["firstStartTimestampMs"])
+    setLastStartTimestamp(logDetails["lastStartTimestampMs"])
+    setLogDuration(logDetails["windowDurationMin"])
+  }
+
+  const convertToDataMap = (resultData: {
+    headers: string[]
+    rows: any[][]
+  }) => {
+    const dataMap: any[] = []
+    for (const row of resultData.rows) {
+      const mapRow: any = {}
+      for (let i = 0; i < resultData.headers.length; i++) {
+        const header = resultData.headers[i]
+        mapRow[header] = row[i]
+      }
+      dataMap.push(mapRow)
+    }
+    return dataMap
   }
 
   return (
     <>
-      <BarChart
-        xAxis={[
-          {
-            id: "barCategories",
-            data: ["bar A", "bar B", "bar C"],
-            scaleType: "band",
-          },
-        ]}
-        series={[
-          {
-            data: [2, 5, 3],
-          },
-        ]}
-        width={500}
-        height={300}
-      />
+      <Box style={{ display: "block", height: CONTENT_AREA_HEIGHT }}>
+        <CssBaseline />
 
-      <Button
-        startIcon={<AddIcon />}
-        onClick={() => handleFetchQueryTimestamps()}
-      >
-        {" "}
-        Fetch
-      </Button>
+        <Grid container spacing={4}>
+          <Grid item xs={12} sm={6} md={6} lg={4} xl={3}>
+            <Card sx={CARD_PROPERTY}>
+              {loading.logDetails && <CircularProgress />}
+              {!loading.logDetails && (
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div">
+                    Log Details
+                  </Typography>
+                  <Typography variant="body2">
+                    First Start Timestamp:{" "}
+                    {`${new Date(firstStartTimestamp).toISOString()}`}
+                  </Typography>
+                  <Typography variant="body2">
+                    Last Start Timestamp:{" "}
+                    {`${new Date(lastStartTimestamp).toISOString()}`}
+                  </Typography>
+                  <Typography variant="body2">
+                    Log Duration: {`${logDuration} minutes`}
+                  </Typography>
 
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={() =>
+                      handleRefetch(
+                        `${SQLITE_ROOT}/${QUERY_LOG_TIME_WINDOW}`,
+                        "logdetails",
+                      )
+                    }
+                  >
+                    {" "}
+                    Update
+                  </Button>
+                </CardContent>
+              )}
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={6} lg={4} xl={3}>
+            <Card sx={CARD_PROPERTY}>
+              {loading.percentile && <CircularProgress />}
+              {!loading.percentile && (
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div">
+                    Card 2
+                  </Typography>
+                  <BarChart
+                    xAxis={[
+                      {
+                        id: "barCategories",
+                        data: ["bar A", "bar B", "bar C"],
+                        scaleType: "band",
+                      },
+                    ]}
+                    series={[
+                      {
+                        data: [2, 5, 3],
+                      },
+                    ]}
+                    width={BAR_CHART_WIDTH}
+                    height={BAR_CHART_HEIGHT}
+                  />
+
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={() =>
+                      handleRefetch(
+                        `${SQLITE_ROOT}/${QUERY_PERCENTILE}`,
+                        "percentile",
+                      )
+                    }
+                  >
+                    {" "}
+                    Update
+                  </Button>
+                </CardContent>
+              )}
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* TOP BAR */}
+        {/* <AppHeader designer={designer} /> */}
+      </Box>
     </>
   )
 }
