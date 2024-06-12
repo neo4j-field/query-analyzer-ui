@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { SetStateAction, useEffect, useState } from "react"
 import AddIcon from "@mui/icons-material/Add"
 import reactLogo from "./assets/react.svg"
 import viteLogo from "/vite.svg"
@@ -20,8 +20,9 @@ import {
   QUERY_PERCENTILE,
   SQLITE_ROOT,
 } from "./util/apiEndpoints"
-import { fetchGetUri } from "./util/helpers"
+import { convertToDataMap, fetchGetUri } from "./util/helpers"
 import { produce } from "immer"
+import PercentileCard from "./components/PercentileCard"
 
 const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
@@ -33,10 +34,20 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
+export interface LoadingStatuses {
+  logDetails: LoadingStatus
+  percentile: LoadingStatus
+}
+
+export interface LoadingStatus {
+  isLoading: boolean
+  hasError: boolean
+}
+
 function App() {
-  const [loading, setLoading] = useState({
-    logDetails: false,
-    percentile: false,
+  const [loading, setLoading] = useState<LoadingStatuses>({
+    logDetails: {isLoading: false, hasError: false},
+    percentile: {isLoading: false, hasError: false},
   })
   const [firstStartTimestamp, setFirstStartTimestamp] = useState<number>(-1)
   const [lastStartTimestamp, setLastStartTimestamp] = useState<number>(-1)
@@ -51,57 +62,37 @@ function App() {
 
   useEffect(() => {
     ;(async () => {
-      setLoading(
-        produce((draft) => {
-          draft.percentile = true
-        }),
-      )
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_PERCENTILE}`).then((response) => {
-        setLoading(
-          produce((draft) => {
-            draft.percentile = false
-          }),
-        )
-        console.log(`query percentile response`, response)
-      })
 
       fetchLogDetails()
     })()
   }, [])
 
+  /****************************************************************************
+   ****************************************************************************/
   const fetchLogDetails = async () => {
     setLoading(
       produce((draft) => {
-        draft.logDetails = true
+        draft.logDetails.isLoading = true
+        draft.logDetails.hasError = false
       }),
     )
     const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_LOG_TIME_WINDOW}`)
+    console.log(result.message)
     setLoading(
       produce((draft) => {
-        draft.logDetails = false
+        draft.logDetails.isLoading = false
+        draft.logDetails.hasError = result.hasError ? true : false
       }),
     )
+
+    if (result.hasError) {
+      return
+    }
 
     const logDetails = convertToDataMap(result.data)[0]
     setFirstStartTimestamp(logDetails["firstStartTimestampMs"])
     setLastStartTimestamp(logDetails["lastStartTimestampMs"])
     setLogDuration(logDetails["windowDurationMin"])
-  }
-
-  const convertToDataMap = (resultData: {
-    headers: string[]
-    rows: any[][]
-  }) => {
-    const dataMap: any[] = []
-    for (const row of resultData.rows) {
-      const mapRow: any = {}
-      for (let i = 0; i < resultData.headers.length; i++) {
-        const header = resultData.headers[i]
-        mapRow[header] = row[i]
-      }
-      dataMap.push(mapRow)
-    }
-    return dataMap
   }
 
   return (
@@ -112,8 +103,9 @@ function App() {
         <Grid container spacing={4}>
           <Grid item xs={12} sm={6} md={6} lg={4} xl={3}>
             <Card sx={CARD_PROPERTY}>
-              {loading.logDetails && <CircularProgress />}
-              {!loading.logDetails && (
+              {loading.logDetails.isLoading && <CircularProgress />}
+              {(!loading.logDetails.isLoading && loading.logDetails.hasError) && <Typography>Error loading</Typography>}
+              {(!loading.logDetails.isLoading && !loading.logDetails.hasError) && (
                 <CardContent>
                   <Typography gutterBottom variant="h5" component="div">
                     Log Details
@@ -147,46 +139,8 @@ function App() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={6} lg={4} xl={3}>
-            <Card sx={CARD_PROPERTY}>
-              {loading.percentile && <CircularProgress />}
-              {!loading.percentile && (
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    Card 2
-                  </Typography>
-                  <BarChart
-                    xAxis={[
-                      {
-                        id: "barCategories",
-                        data: ["bar A", "bar B", "bar C"],
-                        scaleType: "band",
-                      },
-                    ]}
-                    series={[
-                      {
-                        data: [2, 5, 3],
-                      },
-                    ]}
-                    width={BAR_CHART_WIDTH}
-                    height={BAR_CHART_HEIGHT}
-                  />
-
-                  <Button
-                    startIcon={<AddIcon />}
-                    onClick={() =>
-                      handleRefetch(
-                        `${SQLITE_ROOT}/${QUERY_PERCENTILE}`,
-                        "percentile",
-                      )
-                    }
-                  >
-                    {" "}
-                    Update
-                  </Button>
-                </CardContent>
-              )}
-            </Card>
+          <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+            <PercentileCard loading={loading} setLoading={setLoading} />
           </Grid>
         </Grid>
 

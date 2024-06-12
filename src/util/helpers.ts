@@ -24,8 +24,24 @@ export const fetchGetUri = async (urlPattern: string) => {
     // setData(result);
   } catch (error) {
     // setError(error);
-    alert(error)
+    console.error(error)
+    return { hasError: true, error }
   } finally {
     // setLoading(false);
   }
+}
+
+/****************************************************************************
+ ****************************************************************************/
+export const convertToDataMap = (resultData: { headers: string[]; rows: any[][] }) => {
+  const dataMap: any[] = []
+  for (const row of resultData.rows) {
+    const mapRow: any = {}
+    for (let i = 0; i < resultData.headers.length; i++) {
+      const header = resultData.headers[i]
+      mapRow[header] = row[i]
+    }
+    dataMap.push(mapRow)
+  }
+  return dataMap
 }
