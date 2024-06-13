@@ -5,12 +5,6 @@ import { useState } from "react"
 import { LoadingStatus } from "../App"
 import QueriesExecutedCard from "./QueriesExecutedCard"
 
-export interface DashboardLoadingStatuses {
-  logTimeWindow: LoadingStatus
-  queriesExecuted: LoadingStatus
-  percentile: LoadingStatus
-}
-
 // Card: Total number of unique queries.
 // Card: Time Peiod. Number of Queries executed. Average time taken, avg page hits, avg page faults.
 // Card: Percentage queries planned, percentage of planning time/elapsedtime
@@ -20,12 +14,6 @@ export interface DashboardLoadingStatuses {
 // Card: Top 5 queries with most elapsedtime
 
 export default function Dashboard() {
-  const [loading, setLoading] = useState<DashboardLoadingStatuses>({
-    logTimeWindow: { isLoading: false, hasError: false },
-    queriesExecuted: { isLoading: false, hasError: false },
-    percentile: { isLoading: false, hasError: false },
-  })
-
   return (
     <Box
       component="main"
@@ -44,13 +32,13 @@ export default function Dashboard() {
 
         {/* <Grid item xs={12} sm={12} md={12} lg={12} xl={12}> */}
         <Grid item xs={6}>
-          <TimePeriodCard loading={loading} setLoading={setLoading} />
+          <TimePeriodCard />
         </Grid>
         <Grid item xs={12}>
-          <QueriesExecutedCard loading={loading} setLoading={setLoading} />
+          <QueriesExecutedCard />
         </Grid>
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <PercentileCard loading={loading} setLoading={setLoading} />
+          <PercentileCard />
         </Grid>
       </Grid>
     </Box>

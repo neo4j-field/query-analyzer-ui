@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import AddIcon from "@mui/icons-material/Add"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import {
@@ -26,20 +26,17 @@ import {
   SQLITE_ROOT,
 } from "../../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
-import { produce } from "immer"
-import { DashboardLoadingStatuses } from "./Dashboard"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
   boxShadow: 0,
 }
 
-interface Props {
-  loading: DashboardLoadingStatuses
-  setLoading: Dispatch<SetStateAction<DashboardLoadingStatuses>>
-}
-
-export default function PercentileCard({ loading, setLoading }: Props) {
+export default function PercentileCard() {
+  const [loadStatus, setLoadStatus] = useState({
+    loading: false,
+    hasError: false,
+  })
   const [rows, setRows] = useState<any[][]>([])
   const [headers, setHeaders] = useState<string[]>([])
   const [openModal, setOpenModal] = useState(false)
@@ -59,19 +56,9 @@ export default function PercentileCard({ loading, setLoading }: Props) {
   /****************************************************************************
    ****************************************************************************/
   const fetchPercentile = async () => {
-    setLoading(
-      produce((draft) => {
-        draft.percentile.isLoading = true
-        draft.percentile.hasError = false
-      }),
-    )
+    setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_PERCENTILE}`)
-    setLoading(
-      produce((draft) => {
-        draft.percentile.isLoading = false
-        draft.percentile.hasError = result.hasError ? true : false
-      }),
-    )
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
     // console.log(`query percentile response`, result)
 
     if (result.hasError) {
@@ -88,11 +75,11 @@ export default function PercentileCard({ loading, setLoading }: Props) {
           <Typography gutterBottom variant="h5" component="div">
             90th Percentiles
           </Typography>
-          {loading.percentile.isLoading && <CircularProgress />}
-          {!loading.percentile.isLoading && loading.percentile.hasError && (
+          {loadStatus.loading && <CircularProgress />}
+          {!loadStatus.loading && loadStatus.hasError && (
             <Typography>Error loading</Typography>
           )}
-          {!loading.percentile.isLoading && !loading.percentile.hasError && (
+          {!loadStatus.loading && !loadStatus.hasError && (
             <TableContainer component={Paper} sx={{ maxHeight: 800 }}>
               <Table
                 stickyHeader

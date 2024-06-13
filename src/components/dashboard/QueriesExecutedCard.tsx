@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import AddIcon from "@mui/icons-material/Add"
 import {
   Button,
@@ -16,27 +16,18 @@ import {
 } from "@mui/material"
 
 import {
-  QUERY_GET_PLANNING_PCT,
-  QUERY_LOG_TIME_WINDOW,
   QUERY_QUERY_COUNT_BY_SERVER,
   SQLITE_ROOT,
 } from "../../util/apiEndpoints"
-import { convertToDataMap, fetchGetUri } from "../../util/helpers"
-import { produce } from "immer"
-import { DashboardLoadingStatuses } from "./Dashboard"
-import { DataGrid } from "@mui/x-data-grid"
+import { fetchGetUri } from "../../util/helpers"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
   boxShadow: 0,
 }
 
-interface Props {
-  loading: DashboardLoadingStatuses
-  setLoading: Dispatch<SetStateAction<DashboardLoadingStatuses>>
-}
-
-export default function QueriesExecuted({ loading, setLoading }: Props) {
+export default function QueriesExecuted() {
+  const [loadStatus, setLoadStatus] = useState({loading: false, hasError: false})
   const [queryCountByServerRows, setQueryCountByServerRows] = useState<any[][]>(
     [],
   )
@@ -55,22 +46,11 @@ export default function QueriesExecuted({ loading, setLoading }: Props) {
   /****************************************************************************
    ****************************************************************************/
   const fetchData = async () => {
-    setLoading(
-      produce((draft) => {
-        draft.queriesExecuted.isLoading = true
-        draft.queriesExecuted.hasError = false
-      }),
-    )
+    setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
       fetchGetUri(`${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}`),
     ])
-    console.log("results", results)
-    setLoading(
-      produce((draft) => {
-        draft.queriesExecuted.isLoading = false
-        draft.queriesExecuted.hasError = false
-      }),
-    )
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
     let i = 0
     for (const result of results) {
@@ -91,12 +71,12 @@ export default function QueriesExecuted({ loading, setLoading }: Props) {
           Queries Executed
         </Typography>
 
-        {loading.queriesExecuted.isLoading && <CircularProgress />}
-        {!loading.queriesExecuted.isLoading && loading.logTimeWindow.hasError && (
+        {loadStatus.loading && <CircularProgress />}
+        {!loadStatus.loading && loadStatus.hasError && (
           <Typography>Error loading query counts by server</Typography>
         )}
-        {!loading.queriesExecuted.isLoading &&
-          !loading.queriesExecuted.hasError && (
+        {!loadStatus.loading &&
+          !loadStatus.hasError && (
             <TableContainer component={Paper} sx={{ maxHeight: 800 }}>
               <Table
                 stickyHeader
