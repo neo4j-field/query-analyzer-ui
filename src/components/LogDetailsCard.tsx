@@ -16,6 +16,7 @@ import {
 } from "@mui/material"
 
 import {
+  QUERY_GET_PLANNING_PCT,
   QUERY_LOG_TIME_WINDOW,
   QUERY_QUERY_COUNT_BY_SERVER,
   SQLITE_ROOT,
@@ -38,17 +39,18 @@ export default function LogDetailsCard({ loading, setLoading }: Props) {
   const [firstStartTimestamp, setFirstStartTimestamp] = useState<number>(-1)
   const [lastStartTimestamp, setLastStartTimestamp] = useState<number>(-1)
   const [logDuration, setLogDuration] = useState<number>(-1)
-  const [rows, setRows] = useState<any[][]>([])
-  const [headers, setHeaders] = useState<string[]>([])
+  const [queryCountByServerRows, setQueryCountByServerRows] = useState<any[][]>([])
+  const [queryCountByServerHeaders, setQueryCountByServerHeaders] = useState<string[]>([])
+  const [planningPercent, setPlanningPercent] = useState<number>(-1)
 
   const handleRefetch = async () => {
     fetchLogTimeWindow()
-    fetchQueryCountByServer()
+    // fetchQueryCountByServer()
   }
 
   useEffect(() => {
     fetchLogTimeWindow()
-    fetchQueryCountByServer()
+    // fetchQueryCountByServer()
   }, [])
 
   /****************************************************************************
@@ -60,49 +62,39 @@ export default function LogDetailsCard({ loading, setLoading }: Props) {
         draft.logTimeWindow.hasError = false
       }),
     )
-    const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_LOG_TIME_WINDOW}`)
+    const results = await Promise.all([
+      fetchGetUri(`${SQLITE_ROOT}/${QUERY_LOG_TIME_WINDOW}`),
+      fetchGetUri(`${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}`),
+      fetchGetUri(`${SQLITE_ROOT}/${QUERY_GET_PLANNING_PCT}`),
+    ]);
+    console.log('results', results)
     setLoading(
       produce((draft) => {
         draft.logTimeWindow.isLoading = false
-        draft.logTimeWindow.hasError = result.hasError ? true : false
+        draft.logTimeWindow.hasError = false
       }),
     )
 
-    if (result.hasError) {
-      return
+    let i = 0
+    for (const result of results) {
+      if (result.hasError) {
+        console.error(`Error for fetch ${i}: ${result}`)
+      }
+      i++
     }
 
-    const datamap = convertToDataMap(result.data.headers, result.data.rows)[0]
+    // log time window
+    const datamap = convertToDataMap(results[0].data.headers, results[0].data.rows)[0]
     setFirstStartTimestamp(datamap["firstStartTimestampMs"])
     setLastStartTimestamp(datamap["lastStartTimestampMs"])
     setLogDuration(datamap["windowDurationMin"])
-  }
 
-  /****************************************************************************
-   ****************************************************************************/
-  const fetchQueryCountByServer = async () => {
-    setLoading(
-      produce((draft) => {
-        draft.queryCountByServer.isLoading = true
-        draft.queryCountByServer.hasError = false
-      }),
-    )
-    const result = await fetchGetUri(
-      `${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}`,
-    )
-    setLoading(
-      produce((draft) => {
-        draft.queryCountByServer.isLoading = false
-        draft.queryCountByServer.hasError = result.hasError ? true : false
-      }),
-    )
+    // query count
+    setQueryCountByServerRows(results[1].data.rows)
+    setQueryCountByServerHeaders(results[1].data.headers)
 
-    if (result.hasError) {
-      return
-    }
-
-    setRows(result.data.rows)
-    setHeaders(result.data.headers)
+    // planning percent
+    setPlanningPercent(results[2].data.rows[0][0])
   }
 
   return (
@@ -119,24 +111,27 @@ export default function LogDetailsCard({ loading, setLoading }: Props) {
           !loading.logTimeWindow.hasError && (
             <>
               <Typography variant="body2">
-                Start: {`${new Date(firstStartTimestamp).toISOString()}`}
+                Start - {`${new Date(firstStartTimestamp).toISOString()}`}
               </Typography>
               <Typography variant="body2">
-                End: {`${new Date(lastStartTimestamp).toISOString()}`}
+                End - {`${new Date(lastStartTimestamp).toISOString()}`}
               </Typography>
               <Typography variant="body2">
-                Log Duration: {`${logDuration} minutes`}
+                Log Duration - {`${logDuration} minutes`}
+              </Typography>
+              <Typography variant="body2">
+                Total Planning to Elapsed Time - {`${planningPercent.toFixed(2)} %`}
               </Typography>
             </>
           )}
 
-        {loading.queryCountByServer.isLoading && <CircularProgress />}
-        {!loading.queryCountByServer.isLoading &&
-          loading.queryCountByServer.hasError && (
+        {loading.logTimeWindow.isLoading && <CircularProgress />}
+        {!loading.logTimeWindow.isLoading &&
+          loading.logTimeWindow.hasError && (
             <Typography>Error loading query counts by server</Typography>
           )}
-        {!loading.queryCountByServer.isLoading &&
-          !loading.queryCountByServer.hasError && (
+        {!loading.logTimeWindow.isLoading &&
+          !loading.logTimeWindow.hasError && (
             
             <TableContainer component={Paper} sx={{ maxHeight: 800 }}>
               <Table
@@ -146,7 +141,7 @@ export default function LogDetailsCard({ loading, setLoading }: Props) {
               >
                 <TableHead>
                   <TableRow>
-                    {headers.map((header, i) => (
+                    {queryCountByServerHeaders.map((header, i) => (
                       <TableCell key={i} align="left">
                         {header}
                       </TableCell>
@@ -154,7 +149,7 @@ export default function LogDetailsCard({ loading, setLoading }: Props) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row, i) => {
+                  {queryCountByServerRows.map((row, i) => {
                     return (
                       <TableRow
                         key={`r${i}`}
