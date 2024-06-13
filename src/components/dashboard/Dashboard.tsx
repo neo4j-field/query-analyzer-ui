@@ -1,8 +1,8 @@
 import { Box, Toolbar, Grid, Paper } from "@mui/material"
-import LogDetailsCard from "../LogDetailsCard"
-import PercentileCard from "../PercentileCard"
+import LogDetailsCard from "./LogDetailsCard"
+import PercentileCard from "./PercentileCard"
 import { useState } from "react"
-import { LoadingStatus } from "../../App"
+import { LoadingStatus } from "../App"
 
 export interface DashboardLoadingStatuses {
   logTimeWindow: LoadingStatus

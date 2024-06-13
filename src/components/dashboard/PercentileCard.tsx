@@ -24,10 +24,10 @@ import {
   QUERY_GET_QUERY_TEXT,
   QUERY_PERCENTILE,
   SQLITE_ROOT,
-} from "../util/apiEndpoints"
-import { convertToDataMap, fetchGetUri } from "../util/helpers"
+} from "../../util/apiEndpoints"
+import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { produce } from "immer"
-import { DashboardLoadingStatuses } from "./dashboard/Dashboard"
+import { DashboardLoadingStatuses } from "./Dashboard"
 
 const CARD_PROPERTY = {
   borderRadius: 3,

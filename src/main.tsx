@@ -1,14 +1,14 @@
 import React from "react"
 import ReactDOM from "react-dom/client"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
-import App from "./App.tsx"
+import App from "./components/App.tsx"
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import "@fontsource/roboto/300.css"
 import "@fontsource/roboto/400.css"
 import "@fontsource/roboto/500.css"
 import "@fontsource/roboto/700.css"
 import Dashboard from "./components/dashboard/Dashboard.tsx"
-import Graphs from "./components/Graphs.tsx"
+import Graphs from "./components/graphs/Graphs.tsx"
 
 const darkTheme = createTheme({
   palette: {

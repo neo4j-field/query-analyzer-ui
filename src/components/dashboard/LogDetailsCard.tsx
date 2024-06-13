@@ -20,10 +20,10 @@ import {
   QUERY_LOG_TIME_WINDOW,
   QUERY_QUERY_COUNT_BY_SERVER,
   SQLITE_ROOT,
-} from "../util/apiEndpoints"
-import { convertToDataMap, fetchGetUri } from "../util/helpers"
+} from "../../util/apiEndpoints"
+import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { produce } from "immer"
-import { DashboardLoadingStatuses } from "./dashboard/Dashboard"
+import { DashboardLoadingStatuses } from "./Dashboard"
 
 const CARD_PROPERTY = {
   borderRadius: 3,

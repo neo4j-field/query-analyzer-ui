@@ -10,8 +10,8 @@ import {
   Typography,
 } from "@mui/material"
 
-import { QUERY_TIME_QUERY_COUNT, SQLITE_ROOT } from "../util/apiEndpoints"
-import { convertToDataMap, fetchGetUri } from "../util/helpers"
+import { QUERY_TIME_QUERY_COUNT, SQLITE_ROOT } from "../../util/apiEndpoints"
+import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { produce } from "immer"
 import { BarChart } from "@mui/x-charts"
 import { GraphsLoadingStatuses } from "./Graphs"
