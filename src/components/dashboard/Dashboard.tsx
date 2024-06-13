@@ -1,12 +1,13 @@
 import { Box, Toolbar, Grid, Paper } from "@mui/material"
-import LogDetailsCard from "./LogDetailsCard"
+import TimePeriodCard from "./TimePeriodCard"
 import PercentileCard from "./PercentileCard"
 import { useState } from "react"
 import { LoadingStatus } from "../App"
+import QueriesExecutedCard from "./QueriesExecutedCard"
 
 export interface DashboardLoadingStatuses {
   logTimeWindow: LoadingStatus
-  queryCountByServer: LoadingStatus
+  queriesExecuted: LoadingStatus
   percentile: LoadingStatus
 }
 
@@ -21,7 +22,7 @@ export interface DashboardLoadingStatuses {
 export default function Dashboard() {
   const [loading, setLoading] = useState<DashboardLoadingStatuses>({
     logTimeWindow: { isLoading: false, hasError: false },
-    queryCountByServer: { isLoading: false, hasError: false },
+    queriesExecuted: { isLoading: false, hasError: false },
     percentile: { isLoading: false, hasError: false },
   })
 
@@ -41,23 +42,12 @@ export default function Dashboard() {
       <Toolbar />
       <Grid container spacing={4}>
 
-      {/* <Grid item xs={12} sm={12} md={12} lg={12} xl={12}> */}
-        <Grid item xs={4}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              // height: 240,
-            }}
-          >
-            <LogDetailsCard loading={loading} setLoading={setLoading} />
-          </Paper>
-        </Grid>
-
         {/* <Grid item xs={12} sm={12} md={12} lg={12} xl={12}> */}
-        <Grid item xs={4}>
-          <LogDetailsCard loading={loading} setLoading={setLoading} />
+        <Grid item xs={6}>
+          <TimePeriodCard loading={loading} setLoading={setLoading} />
+        </Grid>
+        <Grid item xs={12}>
+          <QueriesExecutedCard loading={loading} setLoading={setLoading} />
         </Grid>
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <PercentileCard loading={loading} setLoading={setLoading} />
