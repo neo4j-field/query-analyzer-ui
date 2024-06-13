@@ -36,12 +36,7 @@ export default function LogDetailsCard() {
   const [firstStartTimestamp, setFirstStartTimestamp] = useState<number>(-1)
   const [lastStartTimestamp, setLastStartTimestamp] = useState<number>(-1)
   const [logDuration, setLogDuration] = useState<number>(-1)
-  const [queryCountByServerRows, setQueryCountByServerRows] = useState<any[][]>(
-    [],
-  )
-  const [queryCountByServerHeaders, setQueryCountByServerHeaders] = useState<
-    string[]
-  >([])
+
   const [planningPercent, setPlanningPercent] = useState<number>(-1)
 
   const handleRefetch = async () => {

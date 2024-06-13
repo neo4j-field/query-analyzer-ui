@@ -22,6 +22,11 @@ import { Link, Outlet } from "react-router-dom"
 
 const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
+const linkPages: { to: string; displayName: string }[] = [
+  { to: "dashboard", displayName: "Dashboard" },
+  { to: "graphs", displayName: "Graphs" },
+]
+
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean
 }
@@ -149,21 +154,19 @@ export default function App() {
             <ChevronLeftIcon />
           </IconButton>
         </Toolbar>
+        
         <Divider />
+        
+        {/* Sidebar links */}
         <List component="nav">
-          <ListItemButton component={Link} to="dashboard">
-            <ListItemIcon>
-              <AssignmentIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
-
-          <ListItemButton component={Link} to="graphs">
-            <ListItemIcon>
-              <AssignmentIcon />
-            </ListItemIcon>
-            <ListItemText primary="Graphs" />
-          </ListItemButton>
+          {linkPages.map(({to, displayName}) => (
+            <ListItemButton component={Link} to={to}>
+              <ListItemIcon>
+                <AssignmentIcon />
+              </ListItemIcon>
+              <ListItemText primary={displayName} />
+            </ListItemButton>
+          ))}
         </List>
       </Drawer>
 

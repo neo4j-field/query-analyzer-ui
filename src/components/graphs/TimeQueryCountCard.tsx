@@ -12,9 +12,7 @@ import {
 
 import { QUERY_TIME_QUERY_COUNT, SQLITE_ROOT } from "../../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
-import { produce } from "immer"
 import { BarChart } from "@mui/x-charts"
-import { GraphsLoadingStatuses } from "./Graphs"
 
 const valueFormatter = (value: number | null) => `${value} ff`
 
@@ -125,12 +123,11 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
-interface Props {
-  loading: GraphsLoadingStatuses
-  setLoading: Dispatch<SetStateAction<GraphsLoadingStatuses>>
-}
-
-export default function TimeQueryCountCard({ loading, setLoading }: Props) {
+export default function TimeQueryCountCard() {
+  const [loadStatus, setLoadStatus] = useState({
+    loading: false,
+    hasError: false,
+  })
   const [dataset, setDataset] = useState<Record<string, any>[]>([])
   // const [openModal, setOpenModal] = useState(false)
   // const [loadingQueryText, setLoadingQueryText] = useState(false)
@@ -149,19 +146,9 @@ export default function TimeQueryCountCard({ loading, setLoading }: Props) {
   /****************************************************************************
    ****************************************************************************/
   const fetchData = async () => {
-    setLoading(
-      produce((draft) => {
-        draft.timeQueryCount.isLoading = true
-        draft.timeQueryCount.hasError = false
-      }),
-    )
+    setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_TIME_QUERY_COUNT}`)
-    setLoading(
-      produce((draft) => {
-        draft.timeQueryCount.isLoading = false
-        draft.timeQueryCount.hasError = result.hasError ? true : false
-      }),
-    )
+    setLoadStatus({ ...loadStatus, loading: false})
 
     if (result.hasError) {
       return
@@ -180,15 +167,15 @@ export default function TimeQueryCountCard({ loading, setLoading }: Props) {
             Number of queries run time graph
           </Typography>
 
-          {loading.timeQueryCount.isLoading && <CircularProgress />}
-          {!loading.timeQueryCount.isLoading &&
-            loading.timeQueryCount.hasError && (
+          {loadStatus.loading && <CircularProgress />}
+          {!loadStatus.loading &&
+            loadStatus.hasError && (
               <Typography>Error loading</Typography>
             )}
 
           {/* BAR */}
-          {!loading.timeQueryCount.isLoading &&
-            !loading.timeQueryCount.hasError && (
+          {!loadStatus.loading &&
+            !loadStatus.hasError && (
               <BarChart
                 dataset={dataset}
                 xAxis={[{ scaleType: "band", dataKey: "time", valueFormatter: (val) => `${val.split(" ")[1]}` }]}
