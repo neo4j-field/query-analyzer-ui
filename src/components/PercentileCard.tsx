@@ -46,7 +46,7 @@ export default function PercentileCard({ loading, setLoading }: Props) {
   const [headers, setHeaders] = useState<string[]>([])
   const [openModal, setOpenModal] = useState(false)
   const [loadingQueryText, setLoadingQueryText] = useState(false)
-  const [queryText, setQueryText] = useState("kdfjldkfj")
+  const [queryText, setQueryText] = useState("")
 
   const handleRefetch = async () => {
     fetchPercentile()
@@ -124,7 +124,7 @@ export default function PercentileCard({ loading, setLoading }: Props) {
                             `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${query_id}`,
                           )
                           setLoadingQueryText(false)
-                          const dataMap = convertToDataMap(result.data)
+                          const dataMap = convertToDataMap(result.data.headers, result.data.rows)
                           setQueryText(dataMap[0].query)
                         }}
                         sx={{

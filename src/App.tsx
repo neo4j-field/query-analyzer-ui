@@ -4,6 +4,7 @@ import { Box, Grid } from "@mui/material"
 import CssBaseline from "@mui/material/CssBaseline"
 import PercentileCard from "./components/PercentileCard"
 import LogDetailsCard from "./components/LogDetailsCard"
+import TimeQueryCountCard from "./components/TimeQueryCountCard"
 
 const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
@@ -11,6 +12,7 @@ export interface LoadingStatuses {
   logTimeWindow: LoadingStatus
   queryCountByServer: LoadingStatus
   percentile: LoadingStatus
+  timeQueryCount: LoadingStatus
 }
 
 export interface LoadingStatus {
@@ -23,6 +25,7 @@ export default function App() {
     logTimeWindow: { isLoading: false, hasError: false },
     queryCountByServer: { isLoading: false, hasError: false },
     percentile: { isLoading: false, hasError: false },
+    timeQueryCount: { isLoading: false, hasError: false },
   })
 
   return (
@@ -33,6 +36,10 @@ export default function App() {
         <Grid container spacing={4}>
           <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
             <LogDetailsCard loading={loading} setLoading={setLoading} />
+          </Grid>
+          
+          <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+            <TimeQueryCountCard loading={loading} setLoading={setLoading} />
           </Grid>
 
           <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>

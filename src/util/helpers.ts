@@ -13,7 +13,7 @@ export const fetchGetUri = async (urlPattern: string) => {
   try {
     // const params = new URLSearchParams({ param1: 'value1', param2: 'value2' });
     const url = `${import.meta.env.VITE_API_URI}/${urlPattern}`
-    console.log("awaiting fetch...")
+    // console.log("awaiting fetch...")
     const response = await fetch(url, { method: "GET", headers })
 
     if (!response.ok) {
@@ -33,12 +33,12 @@ export const fetchGetUri = async (urlPattern: string) => {
 
 /****************************************************************************
  ****************************************************************************/
-export const convertToDataMap = (resultData: { headers: string[]; rows: any[][] }) => {
-  const dataMap: any[] = []
-  for (const row of resultData.rows) {
+export const convertToDataMap = (headers: string[], rows: any[][],) => {
+  const dataMap: Record<string, any>[] = []
+  for (const row of rows) {
     const mapRow: any = {}
-    for (let i = 0; i < resultData.headers.length; i++) {
-      const header = resultData.headers[i]
+    for (let i = 0; i < headers.length; i++) {
+      const header = headers[i]
       mapRow[header] = row[i]
     }
     dataMap.push(mapRow)

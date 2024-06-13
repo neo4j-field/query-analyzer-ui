@@ -72,7 +72,7 @@ export default function LogDetailsCard({ loading, setLoading }: Props) {
       return
     }
 
-    const datamap = convertToDataMap(result.data)[0]
+    const datamap = convertToDataMap(result.data.headers, result.data.rows)[0]
     setFirstStartTimestamp(datamap["firstStartTimestampMs"])
     setLastStartTimestamp(datamap["lastStartTimestampMs"])
     setLogDuration(datamap["windowDurationMin"])
