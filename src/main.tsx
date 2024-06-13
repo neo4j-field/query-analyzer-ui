@@ -7,7 +7,7 @@ import "@fontsource/roboto/300.css"
 import "@fontsource/roboto/400.css"
 import "@fontsource/roboto/500.css"
 import "@fontsource/roboto/700.css"
-import Dashboard from "./components/Dashboard.tsx"
+import Dashboard from "./components/dashboard/Dashboard.tsx"
 import Graphs from "./components/Graphs.tsx"
 
 const darkTheme = createTheme({

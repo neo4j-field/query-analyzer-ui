@@ -23,7 +23,7 @@ import {
 } from "../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../util/helpers"
 import { produce } from "immer"
-import { DashboardLoadingStatuses } from "./Dashboard"
+import { DashboardLoadingStatuses } from "./dashboard/Dashboard"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
