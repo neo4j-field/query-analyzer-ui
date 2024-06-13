@@ -3,7 +3,6 @@ import {
   Box,
   Divider,
   Drawer as MuiDrawer,
-  Grid,
   IconButton,
   List,
   ListItemButton,
@@ -11,19 +10,15 @@ import {
   ListItemText,
   Toolbar,
   styled,
-  Badge,
   Typography,
 } from "@mui/material"
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import AssignmentIcon from "@mui/icons-material/Assignment"
 import MenuIcon from "@mui/icons-material/Menu"
-import NotificationsIcon from "@mui/icons-material/Notifications"
 
 import CssBaseline from "@mui/material/CssBaseline"
-import PercentileCard from "./components/PercentileCard"
-import LogDetailsCard from "./components/LogDetailsCard"
-import TimeQueryCountCard from "./components/TimeQueryCountCard"
+import { Link, Outlet } from "react-router-dom"
 
 const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
@@ -97,7 +92,7 @@ export interface LoadingStatus {
 export default function App() {
   const [open, setOpen] = useState(true)
   const toggleDrawer = () => {
-    setOpen(!open)
+    setOpen(true)
   }
 
   const [loading, setLoading] = useState<LoadingStatuses>({
@@ -108,101 +103,72 @@ export default function App() {
   })
 
   return (
-    <>
-      <Box style={{ display: "flex", height: CONTENT_AREA_HEIGHT }}>
-        <CssBaseline />
+    <Box style={{ display: "flex", height: CONTENT_AREA_HEIGHT }}>
+      <CssBaseline />
 
-        <AppBar position="absolute" open={open}>
-          <Toolbar
-            sx={{
-              pr: "24px", // keep right padding when drawer closed
-            }}
-          >
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleDrawer}
-              sx={{
-                marginRight: "36px",
-                ...(open && { display: "none" }),
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              sx={{ flexGrow: 1 }}
-            >
-              Dashboard
-            </Typography>
-          </Toolbar>
-        </AppBar>
-
-        <Drawer variant="permanent" open={open}>
-          <Toolbar
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              px: [1],
-            }}
-          >
-            <IconButton onClick={toggleDrawer}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </Toolbar>
-          <Divider />
-          <List component="nav">
-            <ListItemButton>
-              <ListItemIcon>
-                <AssignmentIcon />
-              </ListItemIcon>
-              <ListItemText primary="Dashboard" />
-            </ListItemButton>
-
-            <Divider sx={{ my: 1 }} />
-
-            <ListItemButton>
-              <ListItemIcon>
-                <AssignmentIcon />
-              </ListItemIcon>
-              <ListItemText primary="Graphs" />
-            </ListItemButton>
-          </List>
-        </Drawer>
-
-        <Box
-          component="main"
+      <AppBar position="absolute" open={open}>
+        <Toolbar
           sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === "light"
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
-            flexGrow: 1,
-            height: "100vh",
-            overflow: "auto",
+            pr: "24px", // keep right padding when drawer closed
           }}
         >
-          <Toolbar/>
-          <Grid container spacing={4}>
-            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-              <LogDetailsCard loading={loading} setLoading={setLoading} />
-            </Grid>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            onClick={toggleDrawer}
+            sx={{
+              marginRight: "36px",
+              ...(open && { display: "none" }),
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            component="h1"
+            variant="h6"
+            color="inherit"
+            noWrap
+            sx={{ flexGrow: 1 }}
+          >
+            Dashboard
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-            {/* <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-              <TimeQueryCountCard loading={loading} setLoading={setLoading} />
-            </Grid> */}
+      <Drawer variant="permanent" open={open}>
+        <Toolbar
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            px: [1],
+          }}
+        >
+          <IconButton onClick={toggleDrawer}>
+            <ChevronLeftIcon />
+          </IconButton>
+        </Toolbar>
+        <Divider />
+        <List component="nav">
+          <ListItemButton component={Link} to="dashboard">
+            <ListItemIcon>
+              <AssignmentIcon />
+            </ListItemIcon>
+            <ListItemText primary="Dashboard" />
+          </ListItemButton>
 
-            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-              <PercentileCard loading={loading} setLoading={setLoading} />
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
-    </>
+          <ListItemButton component={Link} to="graphs">
+            <ListItemIcon>
+              <AssignmentIcon />
+            </ListItemIcon>
+            <ListItemText primary="Graphs" />
+          </ListItemButton>
+        </List>
+      </Drawer>
+
+      {/* Render data pages depending on route */}
+      <Outlet />
+    </Box>
   )
 }

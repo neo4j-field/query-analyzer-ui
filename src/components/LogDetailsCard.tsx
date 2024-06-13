@@ -23,7 +23,7 @@ import {
 } from "../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../util/helpers"
 import { produce } from "immer"
-import { LoadingStatuses } from "../App"
+import { DashboardLoadingStatuses } from "./Dashboard"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -31,8 +31,8 @@ const CARD_PROPERTY = {
 }
 
 interface Props {
-  loading: LoadingStatuses
-  setLoading: Dispatch<SetStateAction<LoadingStatuses>>
+  loading: DashboardLoadingStatuses
+  setLoading: Dispatch<SetStateAction<DashboardLoadingStatuses>>
 }
 
 export default function LogDetailsCard({ loading, setLoading }: Props) {

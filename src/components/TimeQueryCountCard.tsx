@@ -13,8 +13,8 @@ import {
 import { QUERY_TIME_QUERY_COUNT, SQLITE_ROOT } from "../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../util/helpers"
 import { produce } from "immer"
-import { LoadingStatuses } from "../App"
 import { BarChart } from "@mui/x-charts"
+import { GraphsLoadingStatuses } from "./Graphs"
 
 const valueFormatter = (value: number | null) => `${value} ff`
 
@@ -126,8 +126,8 @@ const CARD_PROPERTY = {
 }
 
 interface Props {
-  loading: LoadingStatuses
-  setLoading: Dispatch<SetStateAction<LoadingStatuses>>
+  loading: GraphsLoadingStatuses
+  setLoading: Dispatch<SetStateAction<GraphsLoadingStatuses>>
 }
 
 export default function TimeQueryCountCard({ loading, setLoading }: Props) {

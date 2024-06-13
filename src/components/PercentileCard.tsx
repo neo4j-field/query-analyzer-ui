@@ -27,9 +27,7 @@ import {
 } from "../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../util/helpers"
 import { produce } from "immer"
-import { LoadingStatuses } from "../App"
-
-const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
+import { DashboardLoadingStatuses } from "./Dashboard"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -37,8 +35,8 @@ const CARD_PROPERTY = {
 }
 
 interface Props {
-  loading: LoadingStatuses
-  setLoading: Dispatch<SetStateAction<LoadingStatuses>>
+  loading: DashboardLoadingStatuses
+  setLoading: Dispatch<SetStateAction<DashboardLoadingStatuses>>
 }
 
 export default function PercentileCard({ loading, setLoading }: Props) {
