@@ -50,7 +50,7 @@ export default function PercentileCard({ loading, setLoading }: Props) {
   const [loadingQueryText, setLoadingQueryText] = useState(false)
   const [queryText, setQueryText] = useState("kdfjldkfj")
 
-  const handleRefetch = async (uri: string, loadingKey: string) => {
+  const handleRefetch = async () => {
     fetchPercentile()
   }
 
@@ -158,15 +158,7 @@ export default function PercentileCard({ loading, setLoading }: Props) {
               </Table>
             </TableContainer>
 
-            <Button
-              startIcon={<AddIcon />}
-              onClick={() =>
-                handleRefetch(
-                  `${SQLITE_ROOT}/${QUERY_PERCENTILE}`,
-                  "percentile",
-                )
-              }
-            >
+            <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
               {" "}
               Update
             </Button>
