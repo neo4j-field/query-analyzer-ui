@@ -1,15 +1,25 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import AddIcon from "@mui/icons-material/Add"
 import {
-  Box,
   Button,
   Card,
   CardContent,
   CircularProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
 } from "@mui/material"
 
-import { QUERY_LOG_TIME_WINDOW, SQLITE_ROOT } from "../util/apiEndpoints"
+import {
+  QUERY_LOG_TIME_WINDOW,
+  QUERY_QUERY_COUNT_BY_SERVER,
+  SQLITE_ROOT,
+} from "../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../util/helpers"
 import { produce } from "immer"
 import { LoadingStatuses } from "../App"
@@ -28,30 +38,33 @@ export default function LogDetailsCard({ loading, setLoading }: Props) {
   const [firstStartTimestamp, setFirstStartTimestamp] = useState<number>(-1)
   const [lastStartTimestamp, setLastStartTimestamp] = useState<number>(-1)
   const [logDuration, setLogDuration] = useState<number>(-1)
+  const [rows, setRows] = useState<any[][]>([])
+  const [headers, setHeaders] = useState<string[]>([])
 
   const handleRefetch = async () => {
-    fetchLogDetails()
+    fetchLogTimeWindow()
+    fetchQueryCountByServer()
   }
 
   useEffect(() => {
-    fetchLogDetails()
+    fetchLogTimeWindow()
+    fetchQueryCountByServer()
   }, [])
 
   /****************************************************************************
    ****************************************************************************/
-  const fetchLogDetails = async () => {
+  const fetchLogTimeWindow = async () => {
     setLoading(
       produce((draft) => {
-        draft.logDetails.isLoading = true
-        draft.logDetails.hasError = false
+        draft.logTimeWindow.isLoading = true
+        draft.logTimeWindow.hasError = false
       }),
     )
     const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_LOG_TIME_WINDOW}`)
-    console.log(result.message)
     setLoading(
       produce((draft) => {
-        draft.logDetails.isLoading = false
-        draft.logDetails.hasError = result.hasError ? true : false
+        draft.logTimeWindow.isLoading = false
+        draft.logTimeWindow.hasError = result.hasError ? true : false
       }),
     )
 
@@ -59,41 +72,115 @@ export default function LogDetailsCard({ loading, setLoading }: Props) {
       return
     }
 
-    const logDetails = convertToDataMap(result.data)[0]
-    setFirstStartTimestamp(logDetails["firstStartTimestampMs"])
-    setLastStartTimestamp(logDetails["lastStartTimestampMs"])
-    setLogDuration(logDetails["windowDurationMin"])
+    const datamap = convertToDataMap(result.data)[0]
+    setFirstStartTimestamp(datamap["firstStartTimestampMs"])
+    setLastStartTimestamp(datamap["lastStartTimestampMs"])
+    setLogDuration(datamap["windowDurationMin"])
+  }
+
+  /****************************************************************************
+   ****************************************************************************/
+  const fetchQueryCountByServer = async () => {
+    setLoading(
+      produce((draft) => {
+        draft.queryCountByServer.isLoading = true
+        draft.queryCountByServer.hasError = false
+      }),
+    )
+    const result = await fetchGetUri(
+      `${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}`,
+    )
+    setLoading(
+      produce((draft) => {
+        draft.queryCountByServer.isLoading = false
+        draft.queryCountByServer.hasError = result.hasError ? true : false
+      }),
+    )
+
+    if (result.hasError) {
+      return
+    }
+
+    setRows(result.data.rows)
+    setHeaders(result.data.headers)
   }
 
   return (
     <Card sx={CARD_PROPERTY}>
-      {loading.logDetails.isLoading && <CircularProgress />}
-      {!loading.logDetails.isLoading && loading.logDetails.hasError && (
-        <Typography>Error loading</Typography>
-      )}
-      {!loading.logDetails.isLoading && !loading.logDetails.hasError && (
-        <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            Log Details
-          </Typography>
-          <Typography variant="body2">
-            First Start Timestamp:{" "}
-            {`${new Date(firstStartTimestamp).toISOString()}`}
-          </Typography>
-          <Typography variant="body2">
-            Last Start Timestamp:{" "}
-            {`${new Date(lastStartTimestamp).toISOString()}`}
-          </Typography>
-          <Typography variant="body2">
-            Log Duration: {`${logDuration} minutes`}
-          </Typography>
+      <CardContent>
+        <Typography gutterBottom variant="h5" component="div">
+          Log Details
+        </Typography>
+        {loading.logTimeWindow.isLoading && <CircularProgress />}
+        {!loading.logTimeWindow.isLoading && loading.logTimeWindow.hasError && (
+          <Typography>Error loading log time windows</Typography>
+        )}
+        {!loading.logTimeWindow.isLoading &&
+          !loading.logTimeWindow.hasError && (
+            <>
+              <Typography variant="body2">
+                Start: {`${new Date(firstStartTimestamp).toISOString()}`}
+              </Typography>
+              <Typography variant="body2">
+                End: {`${new Date(lastStartTimestamp).toISOString()}`}
+              </Typography>
+              <Typography variant="body2">
+                Log Duration: {`${logDuration} minutes`}
+              </Typography>
+            </>
+          )}
 
-          <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
-            {" "}
-            Update
-          </Button>
-        </CardContent>
-      )}
+        {loading.queryCountByServer.isLoading && <CircularProgress />}
+        {!loading.queryCountByServer.isLoading &&
+          loading.queryCountByServer.hasError && (
+            <Typography>Error loading query counts by server</Typography>
+          )}
+        {!loading.queryCountByServer.isLoading &&
+          !loading.queryCountByServer.hasError && (
+            
+            <TableContainer component={Paper} sx={{ maxHeight: 800 }}>
+              <Table
+                stickyHeader
+                sx={{ minWidth: 650 }}
+                aria-label="simple table"
+              >
+                <TableHead>
+                  <TableRow>
+                    {headers.map((header, i) => (
+                      <TableCell key={i} align="left">
+                        {header}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row, i) => {
+                    return (
+                      <TableRow
+                        key={`r${i}`}
+                        hover
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                        }}
+                      >
+                        {row.map((v, j) => (
+                          <TableCell key={`c${j}`} align="left">
+                            {v === null ? "null" : v}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+
+        <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
+          {" "}
+          Update
+        </Button>
+      </CardContent>
     </Card>
   )
 }

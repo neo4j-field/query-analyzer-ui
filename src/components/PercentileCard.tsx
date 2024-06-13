@@ -2,7 +2,6 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import AddIcon from "@mui/icons-material/Add"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import {
-  Box,
   Button,
   Card,
   CardContent,
@@ -11,7 +10,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Modal,
   Paper,
   Table,
   TableBody,
@@ -81,8 +79,6 @@ export default function PercentileCard({ loading, setLoading }: Props) {
     if (result.hasError) {
       return
     }
-
-    const logDetails = convertToDataMap(result.data)[0]
     setRows(result.data.rows)
     setHeaders(result.data.headers)
   }
@@ -90,16 +86,15 @@ export default function PercentileCard({ loading, setLoading }: Props) {
   return (
     <>
       <Card sx={CARD_PROPERTY}>
-        {loading.percentile.isLoading && <CircularProgress />}
-        {!loading.percentile.isLoading && loading.percentile.hasError && (
-          <Typography>Error loading</Typography>
-        )}
-        {!loading.percentile.isLoading && !loading.percentile.hasError && (
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              90th Percentiles
-            </Typography>
-
+        <CardContent>
+          <Typography gutterBottom variant="h5" component="div">
+            90th Percentiles
+          </Typography>
+          {loading.percentile.isLoading && <CircularProgress />}
+          {!loading.percentile.isLoading && loading.percentile.hasError && (
+            <Typography>Error loading</Typography>
+          )}
+          {!loading.percentile.isLoading && !loading.percentile.hasError && (
             <TableContainer component={Paper} sx={{ maxHeight: 800 }}>
               <Table
                 stickyHeader
@@ -132,13 +127,6 @@ export default function PercentileCard({ loading, setLoading }: Props) {
                           const dataMap = convertToDataMap(result.data)
                           setQueryText(dataMap[0].query)
                         }}
-                        // onClick={async (e) => {
-                        //   console.log(e)
-                        //   const result = await fetchGetUri(
-                        //     `${SQLITE_ROOT}/${QUERY_PERCENTILE}`,
-                        //   )
-                        //   console.log("result", result)
-                        // }}
                         sx={{
                           "&:last-child td, &:last-child th": { border: 0 },
                         }}
@@ -148,22 +136,18 @@ export default function PercentileCard({ loading, setLoading }: Props) {
                             {v}
                           </TableCell>
                         ))}
-                        {/* <TableCell component="th" scope="row">
-                     {row[0]}
-                    </TableCell> */}
                       </TableRow>
                     )
                   })}
                 </TableBody>
               </Table>
             </TableContainer>
-
-            <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
-              {" "}
-              Update
-            </Button>
-          </CardContent>
-        )}
+          )}
+          <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
+            {" "}
+            Update
+          </Button>
+        </CardContent>
       </Card>
 
       <Dialog
