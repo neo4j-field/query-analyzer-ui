@@ -16,6 +16,7 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import AssignmentIcon from "@mui/icons-material/Assignment"
 import MenuIcon from "@mui/icons-material/Menu"
+import { v4 as uuid } from "uuid"
 
 import CssBaseline from "@mui/material/CssBaseline"
 import { Link, Outlet } from "react-router-dom"
@@ -159,8 +160,8 @@ export default function App() {
         
         {/* Sidebar links */}
         <List component="nav">
-          {linkPages.map(({to, displayName}) => (
-            <ListItemButton component={Link} to={to}>
+          {linkPages.map(({to, displayName}, i) => (
+            <ListItemButton key={uuid()} component={Link} to={to}>
               <ListItemIcon>
                 <AssignmentIcon />
               </ListItemIcon>

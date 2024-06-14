@@ -1,9 +1,8 @@
 import { Box, Toolbar, Grid, Paper } from "@mui/material"
 import TimePeriodCard from "./TimePeriodCard"
 import PercentileCard from "./PercentileCard"
-import { useState } from "react"
-import { LoadingStatus } from "../App"
-import QueriesExecutedCard from "./QueriesExecutedCard"
+import QueriesExecutedByServerCard from "./QueriesExecutedByServerCard"
+import UniqueQueriesExecutedCard from "./UniqueQueriesExecuted"
 
 // Card: Total number of unique queries.
 // Card: Time Peiod. Number of Queries executed. Average time taken, avg page hits, avg page faults.
@@ -29,13 +28,23 @@ export default function Dashboard() {
     >
       <Toolbar />
       <Grid container spacing={4}>
-
         {/* <Grid item xs={12} sm={12} md={12} lg={12} xl={12}> */}
+
+        {/* LEFT COLUMN  */}
         <Grid item xs={6}>
-          <TimePeriodCard />
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <UniqueQueriesExecutedCard />
+            </Grid>
+            <Grid item xs={12}>
+              <TimePeriodCard />
+            </Grid>
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <QueriesExecutedCard />
+
+        {/* RIGHT COLUMN */}
+        <Grid item xs={6}>
+          <QueriesExecutedByServerCard />
         </Grid>
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <PercentileCard />

@@ -198,10 +198,10 @@ export default function TimeQueryCountCard() {
               // />
             )}
 
-          <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
+          {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
             {" "}
             Update
-          </Button>
+          </Button> */}
         </CardContent>
       </Card>
 

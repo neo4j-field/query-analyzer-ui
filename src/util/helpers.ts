@@ -39,7 +39,7 @@ export const convertToDataMap = (headers: string[], rows: any[][],) => {
     const mapRow: any = {}
     for (let i = 0; i < headers.length; i++) {
       const header = headers[i]
-      mapRow[header] = row[i]
+      mapRow[header] = row[i] === null ? "NULL" : row[i]
     }
     dataMap.push(mapRow)
   }

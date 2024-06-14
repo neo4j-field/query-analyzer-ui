@@ -109,7 +109,10 @@ export default function PercentileCard() {
                             `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${query_id}`,
                           )
                           setLoadingQueryText(false)
-                          const dataMap = convertToDataMap(result.data.headers, result.data.rows)
+                          const dataMap = convertToDataMap(
+                            result.data.headers,
+                            result.data.rows,
+                          )
                           setQueryText(dataMap[0].query)
                         }}
                         sx={{
@@ -128,10 +131,10 @@ export default function PercentileCard() {
               </Table>
             </TableContainer>
           )}
-          <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
+          {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
             {" "}
             Update
-          </Button>
+          </Button> */}
         </CardContent>
       </Card>
 

@@ -1,25 +1,8 @@
 import { useEffect, useState } from "react"
-import AddIcon from "@mui/icons-material/Add"
-import {
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material"
+// import AddIcon from "@mui/icons-material/Add"
+import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 
-import {
-  QUERY_GET_PLANNING_PCT,
-  QUERY_LOG_TIME_WINDOW,
-  SQLITE_ROOT,
-} from "../../util/apiEndpoints"
+import { QUERY_GENERAL_STATS, SQLITE_ROOT } from "../../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 
@@ -36,8 +19,10 @@ export default function LogDetailsCard() {
   const [firstStartTimestamp, setFirstStartTimestamp] = useState<number>(-1)
   const [lastStartTimestamp, setLastStartTimestamp] = useState<number>(-1)
   const [logDuration, setLogDuration] = useState<number>(-1)
-
-  const [planningPercent, setPlanningPercent] = useState<number>(-1)
+  const [avgPageHits, setAvgPageHits] = useState<number>(-1)
+  const [avgPageFaults, setAvgPageFaults] = useState<number>(-1)
+  const [avgTimeTaken, setAvgTimeTaken] = useState<number>(-1)
+  const [numQueriesExecuted, setNumQueriesExecuted] = useState<number>(-1)
 
   const handleRefetch = async () => {
     fetchData()
@@ -52,8 +37,7 @@ export default function LogDetailsCard() {
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_LOG_TIME_WINDOW}`),
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_GET_PLANNING_PCT}`),
+      fetchGetUri(`${SQLITE_ROOT}/${QUERY_GENERAL_STATS}`),
     ])
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
@@ -65,70 +49,35 @@ export default function LogDetailsCard() {
       i++
     }
 
-    // log time window
+    // general stats
     const datamap = convertToDataMap(
       results[0].data.headers,
       results[0].data.rows,
     )[0]
-    setFirstStartTimestamp(datamap["firstStartTimestampMs"])
-    setLastStartTimestamp(datamap["lastStartTimestampMs"])
-    setLogDuration(datamap["windowDurationMin"])
-
-    // planning percent
-    setPlanningPercent(results[1].data.rows[0][0])
+    setFirstStartTimestamp(datamap.firstStartTimestampMs)
+    setLastStartTimestamp(datamap.lastStartTimestampMs)
+    setLogDuration(datamap.windowDurationMin)
+    setAvgPageHits(datamap.avgPageHits)
+    setAvgPageFaults(datamap.avgPageFaults)
+    setAvgTimeTaken(datamap.avgTimeTaken)
+    setNumQueriesExecuted(datamap.numQueriesExecuted)
   }
 
   return (
     <Card sx={CARD_PROPERTY}>
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
-          Time Period
+          General Stats
         </Typography>
         {loadStatus.loading && <CircularProgress />}
         {!loadStatus.loading && loadStatus.hasError && (
           <Typography>Error loading log time windows</Typography>
         )}
         {!loadStatus.loading && !loadStatus.hasError && (
-          // <TableContainer component={Paper} sx={{ maxHeight: 800 }}>
-          //   <Table
-          //     stickyHeader
-          //     aria-label="simple table"
-          //   >
-          //     <TableBody>
-          //       {[
-          //         ["Start", `${new Date(firstStartTimestamp).toISOString()}`],
-          //         ["End", `${new Date(lastStartTimestamp).toISOString()}`],
-          //         ["Duration", `${logDuration} minutes`],
-          //         [
-          //           "Planning / Elapsed Time",
-          //           `${planningPercent.toFixed(2)} %`,
-          //         ],
-          //       ].map((row, i) => {
-          //         return (
-          //           <TableRow
-          //             key={`r${i}`}
-          //             hover
-          //             sx={{
-          //               "&:last-child td, &:last-child th": { border: 0 },
-          //             }}
-          //           >
-          //             {row.map((v, j) => (
-          //               <TableCell key={`c${j}`} align="left">
-          //                 {v === null ? "null" : v}
-          //               </TableCell>
-          //             ))}
-          //           </TableRow>
-          //         )
-          //       })}
-          //     </TableBody>
-          //   </Table>
-          // </TableContainer>
           <DataGrid
             autoHeight
-            slots={{
-              columnHeaders: () => null,
-              footer: () => null,
-            }}
+            columnHeaderHeight={0}
+            hideFooter={true}
             rows={[
               {
                 id: 1,
@@ -140,11 +89,30 @@ export default function LogDetailsCard() {
                 col1: "End",
                 col2: `${new Date(lastStartTimestamp).toISOString()}`,
               },
-              { id: 3, col1: "Duration", col2: `${logDuration} minutes` },
+              {
+                id: 3,
+                col1: "Duration",
+                col2: `${logDuration.toFixed(1)} minutes`,
+              },
+              {
+                id: 7,
+                col1: "Queries Executed",
+                col2: `${numQueriesExecuted.toLocaleString()} queries`,
+              },
+              {
+                id: 6,
+                col1: "Avg Time Taken",
+                col2: `${avgTimeTaken.toFixed(1)} ms`,
+              },
               {
                 id: 4,
-                col1: "Planning / Elapsed Time",
-                col2: `${planningPercent.toFixed(2)} %`,
+                col1: "Avg Page Hits",
+                col2: `${avgPageHits.toFixed(1)} hits`,
+              },
+              {
+                id: 5,
+                col1: "Avg Page Faults",
+                col2: `${avgPageFaults.toFixed(1)} faults`,
               },
             ]}
             columns={[
@@ -154,10 +122,10 @@ export default function LogDetailsCard() {
           />
         )}
 
-        <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
+        {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
           {" "}
           Update
-        </Button>
+        </Button> */}
       </CardContent>
     </Card>
   )
