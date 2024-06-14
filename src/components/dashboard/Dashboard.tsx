@@ -1,5 +1,5 @@
 import { Box, Toolbar, Grid, Paper } from "@mui/material"
-import TimePeriodCard from "./TimePeriodCard"
+import GeneralStatsCard from "./GeneralStatsCard"
 import PercentileCard from "./PercentileCard"
 import QueriesExecutedByServerCard from "./QueriesExecutedByServerCard"
 import UniqueQueriesExecutedCard from "./UniqueQueriesExecuted"
@@ -37,7 +37,7 @@ export default function Dashboard() {
               <UniqueQueriesExecutedCard />
             </Grid>
             <Grid item xs={12}>
-              <TimePeriodCard />
+              <GeneralStatsCard />
             </Grid>
           </Grid>
         </Grid>

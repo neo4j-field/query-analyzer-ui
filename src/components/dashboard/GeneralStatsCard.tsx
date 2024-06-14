@@ -11,7 +11,7 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
-export default function LogDetailsCard() {
+export default function GeneralStatsCard() {
   const [loadStatus, setLoadStatus] = useState({
     loading: false,
     hasError: false,
