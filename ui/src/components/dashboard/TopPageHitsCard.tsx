@@ -1,22 +1,9 @@
 import { useEffect, useState } from "react"
-import {
-  Card,
-  CardContent,
-  CircularProgress,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Typography,
-} from "@mui/material"
-import ContentCopyIcon from "@mui/icons-material/ContentCopy"
-import {
-  QUERY_GET_QUERY_TEXT,
-  QUERY_TOP5_PAGE_HITS,
-  SQLITE_ROOT,
-} from "../../util/apiEndpoints"
+import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
+import { QUERY_TOP5_PAGE_HITS, SQLITE_ROOT } from "../../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { DataGrid, GridEventListener } from "@mui/x-data-grid"
+import QueryModal from "./QueryModal"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -30,13 +17,10 @@ export default function TopPageHitsCard() {
   })
   const [headers, setHeaders] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
-  const [modalQryText, setModalQryText] = useState<string>("")
   const [openModal, setOpenModal] = useState(false)
-  const [loadingQueryText, setLoadingQueryText] = useState(false)
+  const [chosenQueryId, setChosenQueryId] = useState("")
 
   const handleRefetch = async () => fetchData()
-
-  const handleCloseModal = () => setOpenModal(false)
 
   useEffect(() => {
     fetchData()
@@ -75,13 +59,7 @@ export default function TopPageHitsCard() {
 
   const handleRowDblClick: GridEventListener<"rowClick"> = async (params) => {
     setOpenModal(true)
-    setLoadingQueryText(true)
-    const result = await fetchGetUri(
-      `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${params.row.query_id}`,
-    )
-    setLoadingQueryText(false)
-    const datamap = convertToDataMap(result.data.headers, result.data.rows)
-    setModalQryText(datamap[0].query)
+    setChosenQueryId(params.row.query_id)
   }
 
   return (
@@ -116,34 +94,11 @@ export default function TopPageHitsCard() {
         </CardContent>
       </Card>
 
-      <Dialog
-        open={openModal}
-        onClose={handleCloseModal}
-        maxWidth={"xs"}
-        fullWidth
-      >
-        <DialogTitle display={"inline"}>
-          <Typography>Query Text</Typography>
-          <IconButton
-            onClick={() => navigator.clipboard.writeText(modalQryText)}
-            edge="start"
-            sx={{ marginRight: 5 }}
-          >
-            <ContentCopyIcon />
-          </IconButton>
-        </DialogTitle>
-
-        <DialogContent>
-          {loadingQueryText && <CircularProgress />}
-          {!loadingQueryText && (
-            <>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                {modalQryText}
-              </Typography>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <QueryModal
+        queryId={chosenQueryId}
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+      />
     </>
   )
 }
