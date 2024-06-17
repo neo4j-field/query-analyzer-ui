@@ -1,17 +1,8 @@
 import { useEffect, useState } from "react"
-import AddIcon from "@mui/icons-material/Add"
 import {
-  Button,
   Card,
   CardContent,
   CircularProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
 } from "@mui/material"
 
@@ -19,7 +10,7 @@ import {
   QUERY_GET_PLANNING_PCT,
   SQLITE_ROOT,
 } from "../../util/apiEndpoints"
-import { convertToDataMap, fetchGetUri } from "../../util/helpers"
+import { fetchGetUri } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 
 const CARD_PROPERTY = {
@@ -32,9 +23,9 @@ export default function PlannedCard() {
     loading: false,
     hasError: false,
   })
-  const [numUniqueQueries, setNumUniqueQueries] = useState<number>(-1)
 
-  const [planningPercent, setPlanningPercent] = useState<number>(-1)
+  const [plannedQueriesPct, setPlannedQueriesPct] = useState<number>(-1)
+  const [planElapsedPct, setPlanElapsedPct] = useState<number>(-1)
 
   const handleRefetch = async () => fetchData()
   useEffect(() => {
@@ -57,97 +48,42 @@ export default function PlannedCard() {
       }
       i++
     }
-
-    setNumUniqueQueries(results[0].data.rows[0])
-
-    // // log time window
-    // const datamap = convertToDataMap(
-    //   results[0].data.headers,
-    //   results[0].data.rows,
-    // )[0]
-    // setFirstStartTimestamp(datamap["firstStartTimestampMs"])
-    // setLastStartTimestamp(datamap["lastStartTimestampMs"])
-    // setLogDuration(datamap["windowDurationMin"])
-
-    // // planning percent
-    // setPlanningPercent(results[1].data.rows[0][0])
+    setPlannedQueriesPct(results[0].data.rows[0][0])
+    setPlanElapsedPct(results[0].data.rows[0][1])
   }
 
   return (
     <Card sx={CARD_PROPERTY}>
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
-          Queries Executed, remove
+          Planning
         </Typography>
         {loadStatus.loading && <CircularProgress />}
         {!loadStatus.loading && loadStatus.hasError && (
           <Typography>Error loading log time windows</Typography>
         )}
         {!loadStatus.loading && !loadStatus.hasError && (
-          // <TableContainer component={Paper} sx={{ maxHeight: 800 }}>
-          //   <Table
-          //     stickyHeader
-          //     aria-label="simple table"
-          //   >
-          //     <TableBody>
-          //       {[
-          //         ["Start", `${new Date(firstStartTimestamp).toISOString()}`],
-          //         ["End", `${new Date(lastStartTimestamp).toISOString()}`],
-          //         ["Duration", `${logDuration} minutes`],
-          //         [
-          //           "Planning / Elapsed Time",
-          //           `${planningPercent.toFixed(2)} %`,
-          //         ],
-          //       ].map((row, i) => {
-          //         return (
-          //           <TableRow
-          //             key={`r${i}`}
-          //             hover
-          //             sx={{
-          //               "&:last-child td, &:last-child th": { border: 0 },
-          //             }}
-          //           >
-          //             {row.map((v, j) => (
-          //               <TableCell key={`c${j}`} align="left">
-          //                 {v === null ? "null" : v}
-          //               </TableCell>
-          //             ))}
-          //           </TableRow>
-          //         )
-          //       })}
-          //     </TableBody>
-          //   </Table>
-          // </TableContainer>
-        //   <DataGrid
-        //     autoHeight
-        //     slots={{
-        //       columnHeaders: () => null,
-        //       footer: () => null,
-        //     }}
-        //     rows={[
-        //       {
-        //         id: 1,
-        //         col1: "Start",
-        //         col2: `${new Date(firstStartTimestamp).toISOString()}`,
-        //       },
-        //       {
-        //         id: 2,
-        //         col1: "End",
-        //         col2: `${new Date(lastStartTimestamp).toISOString()}`,
-        //       },
-        //       { id: 3, col1: "Duration", col2: `${logDuration} minutes` },
-        //       {
-        //         id: 4,
-        //         col1: "Planning / Elapsed Time",
-        //         col2: `${planningPercent.toFixed(2)} %`,
-        //       },
-        //     ]}
-        //     columns={[
-        //       { field: "col1", headerName: "", flex: 1 },
-        //       { field: "col2", headerName: "", flex: 1 },
-        //     ]}
-        //   />
-        <div>todo</div>
+          <DataGrid
+            autoHeight
+            columnHeaderHeight={0}
+            hideFooter={true}
+            rows={[
+              {
+                id: 1,
+                col1: "Queries Planned",
+                col2: `${plannedQueriesPct.toFixed(2)} %`,
+              },
+              {
+                id: 2,
+                col1: "Planned / Elapsed",
+                col2: `${planElapsedPct.toFixed(2)} %`,
+              },
+            ]}
+            columns={[
+              { field: "col1", headerName: "", flex: 1 },
+              { field: "col2", headerName: "", flex: 1 },
+            ]}
+          />
         )}
 
         {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>

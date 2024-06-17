@@ -11,8 +11,13 @@ SELECT count(1) as numUniqueQueries FROM queries
 # cursor.execute(query, params)
 
 QUERY_GET_PLANNING_PCT = """
-SELECT sum(planning) *100.0/  sum(elapsedTimeMs)  as planPercent
-from query_execution
+SELECT 
+  avg(hasPlanning) * 100.0 as percentQueriesPlanned,
+  sum(planning) * 100.0 /  sum(elapsedTimeMs) as planElapsedPercent
+FROM (
+  SELECT case planning when  0 THEN 0 ELSE 1 END as hasPlanning, planning, elapsedTimeMs
+  FROM query_execution
+)
 """
 
 QUERY_GET_QUERY_TEXT = """

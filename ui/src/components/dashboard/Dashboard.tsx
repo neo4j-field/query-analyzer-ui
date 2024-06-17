@@ -3,10 +3,8 @@ import GeneralStatsCard from "./GeneralStatsCard"
 import PercentileCard from "./PercentileCard"
 import QueriesExecutedByServerCard from "./QueriesExecutedByServerCard"
 import UniqueQueriesExecutedCard from "./UniqueQueriesExecuted"
+import PlannedCard from "./PlannedCard"
 
-// Card: Total number of unique queries.
-// Card: Time Peiod. Number of Queries executed. Average time taken, avg page hits, avg page faults.
-// Card: Percentage queries planned, percentage of planning time/elapsedtime
 // Card: Top 5 queries in terms of in terms of invocations.
 // Card: Top 5 queries with most page hits.
 // Card: Top 5 queries with most page faults
@@ -38,6 +36,9 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12}>
               <GeneralStatsCard />
+            </Grid>
+            <Grid item xs={12}>
+              <PlannedCard />
             </Grid>
           </Grid>
         </Grid>
