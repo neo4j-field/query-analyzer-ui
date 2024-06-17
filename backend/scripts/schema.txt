@@ -1,0 +1,43 @@
+annotation_params
+    id, INTEGER
+    params, varchar(1000)
+
+graphql_queries
+    id, INTEGER
+    app, varchar(40)
+    query, varchar(4000)
+
+queries
+    id, INTEGER
+    query, varchar(4000)
+    runtime, varchar(20)
+    write_query, INTEGER
+
+query_annotation
+graphql_query_id, INTEGER
+query_id, INTEGER
+annotation_params_id, INTEGER
+
+query_execution
+    db_query_id, INTEGER NOT NULL
+    db_transaction_id, INTEGER NOT NULL
+    query_id, INTEGER
+    database, varchar(100)
+    db_id, varchar(20)
+    authenticatedUser, varchar(100)
+    executedUser, varchar(100)
+    elapsedTimeMs, INTEGER
+    pageFaults, INTEGER
+    pageHits, INTEGER
+    planning, INTEGER
+    waiting, INTEGER
+    start_timeStamp, DATETIME
+    end_timeStamp, DATETIME
+    allocatedBytes, INTEGER
+    client, varchar(200)
+    server, varchar(200)
+    failed, INTEGER
+    stacktrace, varchar(4000)
+    lang_driver, varchar(100)
+    driver_version, varchar(100)
+    query_type, INTEGER
