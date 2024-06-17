@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react"
-import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
-import { QUERY_TOP5_PAGE_HITS, SQLITE_ROOT } from "../../util/apiEndpoints"
+import {
+  Card,
+  CardContent,
+  CircularProgress,
+  Typography,
+} from "@mui/material"
+import {
+  QUERY_TOP5_QUERIES_EXECUTED,
+  SQLITE_ROOT,
+} from "../../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { DataGrid, GridEventListener } from "@mui/x-data-grid"
 import QueryModal from "./QueryModal"
@@ -10,7 +18,7 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
-export default function TopPageHitsCard() {
+export default function TopQueriesCard() {
   const [loadStatus, setLoadStatus] = useState({
     loading: false,
     hasError: false,
@@ -31,7 +39,7 @@ export default function TopPageHitsCard() {
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_TOP5_PAGE_HITS}?limit=5`),
+      fetchGetUri(`${SQLITE_ROOT}/${QUERY_TOP5_QUERIES_EXECUTED}?limit=5`),
     ])
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
@@ -66,7 +74,7 @@ export default function TopPageHitsCard() {
       <Card sx={CARD_PROPERTY}>
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
-            Top 5 Page Hits
+            Top 5 Queries
           </Typography>
           {loadStatus.loading && <CircularProgress />}
           {!loadStatus.loading && loadStatus.hasError && (

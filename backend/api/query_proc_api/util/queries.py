@@ -10,6 +10,14 @@ SELECT count(1) as numUniqueQueries FROM queries
 
 # cursor.execute(query, params)
 
+QUERY_TOP5_QUERIES_EXECUTED = """
+SELECT query_id, count(query_id) as numExecutions
+FROM query_execution qe
+GROUP BY query_id
+ORDER BY numExecutions desc
+LIMIT %LIMIT%
+"""
+
 QUERY_TOP5_PAGE_HITS = """
 SELECT query_id,
   sum(pageHits) as "Total Page Hits",
@@ -204,4 +212,5 @@ ENDPOINT_QUERY_DICT = {
     "countuniquequeries": QUERY_COUNT_UNIQUE_QUERIES,
     "generalstats": QUERY_GENERAL_STATS,
     "pageHits": QUERY_TOP5_PAGE_HITS,
+    "queriesexecuted": QUERY_TOP5_QUERIES_EXECUTED,
 }

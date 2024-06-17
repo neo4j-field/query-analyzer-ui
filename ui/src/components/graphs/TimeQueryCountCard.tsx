@@ -156,7 +156,6 @@ export default function TimeQueryCountCard() {
 
     const datamap = convertToDataMap(result.data.headers, result.data.rows)
     setDataset(datamap)
-    console.log("dataset", datamap)
   }
 
   return (

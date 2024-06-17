@@ -28,14 +28,12 @@ export default function QueryModal({
 
   useEffect(() => {
     ;(async function () {
-      console.log(openModal)
       if (openModal) {
         
         setLoadingQueryText(true)
         const result = await fetchGetUri(
           `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${queryId}`,
         )
-        console.log(result)
         setLoadingQueryText(false)
         const datamap = convertToDataMap(result.data.headers, result.data.rows)
         setModalQryText(datamap[0].query)

@@ -5,9 +5,8 @@ import QueriesExecutedByServerCard from "./QueriesExecutedByServerCard"
 import UniqueQueriesExecutedCard from "./UniqueQueriesExecuted"
 import PlannedCard from "./PlannedCard"
 import TopPageHitsCard from "./TopPageHitsCard"
+import TopQueriesCard from "./TopQueriesCard"
 
-// Card: Top 5 queries in terms of in terms of invocations.
-// Card: Top 5 queries with most page hits.
 // Card: Top 5 queries with most page faults
 // Card: Top 5 queries with most elapsedtime
 
@@ -50,6 +49,10 @@ export default function Dashboard() {
         </Grid>
         
         {/* TOP 5ers*/}
+        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+          <TopQueriesCard />
+        </Grid>
+
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <TopPageHitsCard />
         </Grid>
