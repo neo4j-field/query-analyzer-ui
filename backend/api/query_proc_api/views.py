@@ -29,6 +29,7 @@ class ApiMetadataView(APIView):
     def get(self, request):
         Response({"data": "stuff"}, status=status.HTTP_200_OK)
 
+
 class ReadSQLiteView(APIView):
     def get(self, request, endpoint, optional_param=None):
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -44,7 +45,11 @@ class ReadSQLiteView(APIView):
         if endpoint == "getquerytext":
             params["query_id"] = optional_param
 
-        query = query.replace("%LIMIT%", str(10))
+        try:
+            limit = request.GET.get("limit")
+        except:
+            limit = 10
+        query = query.replace("%LIMIT%", str(limit))
 
         # TODO set up dirpaths
         fp = os.path.join(dir_path, "..", "..", "query_db2.db")

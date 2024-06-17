@@ -34,6 +34,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # path('read-sqlite/<str:endpoint>', ReadSQLiteView.as_view(), name='read-sqlite'),
-    re_path(r'^read-sqlite/(?P<endpoint>[^/]+)/(?P<optional_param>[^/]+)?$', ReadSQLiteView.as_view(), name='read-sqlite'),
+    re_path(r'^read-sqlite/(?P<endpoint>\w{1,50}[^/]+)/(?P<optional_param>[^/]+)?$', ReadSQLiteView.as_view(), name='read-sqlite'),
     path('apimetadata', ApiMetadataView.as_view(), name='read-sqlite'),
 ]

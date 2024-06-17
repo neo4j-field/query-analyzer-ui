@@ -10,6 +10,18 @@ SELECT count(1) as numUniqueQueries FROM queries
 
 # cursor.execute(query, params)
 
+QUERY_TOP5_PAGE_HITS = """
+SELECT query_id,
+  sum(pageHits) as "Total Page Hits",
+  min(pageHits) as "Min Page Hits",
+  max(pageHits) as "Max Page Hits",
+  avg(pageHits) as "Avg Page Hits"
+FROM query_execution qe
+GROUP BY query_id
+ORDER BY sum(pageHits) DESC
+LIMIT %LIMIT%
+"""
+
 QUERY_GET_PLANNING_PCT = """
 SELECT 
   avg(hasPlanning) * 100.0 as percentQueriesPlanned,
@@ -191,4 +203,5 @@ ENDPOINT_QUERY_DICT = {
     "planningpercent": QUERY_GET_PLANNING_PCT,
     "countuniquequeries": QUERY_COUNT_UNIQUE_QUERIES,
     "generalstats": QUERY_GENERAL_STATS,
+    "pageHits": QUERY_TOP5_PAGE_HITS,
 }

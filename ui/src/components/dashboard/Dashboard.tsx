@@ -4,6 +4,7 @@ import PercentileCard from "./PercentileCard"
 import QueriesExecutedByServerCard from "./QueriesExecutedByServerCard"
 import UniqueQueriesExecutedCard from "./UniqueQueriesExecuted"
 import PlannedCard from "./PlannedCard"
+import TopPageHitsCard from "./TopPageHitsCard"
 
 // Card: Top 5 queries in terms of in terms of invocations.
 // Card: Top 5 queries with most page hits.
@@ -47,6 +48,12 @@ export default function Dashboard() {
         <Grid item xs={6}>
           <QueriesExecutedByServerCard />
         </Grid>
+        
+        {/* TOP 5ers*/}
+        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+          <TopPageHitsCard />
+        </Grid>
+        
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <PercentileCard />
         </Grid>
