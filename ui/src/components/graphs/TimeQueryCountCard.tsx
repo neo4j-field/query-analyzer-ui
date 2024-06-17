@@ -203,35 +203,6 @@ export default function TimeQueryCountCard() {
           </Button> */}
         </CardContent>
       </Card>
-
-      {/* <Dialog
-        open={openModal}
-        onClose={handleCloseModal}
-        maxWidth={"xs"}
-        fullWidth
-      >
-        <DialogTitle display={"inline"}>
-          <Typography>Query Text</Typography>
-          <IconButton
-            onClick={() => navigator.clipboard.writeText(queryText)}
-            edge="start"
-            sx={{ marginRight: 5 }}
-          >
-            <ContentCopyIcon />
-          </IconButton>
-        </DialogTitle>
-
-        <DialogContent>
-          {loadingQueryText && <CircularProgress />}
-          {!loadingQueryText && (
-            <>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                {queryText}
-              </Typography>
-            </>
-          )}
-        </DialogContent>
-      </Dialog> */}
     </>
   )
 }
