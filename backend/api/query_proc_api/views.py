@@ -46,10 +46,10 @@ class ReadSQLiteView(APIView):
 
         query = query.replace("%LIMIT%", str(10))
 
-        # fp = os.path.join(dir_path, "..", "..", filename)
-        fp = "/Users/henrylin/dev/query-proc-db-analysis/query_db2.db"
+        # TODO set up dirpaths
+        fp = os.path.join(dir_path, "..", "..", "query_db2.db")
         if not os.path.isfile(fp):
-            print("The specified database path does not exist.")
+            print(f'The specified database path "{fp}" does not exist.')
             return Response(
                 {"error": f"{fp} not found"}, status=status.HTTP_404_NOT_FOUND
             )
