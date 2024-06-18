@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react"
-import {
-  Card,
-  CardContent,
-  CircularProgress,
-  Typography,
-} from "@mui/material"
+import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 import {
   QUERY_TOP5_QUERIES_EXECUTED,
   SQLITE_ROOT,
