@@ -11,10 +11,10 @@ SELECT count(1) as numUniqueQueries FROM queries
 # cursor.execute(query, params)
 
 QUERY_TOP5_QUERIES_EXECUTED = """
-SELECT query_id, count(query_id) as numExecutions
+SELECT query_id, count(query_id) as "Total Executions"
 FROM query_execution qe
 GROUP BY query_id
-ORDER BY numExecutions desc
+ORDER BY "Total Executions" desc
 LIMIT %LIMIT%
 """
 
@@ -27,6 +27,30 @@ SELECT query_id,
 FROM query_execution qe
 GROUP BY query_id
 ORDER BY sum(pageHits) DESC
+LIMIT %LIMIT%
+"""
+
+QUERY_TOP5_PAGE_FAULTS = """
+SELECT query_id,
+  sum(pageFaults) as "Total Page Faults",
+  min(pageFaults) as "Min Page Faults",
+  max(pageFaults) as "Max Page Faults",
+  avg(pageFaults) as "Avg Page Faults"
+FROM query_execution
+GROUP BY query_id
+ORDER BY "Total Page Faults" DESC
+LIMIT %LIMIT%
+"""
+
+QUERY_TOP5_ELAPSED_TIME = """
+SELECT query_id, 
+  sum(elapsedTimeMs) as "Total Elapsed Time (ms)",
+  min(elapsedTimeMs) as "Min Elapsed Time (ms)",
+  max(elapsedTimeMs) as "Max Elapsed Time (ms)",
+  avg(elapsedTimeMs) as "Avg Elapsed Time (ms)"
+FROM query_execution
+GROUP BY query_id
+ORDER BY "Total Elapsed Time (ms)" DESC
 LIMIT %LIMIT%
 """
 
@@ -213,4 +237,6 @@ ENDPOINT_QUERY_DICT = {
     "generalstats": QUERY_GENERAL_STATS,
     "pageHits": QUERY_TOP5_PAGE_HITS,
     "queriesexecuted": QUERY_TOP5_QUERIES_EXECUTED,
+    "pageFaults": QUERY_TOP5_PAGE_FAULTS,
+    "elapsedTime": QUERY_TOP5_ELAPSED_TIME,
 }

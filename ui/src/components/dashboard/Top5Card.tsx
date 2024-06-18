@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
-import {
-  QUERY_TOP5_QUERIES_EXECUTED,
-  SQLITE_ROOT,
-} from "../../util/apiEndpoints"
+import { SQLITE_ROOT } from "../../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { DataGrid, GridEventListener } from "@mui/x-data-grid"
 import QueryModal from "./QueryModal"
@@ -13,7 +10,12 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
-export default function TopQueriesCard() {
+interface Props {
+  uriName: string
+  title: string
+}
+
+export default function Top5Card({ uriName, title }: Props) {
   const [loadStatus, setLoadStatus] = useState({
     loading: false,
     hasError: false,
@@ -33,29 +35,22 @@ export default function TopQueriesCard() {
    ****************************************************************************/
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_TOP5_QUERIES_EXECUTED}?limit=5`),
-    ])
+    const result = await fetchGetUri(`${SQLITE_ROOT}/${uriName}?limit=5`)
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
-    let i = 0
-    for (const result of results) {
-      if (result.hasError) {
-        console.error(`Error for fetch ${i}: ${result}`)
-      }
-      i++
+    if (result.hasError) {
+      console.error(`Error for fetch: ${result}`)
     }
 
+
     const datamap = convertToDataMap(
-      results[0].data.headers,
-      results[0].data.rows,
+      result.data.headers,
+      result.data.rows,
     )
-    i = 0
-    for (const x of datamap) {
-      x.id = i
-      i++
+    for (let i = 0; i < datamap.length; i++) {
+      datamap[i].id = i
     }
-    setHeaders(results[0].data.headers)
+    setHeaders(result.data.headers)
     setDatamap(datamap)
   }
 
@@ -69,7 +64,7 @@ export default function TopQueriesCard() {
       <Card sx={CARD_PROPERTY}>
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
-            Top 5 Queries
+            {title}
           </Typography>
           {loadStatus.loading && <CircularProgress />}
           {!loadStatus.loading && loadStatus.hasError && (
@@ -79,7 +74,7 @@ export default function TopQueriesCard() {
             <DataGrid
               autoHeight
               onRowDoubleClick={handleRowDblClick}
-              // hideFooter
+              hideFooter
               rows={datamap}
               columns={headers.map((s) => {
                 const ret: any = { field: s, headerName: s, flex: 1 }
