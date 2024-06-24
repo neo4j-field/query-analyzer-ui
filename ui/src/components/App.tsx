@@ -25,7 +25,7 @@ const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
 const linkPages: { to: string; displayName: string }[] = [
   { to: "dashboard", displayName: "Dashboard" },
-  { to: "graphs", displayName: "Graphs" },
+  { to: "graphs", displayName: "Performance Overview" },
 ]
 
 interface AppBarProps extends MuiAppBarProps {
@@ -95,8 +95,14 @@ export interface LoadingStatus {
   hasError: boolean
 }
 
+/******************************************************************************
+ * APP
+ * @returns
+ ******************************************************************************/
 export default function App() {
   const [open, setOpen] = useState(true)
+  const [appBarName, setAppBarName] = useState<string>("")
+  
   const toggleDrawer = () => {
     setOpen(true)
   }
@@ -137,7 +143,7 @@ export default function App() {
             noWrap
             sx={{ flexGrow: 1 }}
           >
-            Dashboard
+            {appBarName}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -155,13 +161,18 @@ export default function App() {
             <ChevronLeftIcon />
           </IconButton>
         </Toolbar>
-        
+
         <Divider />
-        
+
         {/* Sidebar links */}
         <List component="nav">
-          {linkPages.map(({to, displayName}, i) => (
-            <ListItemButton key={uuid()} component={Link} to={to}>
+          {linkPages.map(({ to, displayName }, i) => (
+            <ListItemButton
+              key={uuid()}
+              component={Link}
+              to={to}
+              onClick={() => setAppBarName(displayName)}
+            >
               <ListItemIcon>
                 <AssignmentIcon />
               </ListItemIcon>
