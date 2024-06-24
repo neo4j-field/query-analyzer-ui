@@ -1,126 +1,73 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import AddIcon from "@mui/icons-material/Add"
-import { axisClasses } from "@mui/x-charts/ChartsAxis"
+import { useEffect, useState } from "react"
+import "chartjs-adapter-moment"
+import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Typography,
-} from "@mui/material"
+  Chart as ChartJS,
+  Tooltip,
+  Legend,
+  ChartData,
+  ChartOptions,
+  CategoryScale,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Title,
+  LineController,
+} from "chart.js"
+import "chart.js/auto"
+import { Line } from "react-chartjs-2"
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+  Title,
+  Tooltip,
+  Legend,
+)
 
 import { QUERY_TIME_QUERY_COUNT, SQLITE_ROOT } from "../../util/apiEndpoints"
-import { convertToDataMap, fetchGetUri } from "../../util/helpers"
-import { BarChart } from "@mui/x-charts"
-
-const valueFormatter = (value: number | null) => `${value} ff`
-
-const chartSetting = {
-  yAxis: [
-    {
-      label: "Number of queries",
-    },
-  ],
-  width: 1000,
-  height: 300,
-  // sx: {
-  //   [`.${axisClasses.left} .${axisClasses.label}`]: {
-  //     transform: "translate(-20px, 0)",
-  //   },
-  // },
-}
-
-// const fakedataset = [
-//   {
-//     london: 59,
-//     paris: 57,
-//     newYork: 86,
-//     seoul: 21,
-//     month: "Jan",
-//   },
-//   {
-//     london: 50,
-//     paris: 52,
-//     newYork: 78,
-//     seoul: 28,
-//     month: "Fev",
-//   },
-//   {
-//     london: 47,
-//     paris: 53,
-//     newYork: 106,
-//     seoul: 41,
-//     month: "Mar",
-//   },
-//   {
-//     london: 54,
-//     paris: 56,
-//     newYork: 92,
-//     seoul: 73,
-//     month: "Apr",
-//   },
-//   {
-//     london: 57,
-//     paris: 69,
-//     newYork: 92,
-//     seoul: 99,
-//     month: "May",
-//   },
-//   {
-//     london: 60,
-//     paris: 63,
-//     newYork: 103,
-//     seoul: 144,
-//     month: "June",
-//   },
-//   {
-//     london: 59,
-//     paris: 60,
-//     newYork: 105,
-//     seoul: 319,
-//     month: "July",
-//   },
-//   {
-//     london: 65,
-//     paris: 60,
-//     newYork: 106,
-//     seoul: 249,
-//     month: "Aug",
-//   },
-//   {
-//     london: 51,
-//     paris: 51,
-//     newYork: 95,
-//     seoul: 131,
-//     month: "Sept",
-//   },
-//   {
-//     london: 60,
-//     paris: 65,
-//     newYork: 97,
-//     seoul: 55,
-//     month: "Oct",
-//   },
-//   {
-//     london: 67,
-//     paris: 64,
-//     newYork: 76,
-//     seoul: 48,
-//     month: "Nov",
-//   },
-//   {
-//     london: 61,
-//     paris: 70,
-//     newYork: 103,
-//     seoul: 25,
-//     month: "Dec",
-//   },
-// ]
+import { fetchGetUri } from "../../util/helpers"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
   boxShadow: 0,
+}
+
+const TIME_QUERY_COUNT_OPTIONS: ChartOptions<"line"> = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: "top" as const,
+    },
+    title: {
+      display: true,
+      text: "Number of Queries Run",
+    },
+    decimation: {
+      enabled: true,
+      algorithm: "lttb",
+      samples: 10,
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "second",
+        // tooltipFormat: "ll HH:mm:ss",
+      },
+      ticks: {
+        maxTicksLimit: 10,
+      },
+      title: {
+        display: true,
+        text: "Timestamp",
+      },
+    },
+  },
 }
 
 export default function TimeQueryCountCard() {
@@ -128,7 +75,12 @@ export default function TimeQueryCountCard() {
     loading: false,
     hasError: false,
   })
-  const [dataset, setDataset] = useState<Record<string, any>[]>([])
+  const [data, setData] = useState<ChartData<"line">>({
+    labels: [],
+    datasets: [],
+  })
+  const [options, setOptions] = useState<ChartOptions<"line">>({})
+
   // const [openModal, setOpenModal] = useState(false)
   // const [loadingQueryText, setLoadingQueryText] = useState(false)
   // const [queryText, setQueryText] = useState("kdfjldkfj")
@@ -148,14 +100,114 @@ export default function TimeQueryCountCard() {
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_TIME_QUERY_COUNT}`)
-    setLoadStatus({ ...loadStatus, loading: false})
+    setLoadStatus({ ...loadStatus, loading: false })
 
     if (result.hasError) {
       return
     }
 
-    const datamap = convertToDataMap(result.data.headers, result.data.rows)
-    setDataset(datamap)
+    const dataTransformed = {
+      datasets: [
+        {
+          label: "All queries",
+          data: result.data.rows.map((row: any) => ({ x: row[0], y: row[1] })),
+          // tension: 0.1,
+          borderColor: "rgba(75, 192, 192, 1)",
+          borderWidth: 1,
+          pointRadius: 0, // Set to 0 to hide the points
+          fill: false,
+        },
+      ],
+    }
+    setData(dataTransformed)
+    setOptions(TIME_QUERY_COUNT_OPTIONS)
+  }
+
+  // const fakeoptions = {
+  //   scales: {
+  //     x: {
+  //       type: "time",
+  //       time: {
+  //         unit: "second", // Adjust the unit as needed
+  //         tooltipFormat: "ll HH:mm:ss",
+  //       },
+  //       ticks: {
+  //         maxTicksLimit: 10, // Set the maximum number of x-axis intervals
+  //       },
+  //     },
+  //     y: {
+  //       beginAtZero: true,
+  //     },
+  //   },
+  //   plugins: {
+  //     decimation: {
+  //       enabled: true,
+  //       algorithm: "lttb", // 'lttb' (Largest Triangle Three Buckets) algorithm
+  //       samples: 100, // Maximum number of points to display
+  //     },
+  //   },
+  // }
+  // const now = Date.now()
+  // const fakedatainner = Array.from({ length: 1000 }, (_, i) => ({
+  //   x: now + i * 1000, // 1-second interval
+  //   y: Math.sin(i / 10),
+  // }))
+  // console.log(fakedatainner)
+  // const fakedata = {
+  //   type: "line",
+  //   data: {
+  //     datasets: [
+  //       {
+  //         label: "Sample Dataset",
+  //         data: fakedatainner,
+  //         borderColor: "rgba(75, 192, 192, 1)",
+  //         borderWidth: 1,
+  //         pointRadius: 2, // Reduce the radius of the points
+  //       },
+  //     ],
+  //   },
+  // }
+
+  console.log("render data", data)
+  console.log("render options", options)
+
+  const foptions = {
+    response: true,
+    scales: {
+      x: {
+        type: "time",
+        time: {
+          unit: "day",
+        },
+      },
+    },
+  }
+
+  const values = [
+    {
+      x: new Date("2020-01-01"),
+      y: 100.2,
+    },
+    {
+      x: new Date("2020-01-02"),
+      y: 102.2,
+    },
+    {
+      x: new Date("2020-01-03"),
+      y: 105.3,
+    },
+    {
+      x: new Date("2020-01-11"),
+      y: 104.4,
+    },
+  ]
+
+  const fdata = {
+    datasets: [
+      {
+        data: values,
+      },
+    ],
   }
 
   return (
@@ -167,35 +219,15 @@ export default function TimeQueryCountCard() {
           </Typography>
 
           {loadStatus.loading && <CircularProgress />}
-          {!loadStatus.loading &&
-            loadStatus.hasError && (
-              <Typography>Error loading</Typography>
-            )}
+          {!loadStatus.loading && loadStatus.hasError && (
+            <Typography>Error loading</Typography>
+          )}
 
           {/* BAR */}
-          {!loadStatus.loading &&
-            !loadStatus.hasError && (
-              <BarChart
-                dataset={dataset}
-                xAxis={[{ scaleType: "band", dataKey: "time", valueFormatter: (val) => `${val.split(" ")[1]}` }]}
-                series={[
-                  { dataKey: "numQueries", label: "", valueFormatter },
-                ]}
-                {...chartSetting}
-              />
-
-              // <BarChart
-              //   dataset={fakedataset}
-              //   xAxis={[{ scaleType: "band", dataKey: "month" }]}
-              //   series={[
-              //     { dataKey: "london", label: "London", valueFormatter },
-              //     { dataKey: "paris", label: "Paris", valueFormatter },
-              //     { dataKey: "newYork", label: "New York", valueFormatter },
-              //     { dataKey: "seoul", label: "Seoul", valueFormatter },
-              //   ]}
-              //   {...chartSetting}
-              // />
-            )}
+          {!loadStatus.loading && !loadStatus.hasError && (
+            <Line options={options} data={data} />
+            // <Line options={fakeoptions} data={fakedata} />
+          )}
 
           {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
             {" "}

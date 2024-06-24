@@ -99,7 +99,7 @@ where planning > 20 GROUP by query_id
 
 # -- timestamps and queries
 QUERY_TIME_QUERY_COUNT = """
-select DATETIME(start_timeStamp/1000, 'unixepoch' ) as time, count(1) as numQueries 
+select start_timeStamp as time, count(1) as numQueries 
 from query_execution 
 group by time order by time
 """
