@@ -38,7 +38,7 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
-const DATASET_BASE: ChartDataset<"line"> = {
+export const DATASET_BASE: ChartDataset<"line"> = {
   label: "Datasetlabel",
   data: [],
   // tension: 0.1,
@@ -119,6 +119,7 @@ interface Props {
   yLabel: string
   graphTitle: string
   graphType: GraphType
+  dataTransformer?: (rows: any[]) => ChartDataset<"line">[]
 }
 
 /******************************************************************************
@@ -132,6 +133,7 @@ export default function TimeGraph({
   yLabel,
   graphTitle,
   graphType,
+  dataTransformer,
 }: Props) {
   const [loadStatus, setLoadStatus] = useState({
     loading: false,
@@ -148,9 +150,9 @@ export default function TimeGraph({
     fetchData()
   }, [apiUri])
 
-  /****************************************************************************
-   * FETCH
-   ****************************************************************************/
+  /*********
+   * FETCH *
+   ********/
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const result = await fetchGetUri(`${SQLITE_ROOT}/${apiUri}`)
@@ -160,31 +162,10 @@ export default function TimeGraph({
       return
     }
 
-    // TODO dependency injection
     // data transformation
     const dataTransformed: ChartData<"line"> = { datasets: [] }
-    if (graphType === "queries") {
-      // partition data by server
-      const dataByServer: Record<string, { x: string; y: string }[]> = {}
-      for (const row of result.data.rows) {
-        const [timestamp, server, count] = row
-        if (!(server in dataByServer)) {
-          dataByServer[server] = []
-        }
-        dataByServer[server].push({ x: timestamp, y: count })
-      }
-
-      for (const [server, data] of Object.entries(dataByServer)) {
-        const dataset = structuredClone(DATASET_BASE)
-        dataset.data = data as any
-        dataset.label = server
-        dataset.hidden = server !== "All Servers"
-        if (server === "All Servers") {
-          dataTransformed.datasets.unshift(dataset)
-        } else {
-          dataTransformed.datasets.push(dataset)
-        }
-      }
+    if (dataTransformer) {
+      dataTransformed.datasets = dataTransformer(result.data.rows)
     } else {
       const dataset = structuredClone(DATASET_BASE)
       dataset.data = result.data.rows.map((row: any) => ({

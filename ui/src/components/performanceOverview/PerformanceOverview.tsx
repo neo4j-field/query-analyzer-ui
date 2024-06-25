@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
   Box,
   Toolbar,
@@ -8,7 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@mui/material"
-import TimeQueryCountCard from "./TimeGraph"
+import TimeQueryCountCard, { DATASET_BASE } from "./TimeGraph"
 import {
   QUERY_TIME_ELAPSED_TIME_COUNT,
   QUERY_TIME_PAGE_FAULTS_COUNT,
@@ -16,6 +16,7 @@ import {
   QUERY_TIME_PLANNING_COUNT,
   QUERY_TIME_QUERY_COUNT,
 } from "../../util/apiEndpoints"
+import { ChartDataset } from "chart.js"
 
 export type GraphType =
   | "queries"
@@ -24,14 +25,42 @@ export type GraphType =
   | "execution"
   | "planning"
 
-const graphTypeMap: Record<GraphType, Record<string, string>> = {
+const graphTypeMap: Record<GraphType, Record<string, any>> = {
   queries: {
     apiUri: QUERY_TIME_QUERY_COUNT,
     datasetLabel: "All",
     xLabel: "Timestamp",
     yLabel: "Total Count",
     graphTitle: "Queries Per Minute By Server",
+    dataTransformer: function(rows: any[]) {
+      // partition data by server
+      const datasets: ChartDataset<"line">[] = []
+      const dataByServer: Record<string, { x: string; y: string }[]> = {}
+      for (const row of rows) {
+        const [timestamp, server, count] = row
+        if (!(server in dataByServer)) {
+          dataByServer[server] = []
+        }
+        dataByServer[server].push({ x: timestamp, y: count })
+      }
+    
+      // Default show only All Servers dataset
+      for (const [server, data] of Object.entries(dataByServer)) {
+        const dataset = structuredClone(DATASET_BASE)
+        dataset.data = data as any
+        dataset.label = server
+        dataset.hidden = server !== "All Servers"
+        if (server === "All Servers") {
+          datasets.unshift(dataset)
+        } else {
+          datasets.push(dataset)
+        }
+      }
+    
+      return datasets
+    }
   },
+  
   pageFaults: {
     apiUri: QUERY_TIME_PAGE_FAULTS_COUNT,
     datasetLabel: "All",
@@ -39,6 +68,7 @@ const graphTypeMap: Record<GraphType, Record<string, string>> = {
     yLabel: "Total Count",
     graphTitle: "Page Faults Per Minute",
   },
+  
   pageHits: {
     apiUri: QUERY_TIME_PAGE_HITS_COUNT,
     datasetLabel: "All",
@@ -46,6 +76,7 @@ const graphTypeMap: Record<GraphType, Record<string, string>> = {
     yLabel: "Total Count",
     graphTitle: "Page Hits Per Minute",
   },
+  
   execution: {
     apiUri: QUERY_TIME_ELAPSED_TIME_COUNT,
     datasetLabel: "All",
@@ -53,6 +84,7 @@ const graphTypeMap: Record<GraphType, Record<string, string>> = {
     yLabel: "Total (ms)",
     graphTitle: "Execution Time Per Minute",
   },
+  
   planning: {
     apiUri: QUERY_TIME_PLANNING_COUNT,
     datasetLabel: "All",
@@ -64,26 +96,10 @@ const graphTypeMap: Record<GraphType, Record<string, string>> = {
 
 export default function PerformanceOverview() {
   const [graphType, setGraphType] = useState<GraphType>("queries")
-  const [apiUri, setApiUri] = useState<string>(graphTypeMap.queries.apiUri)
-  const [datasetLabel, setDatasetLabel] = useState<string>(
-    graphTypeMap.queries.datasetLabel,
-  )
-  const [xLabel, setXLabel] = useState<string>(graphTypeMap.queries.xLabel)
-  const [yLabel, setYLabel] = useState<string>(graphTypeMap.queries.yLabel)
-  const [graphTitle, setGraphTitle] = useState<string>(
-    graphTypeMap.queries.graphTitle,
-  )
+  
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setGraphType((event.target as HTMLInputElement).value as GraphType)
   }
-
-  useEffect(() => {
-    setApiUri(graphTypeMap[graphType].apiUri)
-    setDatasetLabel(graphTypeMap[graphType].datasetLabel)
-    setXLabel(graphTypeMap[graphType].xLabel)
-    setYLabel(graphTypeMap[graphType].yLabel)
-    setGraphTitle(graphTypeMap[graphType].graphTitle)
-  }, [graphType])
 
   return (
     <Box
@@ -140,12 +156,13 @@ export default function PerformanceOverview() {
 
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <TimeQueryCountCard
-            apiUri={apiUri}
-            datasetLabel={datasetLabel}
-            xLabel={xLabel}
-            yLabel={yLabel}
-            graphTitle={graphTitle}
-            graphType={graphType}
+            apiUri={graphTypeMap[graphType].apiUri}
+            datasetLabel={graphTypeMap[graphType].datasetLabel}
+            xLabel={graphTypeMap[graphType].xLabel}
+            yLabel={graphTypeMap[graphType].yLabel}
+            graphTitle={graphTypeMap[graphType].graphTitle}
+            graphType={graphTypeMap[graphType].graphType}
+            dataTransformer={graphTypeMap[graphType].dataTransformer}
           />
         </Grid>
       </Grid>
