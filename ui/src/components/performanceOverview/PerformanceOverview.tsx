@@ -8,7 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@mui/material"
-import TimeQueryCountCard from "./TimeQueryCountGraph"
+import TimeQueryCountCard from "./TimeGraph"
 import {
   QUERY_TIME_ELAPSED_TIME_COUNT,
   QUERY_TIME_PAGE_FAULTS_COUNT,
