@@ -182,11 +182,6 @@ export default function TimeGraph({
             <Line options={options} data={data} />
             // <Line options={fakeoptions} data={fakedata} />
           )}
-
-          {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
-            {" "}
-            Update
-          </Button> */}
         </CardContent>
       </Card>
     </>

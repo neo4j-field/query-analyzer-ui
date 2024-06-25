@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import {
-  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -35,9 +34,9 @@ export default function PercentileCard() {
   const [openModal, setOpenModal] = useState(false)
   const [chosenQueryId, setChosenQueryId] = useState("")
 
-  const handleRefetch = async () => {
-    fetchPercentile()
-  }
+  // const handleRefetch = async () => {
+  //   fetchPercentile()
+  // }
 
   useEffect(() => {
     fetchPercentile()
@@ -112,10 +111,6 @@ export default function PercentileCard() {
               </Table>
             </TableContainer>
           )}
-          {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
-            {" "}
-            Update
-          </Button> */}
         </CardContent>
       </Card>
 

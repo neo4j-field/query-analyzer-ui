@@ -24,9 +24,9 @@ export default function GeneralStatsCard() {
   const [avgTimeTaken, setAvgTimeTaken] = useState<number>(-1)
   const [numQueriesExecuted, setNumQueriesExecuted] = useState<number>(-1)
 
-  const handleRefetch = async () => {
-    fetchData()
-  }
+  // const handleRefetch = async () => {
+  //   fetchData()
+  // }
 
   useEffect(() => {
     fetchData()
@@ -122,10 +122,6 @@ export default function GeneralStatsCard() {
           />
         )}
 
-        {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
-          {" "}
-          Update
-        </Button> */}
       </CardContent>
     </Card>
   )

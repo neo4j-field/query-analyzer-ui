@@ -25,7 +25,7 @@ export default function Top5Card({ uriName, title }: Props) {
   const [openModal, setOpenModal] = useState(false)
   const [chosenQueryId, setChosenQueryId] = useState("")
 
-  const handleRefetch = async () => fetchData()
+  // const handleRefetch = async () => fetchData()
 
   useEffect(() => {
     fetchData()
@@ -83,11 +83,6 @@ export default function Top5Card({ uriName, title }: Props) {
               })}
             />
           )}
-
-          {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
-          {" "}
-          Update
-        </Button> */}
         </CardContent>
       </Card>
 

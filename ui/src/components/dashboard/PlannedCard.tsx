@@ -27,7 +27,8 @@ export default function PlannedCard() {
   const [plannedQueriesPct, setPlannedQueriesPct] = useState<number>(-1)
   const [planElapsedPct, setPlanElapsedPct] = useState<number>(-1)
 
-  const handleRefetch = async () => fetchData()
+  // const handleRefetch = async () => fetchData()
+  
   useEffect(() => {
     fetchData()
   }, [])
@@ -85,11 +86,6 @@ export default function PlannedCard() {
             ]}
           />
         )}
-
-        {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
-          {" "}
-          Update
-        </Button> */}
       </CardContent>
     </Card>
   )

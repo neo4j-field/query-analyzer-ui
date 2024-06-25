@@ -29,9 +29,9 @@ export default function QueriesExecutedByServer() {
     Record<string, any>[]
   >([])
 
-  const handleRefetch = async () => {
-    fetchData()
-  }
+  // const handleRefetch = async () => {
+  //   fetchData()
+  // }
 
   useEffect(() => {
     fetchData()
@@ -93,11 +93,6 @@ export default function QueriesExecutedByServer() {
             })}
           />
         )}
-
-        {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
-          {" "}
-          Update
-        </Button> */}
       </CardContent>
     </Card>
   )

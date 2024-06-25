@@ -26,7 +26,8 @@ export default function UniqueQueriesExecutedCard() {
   })
   const [numUniqueQueries, setNumUniqueQueries] = useState<number>(-1)
 
-  const handleRefetch = async () => fetchData()
+  // const handleRefetch = async () => fetchData()
+  
   useEffect(() => {
     fetchData()
   }, [])
@@ -77,10 +78,6 @@ export default function UniqueQueriesExecutedCard() {
           />
         )}
 
-        {/* <Button startIcon={<AddIcon />} onClick={() => handleRefetch()}>
-          {" "}
-          Update
-        </Button> */}
       </CardContent>
     </Card>
   )

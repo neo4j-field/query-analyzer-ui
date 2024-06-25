@@ -102,17 +102,10 @@ export interface LoadingStatus {
 export default function App() {
   const [open, setOpen] = useState(true)
   const [appBarName, setAppBarName] = useState<string>("")
-  
+
   const toggleDrawer = () => {
     setOpen(true)
   }
-
-  const [loading, setLoading] = useState<LoadingStatuses>({
-    logTimeWindow: { isLoading: false, hasError: false },
-    queryCountByServer: { isLoading: false, hasError: false },
-    percentile: { isLoading: false, hasError: false },
-    timeQueryCount: { isLoading: false, hasError: false },
-  })
 
   return (
     <Box style={{ display: "flex", height: CONTENT_AREA_HEIGHT }}>
