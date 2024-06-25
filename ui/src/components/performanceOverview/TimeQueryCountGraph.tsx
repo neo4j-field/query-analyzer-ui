@@ -37,13 +37,13 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
-const TIME_QUERY_DATASETS_BASE: ChartDataset<"line"> = {
-  label: "All queries",
+const DATASETS_BASE: ChartDataset<"line"> = {
+  label: "Datasetlabel",
   data: [],
   // tension: 0.1,
   borderColor: "rgba(75, 192, 192, 1)",
   borderWidth: 1,
-  // pointRadius: 0, // Set to 0 to hide the points
+  pointRadius: 1, // Set to 0 to hide the points
   // fill: {
   //   target: 'origin',
   //   above: 'rgb(255, 0, 0)',   // Area will be red above the origin
@@ -51,7 +51,7 @@ const TIME_QUERY_DATASETS_BASE: ChartDataset<"line"> = {
   // },
 }
 
-const TIME_QUERY_COUNT_OPTIONS: ChartOptions<"line"> = {
+const CHART_OPTIONS_BASE: ChartOptions<"line"> = {
   responsive: true,
   plugins: {
     legend: {
@@ -59,15 +59,15 @@ const TIME_QUERY_COUNT_OPTIONS: ChartOptions<"line"> = {
     },
     title: {
       display: true,
-      text: "Number of Queries Run",
+      text: "Title",
     },
     decimation: {
       enabled: true,
       algorithm: "lttb",
-      samples: 90,
-      
+      // samples: 500,
+
       // algorithm: "min-max",
-      threshold: 90,
+      // threshold: 90,
     },
   },
   indexAxis: "x",
@@ -90,13 +90,31 @@ const TIME_QUERY_COUNT_OPTIONS: ChartOptions<"line"> = {
       beginAtZero: true,
       title: {
         display: true,
-        text: "Number of Queries Run",
+        text: "Query Count",
       },
     },
   },
 }
 
-export default function TimeQueryCountGraph() {
+interface Props {
+  apiUri: string
+  datasetLabel: string
+  xLabel: string
+  yLabel: string
+  graphTitle: string
+}
+
+/******************************************************************************
+ * TIME GRAPH
+ * @returns
+ ******************************************************************************/
+export default function TimeGraph({
+  apiUri,
+  datasetLabel,
+  xLabel,
+  yLabel,
+  graphTitle,
+}: Props) {
   const [loadStatus, setLoadStatus] = useState({
     loading: false,
     hasError: false,
@@ -107,41 +125,44 @@ export default function TimeQueryCountGraph() {
   })
   const [options, setOptions] = useState<ChartOptions<"line">>({})
 
-  // const [openModal, setOpenModal] = useState(false)
-  // const [loadingQueryText, setLoadingQueryText] = useState(false)
-  // const [queryText, setQueryText] = useState("kdfjldkfj")
-
   const handleRefetch = async () => {
     fetchData()
   }
 
-  // const handleCloseModal = () => setOpenModal(false)
-
   useEffect(() => {
+    setData({ labels: [], datasets: [] })
     fetchData()
-  }, [])
+  }, [apiUri])
 
   /****************************************************************************
+   * FETCH
    ****************************************************************************/
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_TIME_QUERY_COUNT}`)
+    const result = await fetchGetUri(`${SQLITE_ROOT}/${apiUri}`)
     setLoadStatus({ ...loadStatus, loading: false })
 
     if (result.hasError) {
       return
     }
 
+    const datasetsBase = structuredClone(DATASETS_BASE)
+    datasetsBase.data = result.data.rows.map((row: any) => ({
+      x: row[0],
+      y: row[1],
+    }))
+    datasetsBase.label = datasetLabel
+
     const dataTransformed = {
-      datasets: [
-        {
-          ...structuredClone(TIME_QUERY_DATASETS_BASE),
-          data: result.data.rows.map((row: any) => ({ x: row[0], y: row[1] })),
-        },
-      ],
+      datasets: [datasetsBase],
     }
+
     setData(dataTransformed)
-    setOptions(TIME_QUERY_COUNT_OPTIONS)
+    const options: ChartOptions<"line"> = structuredClone(CHART_OPTIONS_BASE)
+    options.scales!.x!.title!.text = xLabel
+    options.scales!.y!.title!.text = yLabel
+    options.plugins!.title!.text = graphTitle
+    setOptions(options)
   }
 
   // console.log("render data", data)

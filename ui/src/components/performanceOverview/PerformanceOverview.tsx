@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Box,
   Toolbar,
@@ -9,6 +9,13 @@ import {
   RadioGroup,
 } from "@mui/material"
 import TimeQueryCountCard from "./TimeQueryCountGraph"
+import {
+  QUERY_TIME_ELAPSED_TIME_COUNT,
+  QUERY_TIME_PAGE_FAULTS_COUNT,
+  QUERY_TIME_PAGE_HITS_COUNT,
+  QUERY_TIME_PLANNING_COUNT,
+  QUERY_TIME_QUERY_COUNT,
+} from "../../util/apiEndpoints"
 
 type GraphType =
   | "queries"
@@ -17,12 +24,66 @@ type GraphType =
   | "execution"
   | "planning"
 
-export default function PerformanceOverview() {
-  const [value, setValue] = useState<GraphType>("queries")
+const graphTypeMap: Record<GraphType, Record<string, string>> = {
+  queries: {
+    apiUri: QUERY_TIME_QUERY_COUNT,
+    datasetLabel: "All",
+    xLabel: "Timestamp",
+    yLabel: "Total Count",
+    graphTitle: "Queries Per Minute",
+  },
+  pageFaults: {
+    apiUri: QUERY_TIME_PAGE_FAULTS_COUNT,
+    datasetLabel: "All",
+    xLabel: "Timestamp",
+    yLabel: "Total Count",
+    graphTitle: "Page Faults Per Minute",
+  },
+  pageHits: {
+    apiUri: QUERY_TIME_PAGE_HITS_COUNT,
+    datasetLabel: "All",
+    xLabel: "Timestamp",
+    yLabel: "Total Count",
+    graphTitle: "Page Hits Per Minute",
+  },
+  execution: {
+    apiUri: QUERY_TIME_ELAPSED_TIME_COUNT,
+    datasetLabel: "All",
+    xLabel: "Timestamp",
+    yLabel: "Total (ms)",
+    graphTitle: "Execution Time Per Minute",
+  },
+  planning: {
+    apiUri: QUERY_TIME_PLANNING_COUNT,
+    datasetLabel: "All",
+    xLabel: "Timestamp",
+    yLabel: "Total (ms)",
+    graphTitle: "Planning Time Per Minute",
+  },
+}
 
+export default function PerformanceOverview() {
+  const [graphType, setGraphType] = useState<GraphType>("queries")
+  const [apiUri, setApiUri] = useState<string>(graphTypeMap.queries.apiUri)
+  const [datasetLabel, setDatasetLabel] = useState<string>(
+    graphTypeMap.queries.datasetLabel,
+  )
+  const [xLabel, setXLabel] = useState<string>(graphTypeMap.queries.xLabel)
+  const [yLabel, setYLabel] = useState<string>(graphTypeMap.queries.yLabel)
+  const [graphTitle, setGraphTitle] = useState<string>(
+    graphTypeMap.queries.graphTitle,
+  )
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue((event.target as HTMLInputElement).value as GraphType)
+    setGraphType((event.target as HTMLInputElement).value as GraphType)
   }
+
+  useEffect(() => {
+    setApiUri(graphTypeMap[graphType].apiUri)
+    setDatasetLabel(graphTypeMap[graphType].datasetLabel)
+    setXLabel(graphTypeMap[graphType].xLabel)
+    setYLabel(graphTypeMap[graphType].yLabel)
+    setGraphTitle(graphTypeMap[graphType].graphTitle)
+  }, [graphType])
 
   return (
     <Box
@@ -45,7 +106,7 @@ export default function PerformanceOverview() {
               row
               // aria-labelledby="demo-row-radio-buttons-group-label"
               // name="row-radio-buttons-group"
-              value={value}
+              value={graphType}
               onChange={handleChange}
             >
               <FormControlLabel
@@ -78,7 +139,13 @@ export default function PerformanceOverview() {
         </Grid>
 
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <TimeQueryCountCard />
+          <TimeQueryCountCard
+            apiUri={apiUri}
+            datasetLabel={datasetLabel}
+            xLabel={xLabel}
+            yLabel={yLabel}
+            graphTitle={graphTitle}
+          />
         </Grid>
       </Grid>
     </Box>

@@ -104,6 +104,34 @@ from query_execution
 group by time order by time
 """
 
+QUERY_TIME_PAGE_FAULTS_COUNT = """
+SELECT start_timeStamp as time, sum(pageFaults) as totalPageFaults
+FROM query_execution
+GROUP BY time
+ORDER BY time
+"""
+
+QUERY_TIME_PAGE_HITS_COUNT = """
+SELECT start_timeStamp as time, sum(pageHits) as totalPageHits
+FROM query_execution
+GROUP BY time
+ORDER BY time
+"""
+
+QUERY_TIME_ELAPSED_TIME_COUNT = """
+SELECT start_timeStamp as time, sum(elapsedTimeMs) as totalElapsedTimeMs
+FROM query_execution
+GROUP BY time
+ORDER BY time
+"""
+
+QUERY_TIME_PLANNING_COUNT = """
+SELECT start_timeStamp as time, sum(planning) as totalPlanning
+FROM query_execution
+GROUP BY time
+ORDER BY time
+"""
+
 # -- how many queries for each server+timestamp combo order by server
 # -- "for each server at each time point, how many queries"
 QUERY_ = """
@@ -232,6 +260,10 @@ ENDPOINT_QUERY_DICT = {
     "getquerytext": QUERY_GET_QUERY_TEXT,
     "getquerycountbyserver": QUERY_QUERY_COUNT_BY_SERVER,
     "timequerycount": QUERY_TIME_QUERY_COUNT,
+    "timepagefaultscount": QUERY_TIME_PAGE_FAULTS_COUNT,
+    "timepagehitscount": QUERY_TIME_PAGE_HITS_COUNT,
+    "timeelapsedtimecount": QUERY_TIME_ELAPSED_TIME_COUNT,
+    "timeplanningcount": QUERY_TIME_PLANNING_COUNT,
     "planningpercent": QUERY_GET_PLANNING_PCT,
     "countuniquequeries": QUERY_COUNT_UNIQUE_QUERIES,
     "generalstats": QUERY_GENERAL_STATS,
