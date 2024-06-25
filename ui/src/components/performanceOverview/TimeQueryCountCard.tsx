@@ -7,6 +7,7 @@ import {
   Legend,
   ChartData,
   ChartOptions,
+  ChartDataset,
   CategoryScale,
   LineElement,
   LinearScale,
@@ -36,6 +37,20 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
+const TIME_QUERY_DATASETS_BASE: ChartDataset<"line"> = {
+  label: "All queries",
+  data: [],
+  // tension: 0.1,
+  borderColor: "rgba(75, 192, 192, 1)",
+  borderWidth: 1,
+  pointRadius: 0, // Set to 0 to hide the points
+  // fill: {
+  //   target: 'origin',
+  //   above: 'rgb(255, 0, 0)',   // Area will be red above the origin
+  //   below: 'rgb(0, 0, 255)'    // And blue below the origin
+  // },
+}
+
 const TIME_QUERY_COUNT_OPTIONS: ChartOptions<"line"> = {
   responsive: true,
   plugins: {
@@ -49,22 +64,33 @@ const TIME_QUERY_COUNT_OPTIONS: ChartOptions<"line"> = {
     decimation: {
       enabled: true,
       algorithm: "lttb",
-      samples: 10,
+      samples: 90,
+      
+      // algorithm: "min-max",
+      threshold: 90,
     },
   },
+  indexAxis: "x",
+  parsing: false,
   scales: {
     x: {
       type: "time",
       time: {
         unit: "second",
-        // tooltipFormat: "ll HH:mm:ss",
       },
       ticks: {
-        maxTicksLimit: 10,
+        maxTicksLimit: 90,
       },
       title: {
         display: true,
         text: "Timestamp",
+      },
+    },
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+        text: "Number of Queries Run",
       },
     },
   },
@@ -109,13 +135,8 @@ export default function TimeQueryCountCard() {
     const dataTransformed = {
       datasets: [
         {
-          label: "All queries",
+          ...structuredClone(TIME_QUERY_DATASETS_BASE),
           data: result.data.rows.map((row: any) => ({ x: row[0], y: row[1] })),
-          // tension: 0.1,
-          borderColor: "rgba(75, 192, 192, 1)",
-          borderWidth: 1,
-          pointRadius: 0, // Set to 0 to hide the points
-          fill: false,
         },
       ],
     }
@@ -123,92 +144,8 @@ export default function TimeQueryCountCard() {
     setOptions(TIME_QUERY_COUNT_OPTIONS)
   }
 
-  // const fakeoptions = {
-  //   scales: {
-  //     x: {
-  //       type: "time",
-  //       time: {
-  //         unit: "second", // Adjust the unit as needed
-  //         tooltipFormat: "ll HH:mm:ss",
-  //       },
-  //       ticks: {
-  //         maxTicksLimit: 10, // Set the maximum number of x-axis intervals
-  //       },
-  //     },
-  //     y: {
-  //       beginAtZero: true,
-  //     },
-  //   },
-  //   plugins: {
-  //     decimation: {
-  //       enabled: true,
-  //       algorithm: "lttb", // 'lttb' (Largest Triangle Three Buckets) algorithm
-  //       samples: 100, // Maximum number of points to display
-  //     },
-  //   },
-  // }
-  // const now = Date.now()
-  // const fakedatainner = Array.from({ length: 1000 }, (_, i) => ({
-  //   x: now + i * 1000, // 1-second interval
-  //   y: Math.sin(i / 10),
-  // }))
-  // console.log(fakedatainner)
-  // const fakedata = {
-  //   type: "line",
-  //   data: {
-  //     datasets: [
-  //       {
-  //         label: "Sample Dataset",
-  //         data: fakedatainner,
-  //         borderColor: "rgba(75, 192, 192, 1)",
-  //         borderWidth: 1,
-  //         pointRadius: 2, // Reduce the radius of the points
-  //       },
-  //     ],
-  //   },
-  // }
-
-  console.log("render data", data)
-  console.log("render options", options)
-
-  const foptions = {
-    response: true,
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "day",
-        },
-      },
-    },
-  }
-
-  const values = [
-    {
-      x: new Date("2020-01-01"),
-      y: 100.2,
-    },
-    {
-      x: new Date("2020-01-02"),
-      y: 102.2,
-    },
-    {
-      x: new Date("2020-01-03"),
-      y: 105.3,
-    },
-    {
-      x: new Date("2020-01-11"),
-      y: 104.4,
-    },
-  ]
-
-  const fdata = {
-    datasets: [
-      {
-        data: values,
-      },
-    ],
-  }
+  // console.log("render data", data)
+  // console.log("render options", options)
 
   return (
     <>

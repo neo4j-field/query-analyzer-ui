@@ -96,9 +96,9 @@ export interface LoadingStatus {
 }
 
 /******************************************************************************
- * APP
+ *
  * @returns
- ******************************************************************************/
+ *****************************************************************************/
 export default function App() {
   const [open, setOpen] = useState(true)
   const [appBarName, setAppBarName] = useState<string>("")
