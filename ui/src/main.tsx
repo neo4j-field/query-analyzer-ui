@@ -8,7 +8,7 @@ import "@fontsource/roboto/400.css"
 import "@fontsource/roboto/500.css"
 import "@fontsource/roboto/700.css"
 import Dashboard from "./components/dashboard/Dashboard.tsx"
-import Graphs from "./components/performanceOverview/PerformanceOverview.tsx"
+import PerformanceOverview from "./components/performanceOverview/PerformanceOverview.tsx"
 
 const darkTheme = createTheme({
   palette: {
@@ -27,7 +27,7 @@ const router = createBrowserRouter([
       },
       {
         path: "graphs",
-        element: <Graphs />,
+        element: <PerformanceOverview />,
       },
     ],
   },

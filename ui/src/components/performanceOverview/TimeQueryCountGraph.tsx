@@ -151,10 +151,6 @@ export default function TimeQueryCountGraph() {
     <>
       <Card sx={CARD_PROPERTY}>
         <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            Number of queries run time graph
-          </Typography>
-
           {loadStatus.loading && <CircularProgress />}
           {!loadStatus.loading && loadStatus.hasError && (
             <Typography>Error loading</Typography>
