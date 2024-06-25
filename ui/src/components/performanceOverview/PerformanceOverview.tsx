@@ -17,7 +17,7 @@ import {
   QUERY_TIME_QUERY_COUNT,
 } from "../../util/apiEndpoints"
 
-type GraphType =
+export type GraphType =
   | "queries"
   | "pageFaults"
   | "pageHits"
@@ -30,7 +30,7 @@ const graphTypeMap: Record<GraphType, Record<string, string>> = {
     datasetLabel: "All",
     xLabel: "Timestamp",
     yLabel: "Total Count",
-    graphTitle: "Queries Per Minute",
+    graphTitle: "Queries Per Minute By Server",
   },
   pageFaults: {
     apiUri: QUERY_TIME_PAGE_FAULTS_COUNT,
@@ -145,6 +145,7 @@ export default function PerformanceOverview() {
             xLabel={xLabel}
             yLabel={yLabel}
             graphTitle={graphTitle}
+            graphType={graphType}
           />
         </Grid>
       </Grid>

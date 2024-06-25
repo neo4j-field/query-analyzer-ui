@@ -85,23 +85,30 @@ FROM query_execution
 
 # # -- which servers started queries at a certain timestamp and how many queries
 # QUERY_ = """
-# select DATETIME(start_timeStamp/1000, 'unixepoch' )as seconds,  server, count(1) as queries 
-# from query_execution group by seconds, server 
+# select DATETIME(start_timeStamp/1000, 'unixepoch' )as seconds,  server, count(1) as queries
+# from query_execution group by seconds, server
 # """
 
 # # -- each query_id's average planning time, total planning, count of each query
 # # -- where planning more than 20
 # QUERY_ = """
-# select query_id, avg(planning), sum(planning), count(1) 
-# from query_execution 
+# select query_id, avg(planning), sum(planning), count(1)
+# from query_execution
 # where planning > 20 GROUP by query_id
 # """
 
-# -- timestamps and queries
+# # # # # # # # # # # # # #
+# PERFORMANCE OVERVIEW
+# # # # # # # # # # # # # #
 QUERY_TIME_QUERY_COUNT = """
-select start_timeStamp as time, count(1) as numQueries 
-from query_execution 
-group by time order by time
+SELECT start_timeStamp as time, "All Servers" as server, count(1) as numQueries 
+FROM query_execution 
+GROUP BY time 
+UNION
+SELECT start_timeStamp as time, server, count(1) as numQueries 
+FROM query_execution 
+GROUP BY time, server
+ORDER BY time
 """
 
 QUERY_TIME_PAGE_FAULTS_COUNT = """
@@ -135,16 +142,16 @@ ORDER BY time
 # # -- how many queries for each server+timestamp combo order by server
 # # -- "for each server at each time point, how many queries"
 # QUERY_ = """
-# select server, DATETIME(start_timeStamp/1000, 'unixepoch' ) as time,  count(1) as count 
-# from query_execution 
-# group by server, time 
+# select server, DATETIME(start_timeStamp/1000, 'unixepoch' ) as time,  count(1) as count
+# from query_execution
+# group by server, time
 # """
 
-# # -- same as above, but only failed queries and order by time first 
+# # -- same as above, but only failed queries and order by time first
 # QUERY_ = """
-# select datetime(start_timeStamp/1000, 'unixepoch' ) as time, server, count(1) as count 
-# from query_execution 
-# where failed=1 
+# select datetime(start_timeStamp/1000, 'unixepoch' ) as time, server, count(1) as count
+# from query_execution
+# where failed=1
 # GROUP by time, server
 # """
 
@@ -158,26 +165,25 @@ ORDER BY "Number of Queries Run" DESC
 
 # # -- time+server counts where planning > 100
 # QUERY_ = """
-# select datetime(start_timeStamp/1000, 'unixepoch' ) as time, server, count(1) as count 
-# from query_execution 
-# where planning>100 
+# select datetime(start_timeStamp/1000, 'unixepoch' ) as time, server, count(1) as count
+# from query_execution
+# where planning>100
 # GROUP by time, server
 # """
 
 # # -- time+server: query counts, average and total plannning times, elapsed
 # # -- "for each server at each time point, how many queries, average and total planning and elapsed times"
 # QUERY_ = """
-# select DATETIME(start_timeStamp/1000, 'unixepoch' ) as time, 
-#   server, 
-#   count(1) as queries, 
-#   avg(planning) as avgPlanning, 
-#   sum(planning) as totalPlanning, 
-#   avg(elapsedtimems) as avgTime, 
-#   sum(elapsedtimems) as totalTime 
-# from query_execution 
+# select DATETIME(start_timeStamp/1000, 'unixepoch' ) as time,
+#   server,
+#   count(1) as queries,
+#   avg(planning) as avgPlanning,
+#   sum(planning) as totalPlanning,
+#   avg(elapsedtimems) as avgTime,
+#   sum(elapsedtimems) as totalTime
+# from query_execution
 # group by  server, time --order by queries desc
 # """
-
 
 
 # mine

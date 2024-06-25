@@ -31,13 +31,14 @@ ChartJS.register(
 
 import { QUERY_TIME_QUERY_COUNT, SQLITE_ROOT } from "../../util/apiEndpoints"
 import { fetchGetUri } from "../../util/helpers"
+import { GraphType } from "./PerformanceOverview"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
   boxShadow: 0,
 }
 
-const DATASETS_BASE: ChartDataset<"line"> = {
+const DATASET_BASE: ChartDataset<"line"> = {
   label: "Datasetlabel",
   data: [],
   // tension: 0.1,
@@ -56,6 +57,21 @@ const CHART_OPTIONS_BASE: ChartOptions<"line"> = {
   plugins: {
     legend: {
       position: "top" as const,
+      // onClick: function (
+      //   e: ChartEvent,
+      //   legendItem: LegendItem,
+      //   legend: LegendElement<"line">,
+      // ) {
+      //   const index = legendItem.datasetIndex!
+      //   const ci = legend.chart
+      //   if (ci.isDatasetVisible(index)) {
+      //     ci.hide(index)
+      //     legendItem.hidden = true
+      //   } else {
+      //     ci.show(index)
+      //     legendItem.hidden = false
+      //   }
+      // },
     },
     title: {
       display: true,
@@ -64,7 +80,7 @@ const CHART_OPTIONS_BASE: ChartOptions<"line"> = {
     decimation: {
       enabled: true,
       algorithm: "lttb",
-      // samples: 500,
+      samples: 500,
 
       // algorithm: "min-max",
       // threshold: 90,
@@ -102,6 +118,7 @@ interface Props {
   xLabel: string
   yLabel: string
   graphTitle: string
+  graphType: GraphType
 }
 
 /******************************************************************************
@@ -114,6 +131,7 @@ export default function TimeGraph({
   xLabel,
   yLabel,
   graphTitle,
+  graphType,
 }: Props) {
   const [loadStatus, setLoadStatus] = useState({
     loading: false,
@@ -124,10 +142,6 @@ export default function TimeGraph({
     datasets: [],
   })
   const [options, setOptions] = useState<ChartOptions<"line">>({})
-
-  const handleRefetch = async () => {
-    fetchData()
-  }
 
   useEffect(() => {
     setData({ labels: [], datasets: [] })
@@ -146,19 +160,43 @@ export default function TimeGraph({
       return
     }
 
-    const datasetsBase = structuredClone(DATASETS_BASE)
-    datasetsBase.data = result.data.rows.map((row: any) => ({
-      x: row[0],
-      y: row[1],
-    }))
-    datasetsBase.label = datasetLabel
+    // TODO dependency injection
+    // data transformation
+    const dataTransformed: ChartData<"line"> = { datasets: [] }
+    if (graphType === "queries") {
+      // partition data by server
+      const dataByServer: Record<string, { x: string; y: string }[]> = {}
+      for (const row of result.data.rows) {
+        const [timestamp, server, count] = row
+        if (!(server in dataByServer)) {
+          dataByServer[server] = []
+        }
+        dataByServer[server].push({ x: timestamp, y: count })
+      }
 
-    const dataTransformed = {
-      datasets: [datasetsBase],
+      for (const [server, data] of Object.entries(dataByServer)) {
+        const dataset = structuredClone(DATASET_BASE)
+        dataset.data = data as any
+        dataset.label = server
+        dataset.hidden = server !== "All Servers"
+        if (server === "All Servers") {
+          dataTransformed.datasets.unshift(dataset)
+        } else {
+          dataTransformed.datasets.push(dataset)
+        }
+      }
+    } else {
+      const dataset = structuredClone(DATASET_BASE)
+      dataset.data = result.data.rows.map((row: any) => ({
+        x: row[0],
+        y: row[1],
+      }))
+      dataset.label = datasetLabel
+      dataTransformed.datasets.push(dataset)
     }
-
     setData(dataTransformed)
-    const options: ChartOptions<"line"> = structuredClone(CHART_OPTIONS_BASE)
+
+    const options: ChartOptions<"line"> = { ...CHART_OPTIONS_BASE }
     options.scales!.x!.title!.text = xLabel
     options.scales!.y!.title!.text = yLabel
     options.plugins!.title!.text = graphTitle
