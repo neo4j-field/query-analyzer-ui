@@ -1,7 +1,5 @@
 import { Box, Toolbar, Grid } from "@mui/material"
-import { useState } from "react"
-import { LoadingStatus } from "../App"
-import TimeQueryCountCard from "./TimeQueryCountCard"
+import TimeQueryCountCard from "./TimeQueryCountGraph"
 
 export default function Graphs() {
 
