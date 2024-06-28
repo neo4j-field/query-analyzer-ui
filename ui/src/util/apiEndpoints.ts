@@ -18,3 +18,7 @@ export const QUERY_TOP5_PAGE_HITS = "pageHits"
 export const QUERY_TOP5_QUERIES_EXECUTED = "queriesexecuted"
 export const QUERY_TOP5_PAGE_FAULTS = "pageFaults"
 export const QUERY_TOP5_ELAPSED_TIME = "elapsedTime"
+
+/** */
+export const API_METADATA_ROOT = "apimetadata"
+export const DB_LIST = "dblist"

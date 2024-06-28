@@ -4,6 +4,7 @@ import { SQLITE_ROOT } from "../../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { DataGrid, GridEventListener } from "@mui/x-data-grid"
 import QueryModal from "./QueryModal"
+import { useChosenDb } from "../App"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -24,6 +25,7 @@ export default function Top5Card({ uriName, title }: Props) {
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
   const [openModal, setOpenModal] = useState(false)
   const [chosenQueryId, setChosenQueryId] = useState("")
+  const { chosenDb } = useChosenDb()
 
   // const handleRefetch = async () => fetchData()
 
@@ -35,11 +37,13 @@ export default function Top5Card({ uriName, title }: Props) {
    ****************************************************************************/
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const result = await fetchGetUri(`${SQLITE_ROOT}/${uriName}?limit=5`)
+    const result = await fetchGetUri(`${SQLITE_ROOT}/${uriName}?limit=5&dbname=${chosenDb}`)
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
     if (result.hasError) {
       console.error(`Error for fetch: ${result}`)
+      setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+      return
     }
 
 
@@ -68,7 +72,7 @@ export default function Top5Card({ uriName, title }: Props) {
           </Typography>
           {loadStatus.loading && <CircularProgress />}
           {!loadStatus.loading && loadStatus.hasError && (
-            <Typography>Error loading log time windows</Typography>
+            <Typography>Error loading</Typography>
           )}
           {!loadStatus.loading && !loadStatus.hasError && (
             <DataGrid

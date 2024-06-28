@@ -12,6 +12,7 @@ import {
 } from "../../util/apiEndpoints"
 import { fetchGetUri } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
+import { useChosenDb } from "../App"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -26,6 +27,7 @@ export default function PlannedCard() {
 
   const [plannedQueriesPct, setPlannedQueriesPct] = useState<number>(-1)
   const [planElapsedPct, setPlanElapsedPct] = useState<number>(-1)
+  const { chosenDb } = useChosenDb()
 
   // const handleRefetch = async () => fetchData()
   
@@ -38,7 +40,7 @@ export default function PlannedCard() {
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_GET_PLANNING_PCT}`),
+      fetchGetUri(`${SQLITE_ROOT}/${QUERY_GET_PLANNING_PCT}?dbname=${chosenDb}`),
     ])
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
@@ -46,6 +48,8 @@ export default function PlannedCard() {
     for (const result of results) {
       if (result.hasError) {
         console.error(`Error for fetch ${i}: ${result}`)
+        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        return
       }
       i++
     }
@@ -61,7 +65,7 @@ export default function PlannedCard() {
         </Typography>
         {loadStatus.loading && <CircularProgress />}
         {!loadStatus.loading && loadStatus.hasError && (
-          <Typography>Error loading log time windows</Typography>
+          <Typography>Error loading</Typography>
         )}
         {!loadStatus.loading && !loadStatus.hasError && (
           <DataGrid

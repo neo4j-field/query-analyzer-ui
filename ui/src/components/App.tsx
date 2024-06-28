@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import {
   Box,
   Divider,
@@ -11,15 +11,21 @@ import {
   Toolbar,
   styled,
   Typography,
+  Select,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  SelectChangeEvent,
 } from "@mui/material"
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar"
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import AssignmentIcon from "@mui/icons-material/Assignment"
 import MenuIcon from "@mui/icons-material/Menu"
 import { v4 as uuid } from "uuid"
 
 import CssBaseline from "@mui/material/CssBaseline"
-import { Link, Outlet } from "react-router-dom"
+import { Link, Outlet, useOutletContext } from "react-router-dom"
+import { fetchGetUri } from "../util/helpers"
+import { API_METADATA_ROOT, DB_LIST } from "../util/apiEndpoints"
 
 const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
@@ -95,6 +101,19 @@ export interface LoadingStatus {
   hasError: boolean
 }
 
+type ContextType = {
+  chosenDb: string
+  setChosenDb: Dispatch<SetStateAction<string>>
+}
+
+/**
+ * Global db state
+ * @returns 
+ */
+export function useChosenDb() {
+  return useOutletContext<ContextType>()
+}
+
 /******************************************************************************
  *
  * @returns
@@ -102,10 +121,23 @@ export interface LoadingStatus {
 export default function App() {
   const [open, setOpen] = useState(true)
   const [appBarName, setAppBarName] = useState<string>("")
+  const [dbList, setDbList] = useState<string[]>(["stuff"])
+  const [chosenDb, setChosenDb] = useState<string>("")
 
   const toggleDrawer = () => {
     setOpen(true)
   }
+
+  useEffect(() => {
+    ;(async () => {
+      const result = await fetchGetUri(`${API_METADATA_ROOT}/${DB_LIST}`)
+
+      if (result.hasError) {
+        return
+      }
+      setDbList(result.data.dbList)
+    })()
+  }, [])
 
   return (
     <Box style={{ display: "flex", height: CONTENT_AREA_HEIGHT }}>
@@ -150,11 +182,23 @@ export default function App() {
             px: [1],
           }}
         >
-          <IconButton onClick={toggleDrawer}>
-            <ChevronLeftIcon />
-          </IconButton>
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">Databases</InputLabel>
+            <Select
+              value={chosenDb}
+              label="Databases"
+              onChange={(e: SelectChangeEvent) => {
+                setChosenDb(e.target.value as string)
+              }}
+            >
+              {dbList.map((s, i) => (
+                <MenuItem key={i} value={s}>
+                  {s}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Toolbar>
-
         <Divider />
 
         {/* Sidebar links */}
@@ -176,7 +220,26 @@ export default function App() {
       </Drawer>
 
       {/* Render data pages depending on route */}
-      <Outlet />
+      {chosenDb && (
+        <Outlet context={{ chosenDb, setChosenDb } satisfies ContextType} />
+      )}
+      {!chosenDb && (
+        <Box
+          component="main"
+          sx={{
+            backgroundColor: (theme) =>
+              theme.palette.mode === "light"
+                ? theme.palette.grey[100]
+                : theme.palette.grey[900],
+            flexGrow: 1,
+            height: "100vh",
+            overflow: "auto",
+          }}
+        >
+          <Toolbar />
+          <Typography>Please Choose Database</Typography>
+        </Box>
+      )}
     </Box>
   )
 }

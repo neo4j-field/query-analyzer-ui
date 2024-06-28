@@ -8,6 +8,7 @@ import {
 } from "../../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
+import { useChosenDb } from "../App"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -19,15 +20,16 @@ export default function QueriesExecutedByServer() {
     loading: false,
     hasError: false,
   })
-  const [queryCountByServerRows, setQueryCountByServerRows] = useState<any[][]>(
-    [],
-  )
+  // const [queryCountByServerRows, setQueryCountByServerRows] = useState<any[][]>(
+  //   [],
+  // )
   const [queryCountByServerHeaders, setQueryCountByServerHeaders] = useState<
     string[]
   >([])
   const [queryCountByServerData, setQueryCountByServerData] = useState<
     Record<string, any>[]
   >([])
+  const { chosenDb } = useChosenDb()
 
   // const handleRefetch = async () => {
   //   fetchData()
@@ -42,7 +44,7 @@ export default function QueriesExecutedByServer() {
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}`),
+      fetchGetUri(`${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}?dbname=${chosenDb}`),
     ])
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
@@ -50,11 +52,13 @@ export default function QueriesExecutedByServer() {
     for (const result of results) {
       if (result.hasError) {
         console.error(`Error for fetch ${i}: ${result}`)
+        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        return
       }
       i++
     }
     // query count
-    setQueryCountByServerRows(results[0].data.rows)
+    // setQueryCountByServerRows(results[0].data.rows)
     setQueryCountByServerHeaders(results[0].data.headers)
     const datamap = convertToDataMap(
       results[0].data.headers,
@@ -75,7 +79,7 @@ export default function QueriesExecutedByServer() {
 
         {loadStatus.loading && <CircularProgress />}
         {!loadStatus.loading && loadStatus.hasError && (
-          <Typography>Error loading query counts by server</Typography>
+          <Typography>Error loading</Typography>
         )}
         {!loadStatus.loading && !loadStatus.hasError && (
           <DataGrid

@@ -32,6 +32,7 @@ ChartJS.register(
 import { QUERY_TIME_QUERY_COUNT, SQLITE_ROOT } from "../../util/apiEndpoints"
 import { fetchGetUri } from "../../util/helpers"
 import { GraphType } from "./PerformanceOverview"
+import { useChosenDb } from "../App"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -144,6 +145,7 @@ export default function TimeGraph({
     datasets: [],
   })
   const [options, setOptions] = useState<ChartOptions<"line">>({})
+  const { chosenDb } = useChosenDb()
 
   useEffect(() => {
     setData({ labels: [], datasets: [] })
@@ -155,10 +157,11 @@ export default function TimeGraph({
    ********/
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const result = await fetchGetUri(`${SQLITE_ROOT}/${apiUri}`)
+    const result = await fetchGetUri(`${SQLITE_ROOT}/${apiUri}?dbname=${chosenDb}`)
     setLoadStatus({ ...loadStatus, loading: false })
 
     if (result.hasError) {
+      setLoadStatus({ ...loadStatus, loading: false, hasError: true })
       return
     }
 

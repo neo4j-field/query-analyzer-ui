@@ -5,6 +5,7 @@ import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 import { QUERY_GENERAL_STATS, SQLITE_ROOT } from "../../util/apiEndpoints"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
+import { useChosenDb } from "../App"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -23,6 +24,7 @@ export default function GeneralStatsCard() {
   const [avgPageFaults, setAvgPageFaults] = useState<number>(-1)
   const [avgTimeTaken, setAvgTimeTaken] = useState<number>(-1)
   const [numQueriesExecuted, setNumQueriesExecuted] = useState<number>(-1)
+  const { chosenDb } = useChosenDb()
 
   // const handleRefetch = async () => {
   //   fetchData()
@@ -32,12 +34,16 @@ export default function GeneralStatsCard() {
     fetchData()
   }, [])
 
+  useEffect(() => {
+    fetchData()
+  }, [chosenDb])
+
   /****************************************************************************
    ****************************************************************************/
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_GENERAL_STATS}`),
+      fetchGetUri(`${SQLITE_ROOT}/${QUERY_GENERAL_STATS}?dbname=${chosenDb}`),
     ])
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
@@ -45,6 +51,8 @@ export default function GeneralStatsCard() {
     for (const result of results) {
       if (result.hasError) {
         console.error(`Error for fetch ${i}: ${result}`)
+        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        return
       }
       i++
     }
@@ -71,7 +79,7 @@ export default function GeneralStatsCard() {
         </Typography>
         {loadStatus.loading && <CircularProgress />}
         {!loadStatus.loading && loadStatus.hasError && (
-          <Typography>Error loading log time windows</Typography>
+          <Typography>Error loading</Typography>
         )}
         {!loadStatus.loading && !loadStatus.hasError && (
           <DataGrid

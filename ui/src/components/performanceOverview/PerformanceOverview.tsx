@@ -8,7 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@mui/material"
-import TimeQueryCountCard, { DATASET_BASE } from "./TimeGraph"
+import TimeGraph, { DATASET_BASE } from "./TimeGraph"
 import {
   QUERY_TIME_ELAPSED_TIME_COUNT,
   QUERY_TIME_PAGE_FAULTS_COUNT,
@@ -94,6 +94,10 @@ const graphTypeMap: Record<GraphType, Record<string, any>> = {
   },
 }
 
+/******************************************************************************
+ * 
+ * @returns 
+ ******************************************************************************/
 export default function PerformanceOverview() {
   const [graphType, setGraphType] = useState<GraphType>("queries")
   
@@ -155,7 +159,7 @@ export default function PerformanceOverview() {
         </Grid>
 
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <TimeQueryCountCard
+          <TimeGraph
             apiUri={graphTypeMap[graphType].apiUri}
             datasetLabel={graphTypeMap[graphType].datasetLabel}
             xLabel={graphTypeMap[graphType].xLabel}

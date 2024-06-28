@@ -18,6 +18,7 @@ import {
 } from "../../util/apiEndpoints"
 import { fetchGetUri } from "../../util/helpers"
 import QueryModal from "./QueryModal"
+import { useChosenDb } from "../App"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -33,6 +34,7 @@ export default function PercentileCard() {
   const [headers, setHeaders] = useState<string[]>([])
   const [openModal, setOpenModal] = useState(false)
   const [chosenQueryId, setChosenQueryId] = useState("")
+  const { chosenDb } = useChosenDb()
 
   // const handleRefetch = async () => {
   //   fetchPercentile()
@@ -46,11 +48,12 @@ export default function PercentileCard() {
    ****************************************************************************/
   const fetchPercentile = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_PERCENTILE}`)
+    const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_PERCENTILE}?dbname=${chosenDb}`)
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
     // console.log(`query percentile response`, result)
 
     if (result.hasError) {
+      setLoadStatus({ ...loadStatus, loading: false, hasError: true })
       return
     }
     setRows(result.data.rows)

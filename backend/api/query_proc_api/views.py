@@ -24,10 +24,16 @@ logger.basicConfig(
     level=getattr(settings, "LOG_LEVEL", logger.DEBUG),
 )
 
+DATABASE_DIRNAME = "databases"
+
 
 class ApiMetadataView(APIView):
-    def get(self, request):
+    def get(self, request, endpoint):
         Response({"data": "stuff"}, status=status.HTTP_200_OK)
+        root_dirpath = os.path.dirname(os.path.realpath(__file__))
+        dirpath = os.path.join(root_dirpath, "..", "..", DATABASE_DIRNAME)
+        if endpoint == "dblist":
+            return Response({"data": {"dbList": next(os.walk(dirpath))[2]}})
 
 
 class ReadSQLiteView(APIView):
@@ -46,13 +52,24 @@ class ReadSQLiteView(APIView):
             params["query_id"] = optional_param
 
         try:
+            db_file_name = request.GET.get("dbname")
+        except:
+            db_file_name = None
+        if db_file_name is None:
+            print(f'db_file_name "{db_file_name}" is invalid')
+            return Response({"error": f"{fp} not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # url params
+        try:
             limit = request.GET.get("limit")
         except:
+            limit = 10
+        if limit is None:
             limit = 10
         query = query.replace("%LIMIT%", str(limit))
 
         # TODO set up dirpaths
-        fp = os.path.join(dir_path, "..", "..", "query_db2.db")
+        fp = os.path.join(dir_path, "..", "..", DATABASE_DIRNAME, db_file_name)
         if not os.path.isfile(fp):
             print(f'The specified database path "{fp}" does not exist.')
             return Response(
@@ -104,7 +121,6 @@ class UserViewSet(viewsets.ModelViewSet):
     API endpoint that allows users to be viewed or edited.
     """
 
-    print("hello in users", os.getcwd())
     queryset = User.objects.all().order_by("-date_joined")
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -118,4 +134,3 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all().order_by("name")
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
-    print("hello in groups")
