@@ -10,6 +10,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { convertToDataMap, fetchGetUri } from "../../util/helpers"
 import { SQLITE_ROOT, QUERY_GET_QUERY_TEXT } from "../../util/apiEndpoints"
+import { useChosenDb } from "../App"
 
 interface Props {
   openModal: boolean
@@ -22,6 +23,7 @@ export default function QueryModal({
   setOpenModal,
   queryId,
 }: Props) {
+  const { chosenDb } = useChosenDb()
   const [modalQryText, setModalQryText] = useState<string>("")
   const [loadingQueryText, setLoadingQueryText] = useState(false)
   const handleCloseModal = () => setOpenModal(false)
@@ -29,10 +31,9 @@ export default function QueryModal({
   useEffect(() => {
     ;(async function () {
       if (openModal) {
-        
         setLoadingQueryText(true)
         const result = await fetchGetUri(
-          `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${queryId}`,
+          `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${queryId}?dbname=${chosenDb}`,
         )
         setLoadingQueryText(false)
         const datamap = convertToDataMap(result.data.headers, result.data.rows)

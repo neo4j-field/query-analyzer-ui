@@ -100,43 +100,40 @@ FROM query_execution
 # # # # # # # # # # # # # #
 # PERFORMANCE OVERVIEW
 # # # # # # # # # # # # # #
+# new
 QUERY_TIME_QUERY_COUNT = """
-SELECT start_timeStamp as time, "All Servers" as server, count(1) as numQueries 
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute,  "All Servers" as server, count(1) as numQueries 
 FROM query_execution 
-GROUP BY time 
-UNION
-SELECT start_timeStamp as time, server, count(1) as numQueries 
-FROM query_execution 
-GROUP BY time, server
-ORDER BY time
+GROUP BY timestampMinute 
+ORDER BY timestampMinute
 """
 
 QUERY_TIME_PAGE_FAULTS_COUNT = """
-SELECT start_timeStamp as time, sum(pageFaults) as totalPageFaults
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, sum(pageFaults) as totalPageFaults
 FROM query_execution
-GROUP BY time
-ORDER BY time
+GROUP BY timestampMinute
+ORDER BY timestampMinute
 """
 
 QUERY_TIME_PAGE_HITS_COUNT = """
-SELECT start_timeStamp as time, sum(pageHits) as totalPageHits
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, sum(pageHits) as totalPageHits
 FROM query_execution
-GROUP BY time
-ORDER BY time
+GROUP BY timestampMinute
+ORDER BY timestampMinute
 """
 
 QUERY_TIME_ELAPSED_TIME_COUNT = """
-SELECT start_timeStamp as time, sum(elapsedTimeMs) as totalElapsedTimeMs
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, sum(elapsedTimeMs) as totalElapsedTimeMs
 FROM query_execution
-GROUP BY time
-ORDER BY time
+GROUP BY timestampMinute
+ORDER BY timestampMinute
 """
 
 QUERY_TIME_PLANNING_COUNT = """
-SELECT start_timeStamp as time, sum(planning) as totalPlanning
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, sum(planning) as totalPlanning
 FROM query_execution
-GROUP BY time
-ORDER BY time
+GROUP BY timestampMinute
+ORDER BY timestampMinute
 """
 
 # # -- how many queries for each server+timestamp combo order by server

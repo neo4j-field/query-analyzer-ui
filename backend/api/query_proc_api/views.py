@@ -33,7 +33,7 @@ class ApiMetadataView(APIView):
         root_dirpath = os.path.dirname(os.path.realpath(__file__))
         dirpath = os.path.join(root_dirpath, "..", "..", DATABASE_DIRNAME)
         if endpoint == "dblist":
-            return Response({"data": {"dbList": next(os.walk(dirpath))[2]}})
+            return Response({"data": {"dbList": [x for x in next(os.walk(dirpath))[2] if x != ".DS_Store"]}})
 
 
 class ReadSQLiteView(APIView):

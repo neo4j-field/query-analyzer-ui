@@ -78,14 +78,14 @@ const CHART_OPTIONS_BASE: ChartOptions<"line"> = {
       display: true,
       text: "Title",
     },
-    decimation: {
-      enabled: true,
-      algorithm: "lttb",
-      samples: 500,
+    // decimation: {
+    //   enabled: true,
+    //   algorithm: "lttb",
+    //   samples: 500,
 
-      // algorithm: "min-max",
-      // threshold: 90,
-    },
+    //   // algorithm: "min-max",
+    //   // threshold: 90,
+    // },
   },
   indexAxis: "x",
   parsing: false,
@@ -94,13 +94,19 @@ const CHART_OPTIONS_BASE: ChartOptions<"line"> = {
       type: "time",
       time: {
         unit: "second",
+        displayFormats: {
+           'second': 'YYYY-MM-DD HH:mm',
+           //  'millisecond': 'MMM DD',
+          //  'minute': 'MMM DD',
+          // ....
+        }
       },
-      ticks: {
-        maxTicksLimit: 90,
-      },
+      // ticks: {
+      //   maxTicksLimit: 90,
+      // },
       title: {
         display: true,
-        text: "Timestamp",
+        text: "Timestamp", // default value
       },
     },
     y: {
