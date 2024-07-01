@@ -39,6 +39,10 @@ export default function QueriesExecutedByServer() {
     fetchData()
   }, [])
 
+  useEffect(() => {
+    fetchData()
+  }, [chosenDb])
+
   /****************************************************************************
    ****************************************************************************/
   const fetchData = async () => {

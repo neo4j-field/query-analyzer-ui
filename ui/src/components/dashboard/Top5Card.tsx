@@ -33,6 +33,10 @@ export default function Top5Card({ uriName, title }: Props) {
     fetchData()
   }, [])
 
+  useEffect(() => {
+    fetchData()
+  }, [chosenDb])
+
   /****************************************************************************
    ****************************************************************************/
   const fetchData = async () => {

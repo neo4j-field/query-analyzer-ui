@@ -41,12 +41,16 @@ export default function PercentileCard() {
   // }
 
   useEffect(() => {
-    fetchPercentile()
+    fetchData()
   }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [chosenDb])
 
   /****************************************************************************
    ****************************************************************************/
-  const fetchPercentile = async () => {
+  const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_PERCENTILE}?dbname=${chosenDb}`)
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })

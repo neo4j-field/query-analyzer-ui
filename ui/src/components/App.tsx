@@ -122,7 +122,7 @@ export default function App() {
   const [open, setOpen] = useState(true)
   const [appBarName, setAppBarName] = useState<string>("")
   const [dbList, setDbList] = useState<string[]>(["stuff"])
-  const [chosenDb, setChosenDb] = useState<string>("")
+  const [chosenDb, setChosenDb] = useState<string>(import.meta.env.VITE_DEBUG_DB || "")
 
   const toggleDrawer = () => {
     setOpen(true)

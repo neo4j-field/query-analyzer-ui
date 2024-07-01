@@ -93,13 +93,17 @@ const CHART_OPTIONS_BASE: ChartOptions<"line"> = {
     x: {
       type: "time",
       time: {
-        unit: "second",
         displayFormats: {
-           'second': 'YYYY-MM-DD HH:mm',
-           //  'millisecond': 'MMM DD',
-          //  'minute': 'MMM DD',
-          // ....
-        }
+          second: "YYYY-MM-DD HH:mm",
+          millisecond: "YYYY-MM-DD HH:mm",
+          minute: "YYYY-MM-DD HH:mm",
+          hour: "YYYY-MM-DD HH:mm",
+          day: "YYYY-MM-DD HH:mm",
+          week: "YYYY-MM-DD HH:mm",
+          month: "YYYY-MM-DD HH:mm",
+          quarter: "YYYY-MM-DD HH:mm",
+          year: "YYYY-MM-DD HH:mm",
+        },
       },
       // ticks: {
       //   maxTicksLimit: 90,
@@ -158,13 +162,21 @@ export default function TimeGraph({
     fetchData()
   }, [apiUri])
 
+  useEffect(() => {
+    setData({ labels: [], datasets: [] })
+    fetchData()
+  }, [chosenDb])
+
   /*********
    * FETCH *
    ********/
   const fetchData = async () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const result = await fetchGetUri(`${SQLITE_ROOT}/${apiUri}?dbname=${chosenDb}`)
+    const result = await fetchGetUri(
+      `${SQLITE_ROOT}/${apiUri}?dbname=${chosenDb}`,
+    )
     setLoadStatus({ ...loadStatus, loading: false })
+    // console.log(`Recieved: `, result)
 
     if (result.hasError) {
       setLoadStatus({ ...loadStatus, loading: false, hasError: true })
