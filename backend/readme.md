@@ -1,7 +1,7 @@
 ## Requirements
 python3.11
 
-## To start
+## Install
 ```bash
 # create python venv environment
 python -m venv .venv
@@ -11,15 +11,11 @@ source .venv/bin/activate
 
 # install dependencies
 (.venv) python -m pip install -r requirements.txt
-
-# start server
-(.venv) python api/manage.py runserver
 ```
 
+* Set the `DATABASE_DIRNAME` in `views.py` to name of directory in the project root folder (eg alongside `ui` and `backend`) where you will store your sqlite3 files. TODO will be updated.
 
-```
-source .venv/bin/activate
-
-cd api
-python manage.py runserver
+## Start
+```bash
+./start.sh
 ```

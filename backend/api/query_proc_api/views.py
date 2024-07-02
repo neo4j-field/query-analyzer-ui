@@ -31,7 +31,7 @@ class ApiMetadataView(APIView):
     def get(self, request, endpoint):
         Response({"data": "stuff"}, status=status.HTTP_200_OK)
         root_dirpath = os.path.dirname(os.path.realpath(__file__))
-        dirpath = os.path.join(root_dirpath, "..", "..", DATABASE_DIRNAME)
+        dirpath = os.path.join(root_dirpath, "..", "..", "..", DATABASE_DIRNAME)
         if endpoint == "dblist":
             return Response(
                 {

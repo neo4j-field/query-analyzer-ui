@@ -2,7 +2,7 @@
 ## Requirements
 * Nodejs 20+
 
-## Installation and Usage
+## Installation and Run
 ```sh
 npm install
 npm run dev
