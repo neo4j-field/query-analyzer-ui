@@ -109,28 +109,45 @@ ORDER BY timestampMinute
 """
 
 QUERY_TIME_PAGE_FAULTS_COUNT = """
-SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, sum(pageFaults) as totalPageFaults
+SELECT 
+  strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  sum(pageFaults) as total,
+  avg(pageFaults) as average,
+  min(pageFaults) as minimum,
+  max(pageFaults) as maximum
 FROM query_execution
 GROUP BY timestampMinute
 ORDER BY timestampMinute
 """
 
 QUERY_TIME_PAGE_HITS_COUNT = """
-SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, sum(pageHits) as totalPageHits
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  sum(pageHits) as total,
+  avg(pageHits) as average,
+  min(pageHits) as minimum,
+  max(pageHits) as maximum
 FROM query_execution
 GROUP BY timestampMinute
 ORDER BY timestampMinute
 """
 
 QUERY_TIME_ELAPSED_TIME_COUNT = """
-SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, sum(elapsedTimeMs) as totalElapsedTimeMs
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  sum(elapsedTimeMs) as total,
+  avg(elapsedTimeMs) as average,
+  min(elapsedTimeMs) as minimum,
+  max(elapsedTimeMs) as maximum
 FROM query_execution
 GROUP BY timestampMinute
 ORDER BY timestampMinute
 """
 
 QUERY_TIME_PLANNING_COUNT = """
-SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, sum(planning) as totalPlanning
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  sum(planning) as total,
+  avg(planning) as average,
+  min(planning) as minimum,
+  max(planning) as maximum
 FROM query_execution
 GROUP BY timestampMinute
 ORDER BY timestampMinute
@@ -262,11 +279,14 @@ ENDPOINT_QUERY_DICT = {
     "querypercentile": QUERY_PERCENTILE,
     "getquerytext": QUERY_GET_QUERY_TEXT,
     "getquerycountbyserver": QUERY_QUERY_COUNT_BY_SERVER,
+    
+    # performance chart
     "timequerycount": QUERY_TIME_QUERY_COUNT,
     "timepagefaultscount": QUERY_TIME_PAGE_FAULTS_COUNT,
     "timepagehitscount": QUERY_TIME_PAGE_HITS_COUNT,
     "timeelapsedtimecount": QUERY_TIME_ELAPSED_TIME_COUNT,
     "timeplanningcount": QUERY_TIME_PLANNING_COUNT,
+
     "planningpercent": QUERY_GET_PLANNING_PCT,
     "countuniquequeries": QUERY_COUNT_UNIQUE_QUERIES,
     "generalstats": QUERY_GENERAL_STATS,

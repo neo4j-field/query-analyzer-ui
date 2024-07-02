@@ -29,9 +29,8 @@ ChartJS.register(
   Legend,
 )
 
-import { QUERY_TIME_QUERY_COUNT, SQLITE_ROOT } from "../../util/apiEndpoints"
+import { SQLITE_ROOT } from "../../util/apiEndpoints"
 import { fetchGetUri } from "../../util/helpers"
-import { GraphType } from "./PerformanceOverview"
 import { useChosenDb } from "../App"
 
 const CARD_PROPERTY = {
@@ -94,15 +93,15 @@ const CHART_OPTIONS_BASE: ChartOptions<"line"> = {
       type: "time",
       time: {
         displayFormats: {
-          second: "YYYY-MM-DD HH:mm",
-          millisecond: "YYYY-MM-DD HH:mm",
-          minute: "YYYY-MM-DD HH:mm",
-          hour: "YYYY-MM-DD HH:mm",
-          day: "YYYY-MM-DD HH:mm",
-          week: "YYYY-MM-DD HH:mm",
-          month: "YYYY-MM-DD HH:mm",
-          quarter: "YYYY-MM-DD HH:mm",
-          year: "YYYY-MM-DD HH:mm",
+          second: "YYYY-MM-DDTHH:mm",
+          millisecond: "YYYY-MM-DDTHH:mm",
+          minute: "YYYY-MM-DDTHH:mm",
+          hour: "YYYY-MM-DDTHH:mm",
+          day: "YYYY-MM-DDTHH:mm",
+          week: "YYYY-MM-DDTHH:mm",
+          month: "YYYY-MM-DDTHH:mm",
+          quarter: "YYYY-MM-DDTHH:mm",
+          year: "YYYY-MM-DDTHH:mm",
         },
       },
       // ticks: {
@@ -129,8 +128,7 @@ interface Props {
   xLabel: string
   yLabel: string
   graphTitle: string
-  graphType: GraphType
-  dataTransformer?: (rows: any[]) => ChartDataset<"line">[]
+  dataTransformer?: (rows: any[], headers: string[]) => ChartDataset<"line">[]
 }
 
 /******************************************************************************
@@ -143,7 +141,6 @@ export default function TimeGraph({
   xLabel,
   yLabel,
   graphTitle,
-  graphType,
   dataTransformer,
 }: Props) {
   const [loadStatus, setLoadStatus] = useState({
@@ -160,12 +157,7 @@ export default function TimeGraph({
   useEffect(() => {
     setData({ labels: [], datasets: [] })
     fetchData()
-  }, [apiUri])
-
-  useEffect(() => {
-    setData({ labels: [], datasets: [] })
-    fetchData()
-  }, [chosenDb])
+  }, [apiUri, chosenDb])
 
   /*********
    * FETCH *
@@ -176,7 +168,7 @@ export default function TimeGraph({
       `${SQLITE_ROOT}/${apiUri}?dbname=${chosenDb}`,
     )
     setLoadStatus({ ...loadStatus, loading: false })
-    // console.log(`Recieved: `, result)
+    console.debug(`Recieved: `, result)
 
     if (result.hasError) {
       setLoadStatus({ ...loadStatus, loading: false, hasError: true })
@@ -186,7 +178,10 @@ export default function TimeGraph({
     // data transformation
     const dataTransformed: ChartData<"line"> = { datasets: [] }
     if (dataTransformer) {
-      dataTransformed.datasets = dataTransformer(result.data.rows)
+      dataTransformed.datasets = dataTransformer(
+        result.data.rows,
+        result.data.headers,
+      )
     } else {
       const dataset = structuredClone(DATASET_BASE)
       dataset.data = result.data.rows.map((row: any) => ({

@@ -32,7 +32,7 @@ const graphTypeMap: Record<GraphType, Record<string, any>> = {
     xLabel: "Timestamp",
     yLabel: "Total Count",
     graphTitle: "Queries Per Minute By Server",
-    dataTransformer: function(rows: any[]) {
+    dataTransformer: function (rows: any[]) {
       // partition data by server
       const datasets: ChartDataset<"line">[] = []
       const dataByServer: Record<string, { x: string; y: string }[]> = {}
@@ -43,7 +43,7 @@ const graphTypeMap: Record<GraphType, Record<string, any>> = {
         }
         dataByServer[server].push({ x: timestamp, y: count })
       }
-    
+
       // Default show only All Servers dataset
       for (const [server, data] of Object.entries(dataByServer)) {
         const dataset = structuredClone(DATASET_BASE)
@@ -56,52 +56,77 @@ const graphTypeMap: Record<GraphType, Record<string, any>> = {
           datasets.push(dataset)
         }
       }
-    
+
       return datasets
-    }
+    },
   },
-  
+
   pageFaults: {
     apiUri: QUERY_TIME_PAGE_FAULTS_COUNT,
     datasetLabel: "All",
     xLabel: "Timestamp",
     yLabel: "Total Count",
     graphTitle: "Page Faults Per Minute",
+    dataTransformer: statsTransformer,
   },
-  
+
   pageHits: {
     apiUri: QUERY_TIME_PAGE_HITS_COUNT,
     datasetLabel: "All",
     xLabel: "Timestamp",
     yLabel: "Total Count",
     graphTitle: "Page Hits Per Minute",
+    dataTransformer: statsTransformer,
   },
-  
+
   execution: {
     apiUri: QUERY_TIME_ELAPSED_TIME_COUNT,
     datasetLabel: "All",
     xLabel: "Timestamp",
     yLabel: "Total (ms)",
     graphTitle: "Execution Time Per Minute",
+    dataTransformer: statsTransformer,
   },
-  
+
   planning: {
     apiUri: QUERY_TIME_PLANNING_COUNT,
     datasetLabel: "All",
     xLabel: "Timestamp",
     yLabel: "Total (ms)",
     graphTitle: "Planning Time Per Minute",
+    dataTransformer: statsTransformer,
   },
 }
 
+function statsTransformer(rows: any[], headers: string[]) {
+  const totalDataset = structuredClone(DATASET_BASE)
+  totalDataset.label = "Total"
+  const avgDataset = structuredClone(DATASET_BASE)
+  avgDataset.label = "Average"
+  const minDataset = structuredClone(DATASET_BASE)
+  minDataset.label = "Min"
+  const maxDataset = structuredClone(DATASET_BASE)
+  maxDataset.label = "Max"
+  for (const row of rows) {
+    const [timestamp, total, avg, min_, max_] = row
+    totalDataset.data.push({ x: timestamp, y: total })
+    avgDataset.data.push({ x: timestamp, y: avg })
+    minDataset.data.push({ x: timestamp, y: min_ })
+    maxDataset.data.push({ x: timestamp, y: max_ })
+  }
+  return [totalDataset, avgDataset, minDataset, maxDataset]
+}
+
 /******************************************************************************
- * 
- * @returns 
+ * PERFORMANCE OVERVIEW COMPONENT
+ * @returns
  ******************************************************************************/
 export default function PerformanceOverview() {
   const [graphType, setGraphType] = useState<GraphType>("queries")
-  
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleChangeGraphType = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setGraphType((event.target as HTMLInputElement).value as GraphType)
   }
 
@@ -119,16 +144,10 @@ export default function PerformanceOverview() {
       }}
     >
       <Toolbar />
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <FormControl>
-            <RadioGroup
-              row
-              // aria-labelledby="demo-row-radio-buttons-group-label"
-              // name="row-radio-buttons-group"
-              value={graphType}
-              onChange={handleChange}
-            >
+            <RadioGroup row value={graphType} onChange={handleChangeGraphType}>
               <FormControlLabel
                 value="queries"
                 label="Queries"
@@ -165,7 +184,6 @@ export default function PerformanceOverview() {
             xLabel={graphTypeMap[graphType].xLabel}
             yLabel={graphTypeMap[graphType].yLabel}
             graphTitle={graphTypeMap[graphType].graphTitle}
-            graphType={graphTypeMap[graphType].graphType}
             dataTransformer={graphTypeMap[graphType].dataTransformer}
           />
         </Grid>

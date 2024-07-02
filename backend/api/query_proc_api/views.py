@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import permissions, viewsets, status
 
-from .util import queries as q
+from .util import queries as Q
 
 formatter = logger.Formatter("%(asctime)s %(levelname)s (:%(lineno)d)  %(message)s")
 logger.basicConfig(
@@ -33,7 +33,15 @@ class ApiMetadataView(APIView):
         root_dirpath = os.path.dirname(os.path.realpath(__file__))
         dirpath = os.path.join(root_dirpath, "..", "..", DATABASE_DIRNAME)
         if endpoint == "dblist":
-            return Response({"data": {"dbList": [x for x in next(os.walk(dirpath))[2] if x != ".DS_Store"]}})
+            return Response(
+                {
+                    "data": {
+                        "dbList": [
+                            x for x in next(os.walk(dirpath))[2] if x != ".DS_Store"
+                        ]
+                    }
+                }
+            )
 
 
 class ReadSQLiteView(APIView):
@@ -42,14 +50,18 @@ class ReadSQLiteView(APIView):
         logger.debug(f"dirpath = {dir_path}")
         logger.debug(f"filename= {endpoint}")
 
-        if endpoint not in q.ENDPOINT_QUERY_DICT:
+        if endpoint not in Q.ENDPOINT_QUERY_DICT:
             msg = f'The requested endpoint "{endpoint}" is not handled'
             print(msg)
             return Response({"error": msg}, status=status.HTTP_404_NOT_FOUND)
-        query = q.ENDPOINT_QUERY_DICT[endpoint]
+        query = Q.ENDPOINT_QUERY_DICT[endpoint]
         params = {}
         if endpoint == "getquerytext":
             params["query_id"] = optional_param
+
+        #
+        # URL PARAMETERS
+        #
 
         try:
             db_file_name = request.GET.get("dbname")
@@ -57,9 +69,10 @@ class ReadSQLiteView(APIView):
             db_file_name = None
         if db_file_name is None:
             print(f'db_file_name "{db_file_name}" is invalid')
-            return Response({"error": f"{fp} not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": f"{fp} not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
-        # url params
         try:
             limit = request.GET.get("limit")
         except:
@@ -68,7 +81,9 @@ class ReadSQLiteView(APIView):
             limit = 10
         query = query.replace("%LIMIT%", str(limit))
 
-        # TODO set up dirpaths
+        #
+        # db paths
+        #
         fp = os.path.join(dir_path, "..", "..", DATABASE_DIRNAME, db_file_name)
         if not os.path.isfile(fp):
             print(f'The specified database path "{fp}" does not exist.')
@@ -76,6 +91,9 @@ class ReadSQLiteView(APIView):
                 {"error": f"{fp} not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
+        #
+        # QUERY DATABASE
+        #
         try:
             conn = sqlite3.connect(fp)
             cursor = conn.cursor()
@@ -83,7 +101,8 @@ class ReadSQLiteView(APIView):
             start = time.time()
 
             # cursor.execute(QUERY_COUNT)
-            # logger.debug(f"query={query}")
+            logger.debug(f"params={params}")
+            logger.debug(f"query={query}")
             logger.debug("Executing...")
             cursor.execute(query, params)
             logger.debug(f"execute took {time.time() - start:.3f}")
