@@ -122,6 +122,8 @@ const CHART_OPTIONS_BASE: ChartOptions<"line"> = {
   },
 }
 
+export const FETCH_ABORT_MSG = "Abort fetch from unmounting or dependency change"
+
 interface Props {
   apiUri: string
   datasetLabel: string
@@ -155,23 +157,33 @@ export default function TimeGraph({
   const { chosenDb } = useChosenDb()
 
   useEffect(() => {
+    const controller = new AbortController()
+    const signal = controller.signal
+
     setData({ labels: [], datasets: [] })
-    fetchData()
-  }, [apiUri, chosenDb])
+    fetchData(signal)
+
+    // Cleanup fetch request on unmount or dependency change
+    // eg if user clicks on another graph type to show, cancel this fetch
+    return () => {
+      controller.abort(FETCH_ABORT_MSG)
+    }
+  }, [apiUri])
 
   /*********
    * FETCH *
    ********/
-  const fetchData = async () => {
+  const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const result = await fetchGetUri(
       `${SQLITE_ROOT}/${apiUri}?dbname=${chosenDb}`,
+      signal,
     )
-    setLoadStatus({ ...loadStatus, loading: false })
     console.debug(`Recieved: `, result)
 
     if (result.hasError) {
-      setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+      if (result.error !== FETCH_ABORT_MSG)
+        setLoadStatus({ ...loadStatus, loading: false, hasError: true})
       return
     }
 
@@ -198,27 +210,26 @@ export default function TimeGraph({
     options.scales!.y!.title!.text = yLabel
     options.plugins!.title!.text = graphTitle
     setOptions(options)
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   // console.log("render data", data)
   // console.log("render options", options)
 
   return (
-    <>
-      <Card sx={CARD_PROPERTY}>
-        <CardContent>
-          {loadStatus.loading && <CircularProgress />}
-          {!loadStatus.loading && loadStatus.hasError && (
-            <Typography>Error loading</Typography>
-          )}
+  <Card sx={CARD_PROPERTY}>
+    <CardContent>
+      {loadStatus.loading && <CircularProgress />}
+      {!loadStatus.loading && loadStatus.hasError && (
+        <Typography>Error loading</Typography>
+      )}
 
-          {/* BAR */}
-          {!loadStatus.loading && !loadStatus.hasError && (
-            <Line options={options} data={data} />
-            // <Line options={fakeoptions} data={fakedata} />
-          )}
-        </CardContent>
-      </Card>
-    </>
+      {/* BAR */}
+      {!loadStatus.loading && !loadStatus.hasError && (
+        <Line options={options} data={data} />
+        // <Line options={fakeoptions} data={fakedata} />
+      )}
+    </CardContent>
+  </Card>
   )
 }

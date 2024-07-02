@@ -1,5 +1,6 @@
-export const fetchGetUri = async (urlPattern: string) => {
-  // const data = await fetch(`${import.meta.env.VITE_API_URL}/` )
+import { FETCH_ABORT_MSG } from "../components/performanceOverview/TimeGraph"
+
+export const fetchGetUri = async (urlPattern: string, signal?: AbortSignal) => {
   const username = "admin"
   const password = "neo4j"
   const credentials = btoa(`${username}:${password}`)
@@ -11,29 +12,26 @@ export const fetchGetUri = async (urlPattern: string) => {
   })
 
   try {
-    // const params = new URLSearchParams({ param1: 'value1', param2: 'value2' });
     const url = `${import.meta.env.VITE_API_URI}/${urlPattern}`
-    // console.log("awaiting fetch...")
-    const response = await fetch(url, { method: "GET", headers })
+    const options: RequestInit = { method: "GET", headers }
+    if (signal) options.signal = signal
+    const response = await fetch(url, options)
 
     if (!response.ok) {
       throw new Error("Network response was not ok")
     }
 
     return response.json()
-    // setData(result);
   } catch (error) {
-    // setError(error);
-    console.error(error)
+    if (error === FETCH_ABORT_MSG) console.debug(error)
+    else console.error(error)
     return { hasError: true, error }
-  } finally {
-    // setLoading(false);
   }
 }
 
 /****************************************************************************
  ****************************************************************************/
-export const convertToDataMap = (headers: string[], rows: any[][],) => {
+export const convertToDataMap = (headers: string[], rows: any[][]) => {
   const dataMap: Record<string, any>[] = []
   for (const row of rows) {
     const mapRow: any = {}

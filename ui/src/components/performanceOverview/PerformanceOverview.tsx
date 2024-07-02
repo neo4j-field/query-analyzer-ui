@@ -129,6 +129,7 @@ export default function PerformanceOverview() {
   ) => {
     setGraphType((event.target as HTMLInputElement).value as GraphType)
   }
+  // console.log("render perfoverview")
 
   return (
     <Box
