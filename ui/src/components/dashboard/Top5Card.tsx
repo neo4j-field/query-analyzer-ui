@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 import { SQLITE_ROOT } from "../../util/apiEndpoints"
-import { convertToDataMap, fetchGetUri } from "../../util/helpers"
+import {
+  FETCH_ABORT_MSG,
+  convertToDataMap,
+  fetchAbortWrapper,
+  fetchGetUri,
+} from "../../util/helpers"
 import { DataGrid, GridEventListener } from "@mui/x-data-grid"
 import QueryModal from "./QueryModal"
 import { useChosenDb } from "../App"
@@ -25,41 +30,37 @@ export default function Top5Card({ uriName, title }: Props) {
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
   const [openModal, setOpenModal] = useState(false)
   const [chosenQueryId, setChosenQueryId] = useState("")
-  const { chosenDb } = useChosenDb()
+  const { chosenDb, triggerRefresh } = useChosenDb()
 
   // const handleRefetch = async () => fetchData()
 
   useEffect(() => {
-    fetchData()
-  }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [chosenDb])
+    return fetchAbortWrapper(fetchData)
+  }, [triggerRefresh])
 
   /****************************************************************************
    ****************************************************************************/
-  const fetchData = async () => {
+  const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const result = await fetchGetUri(`${SQLITE_ROOT}/${uriName}?limit=5&dbname=${chosenDb}`)
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
+    const result = await fetchGetUri(
+      `${SQLITE_ROOT}/${uriName}?limit=5&dbname=${chosenDb}`,
+    )
 
     if (result.hasError) {
-      console.error(`Error for fetch: ${result}`)
-      setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+      if (result.hasError !== FETCH_ABORT_MSG) {
+        console.error(`Error for fetch: ${result}`)
+        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+      }
       return
     }
 
-
-    const datamap = convertToDataMap(
-      result.data.headers,
-      result.data.rows,
-    )
+    const datamap = convertToDataMap(result.data.headers, result.data.rows)
     for (let i = 0; i < datamap.length; i++) {
       datamap[i].id = i
     }
     setHeaders(result.data.headers)
     setDatamap(datamap)
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   const handleRowDblClick: GridEventListener<"rowClick"> = async (params) => {

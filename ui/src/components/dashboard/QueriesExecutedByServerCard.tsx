@@ -6,7 +6,12 @@ import {
   QUERY_QUERY_COUNT_BY_SERVER,
   SQLITE_ROOT,
 } from "../../util/apiEndpoints"
-import { convertToDataMap, fetchGetUri } from "../../util/helpers"
+import {
+  FETCH_ABORT_MSG,
+  convertToDataMap,
+  fetchAbortWrapper,
+  fetchGetUri,
+} from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
 
@@ -29,34 +34,34 @@ export default function QueriesExecutedByServer() {
   const [queryCountByServerData, setQueryCountByServerData] = useState<
     Record<string, any>[]
   >([])
-  const { chosenDb } = useChosenDb()
+  const { chosenDb, triggerRefresh } = useChosenDb()
 
   // const handleRefetch = async () => {
   //   fetchData()
   // }
 
   useEffect(() => {
-    fetchData()
-  }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [chosenDb])
+    return fetchAbortWrapper(fetchData)
+  }, [triggerRefresh])
 
   /****************************************************************************
    ****************************************************************************/
-  const fetchData = async () => {
+  const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}?dbname=${chosenDb}`),
+      fetchGetUri(
+        `${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}?dbname=${chosenDb}`,
+      ),
+      signal,
     ])
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
     let i = 0
     for (const result of results) {
       if (result.hasError) {
-        console.error(`Error for fetch ${i}: ${result}`)
-        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        if (result.hasError !== FETCH_ABORT_MSG) {
+          console.error(`Error for fetch ${i}: ${result}`)
+          setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        }
         return
       }
       i++
@@ -72,6 +77,7 @@ export default function QueriesExecutedByServer() {
       datamap[i].id = i
     }
     setQueryCountByServerData(datamap)
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   return (

@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react"
-// import AddIcon from "@mui/icons-material/Add"
 import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 
 import { QUERY_GENERAL_STATS, SQLITE_ROOT } from "../../util/apiEndpoints"
-import { convertToDataMap, fetchGetUri } from "../../util/helpers"
+import {
+  FETCH_ABORT_MSG,
+  convertToDataMap,
+  fetchAbortWrapper,
+  fetchGetUri,
+} from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
 
@@ -24,34 +28,28 @@ export default function GeneralStatsCard() {
   const [avgPageFaults, setAvgPageFaults] = useState<number>(-1)
   const [avgTimeTaken, setAvgTimeTaken] = useState<number>(-1)
   const [numQueriesExecuted, setNumQueriesExecuted] = useState<number>(-1)
-  const { chosenDb } = useChosenDb()
-
-  // const handleRefetch = async () => {
-  //   fetchData()
-  // }
+  const { chosenDb, triggerRefresh } = useChosenDb()
 
   useEffect(() => {
-    fetchData()
-  }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [chosenDb])
+    return fetchAbortWrapper(fetchData)
+  }, [triggerRefresh])
 
   /****************************************************************************
    ****************************************************************************/
-  const fetchData = async () => {
+  const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
       fetchGetUri(`${SQLITE_ROOT}/${QUERY_GENERAL_STATS}?dbname=${chosenDb}`),
+      signal,
     ])
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
     let i = 0
     for (const result of results) {
       if (result.hasError) {
-        console.error(`Error for fetch ${i}: ${result}`)
-        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        if (result.error !== FETCH_ABORT_MSG) {
+          console.error(`Error for fetch ${i}: ${result}`)
+          setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        }
         return
       }
       i++
@@ -69,6 +67,7 @@ export default function GeneralStatsCard() {
     setAvgPageFaults(datamap.avgPageFaults)
     setAvgTimeTaken(datamap.avgTimeTaken)
     setNumQueriesExecuted(datamap.numQueriesExecuted)
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   return (
@@ -129,7 +128,6 @@ export default function GeneralStatsCard() {
             ]}
           />
         )}
-
       </CardContent>
     </Card>
   )

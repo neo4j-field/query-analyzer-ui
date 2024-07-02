@@ -6,7 +6,7 @@ import {
   QUERY_COUNT_UNIQUE_QUERIES,
   SQLITE_ROOT,
 } from "../../util/apiEndpoints"
-import { fetchGetUri } from "../../util/helpers"
+import { FETCH_ABORT_MSG, fetchAbortWrapper, fetchGetUri } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
 
@@ -21,36 +21,37 @@ export default function UniqueQueriesExecutedCard() {
     hasError: false,
   })
   const [numUniqueQueries, setNumUniqueQueries] = useState<number>(-1)
-  const { chosenDb } = useChosenDb()
+  const { chosenDb, triggerRefresh } = useChosenDb()
 
   useEffect(() => {
-    fetchData()
-  }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [chosenDb])
+    return fetchAbortWrapper(fetchData)
+  }, [triggerRefresh])
 
   /****************************************************************************
    ****************************************************************************/
-  const fetchData = async () => {
+  const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_COUNT_UNIQUE_QUERIES}?dbname=${chosenDb}`),
+      fetchGetUri(
+        `${SQLITE_ROOT}/${QUERY_COUNT_UNIQUE_QUERIES}?dbname=${chosenDb}`,
+        signal,
+      ),
     ])
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
     let i = 0
     for (const result of results) {
       if (result.hasError) {
-        console.error(`Error for fetch ${i}: ${result}`)
-        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        if (result.error !== FETCH_ABORT_MSG) {
+          console.error(`Error for fetch ${i}: ${result}`)
+          setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        }
         return
       }
       i++
     }
 
     setNumUniqueQueries(results[0].data.rows[0])
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   return (

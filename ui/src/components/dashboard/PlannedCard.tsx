@@ -1,16 +1,8 @@
 import { useEffect, useState } from "react"
-import {
-  Card,
-  CardContent,
-  CircularProgress,
-  Typography,
-} from "@mui/material"
+import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 
-import {
-  QUERY_GET_PLANNING_PCT,
-  SQLITE_ROOT,
-} from "../../util/apiEndpoints"
-import { fetchGetUri } from "../../util/helpers"
+import { QUERY_GET_PLANNING_PCT, SQLITE_ROOT } from "../../util/apiEndpoints"
+import { FETCH_ABORT_MSG, fetchAbortWrapper, fetchGetUri } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
 
@@ -27,38 +19,39 @@ export default function PlannedCard() {
 
   const [plannedQueriesPct, setPlannedQueriesPct] = useState<number>(-1)
   const [planElapsedPct, setPlanElapsedPct] = useState<number>(-1)
-  const { chosenDb } = useChosenDb()
+  const { chosenDb, triggerRefresh } = useChosenDb()
 
   // const handleRefetch = async () => fetchData()
-  
-  useEffect(() => {
-    fetchData()
-  }, [])
 
   useEffect(() => {
-    fetchData()
-  }, [chosenDb])
+    return fetchAbortWrapper(fetchData)
+  }, [triggerRefresh])
 
   /****************************************************************************
    ****************************************************************************/
-  const fetchData = async () => {
+  const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
     const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_GET_PLANNING_PCT}?dbname=${chosenDb}`),
+      fetchGetUri(
+        `${SQLITE_ROOT}/${QUERY_GET_PLANNING_PCT}?dbname=${chosenDb}`,
+      ),
+      signal,
     ])
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
     let i = 0
     for (const result of results) {
       if (result.hasError) {
-        console.error(`Error for fetch ${i}: ${result}`)
-        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        if (result.error !== FETCH_ABORT_MSG) {
+          console.error(`Error for fetch ${i}: ${result}`)
+          setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+        }
         return
       }
       i++
     }
     setPlannedQueriesPct(results[0].data.rows[0][0])
     setPlanElapsedPct(results[0].data.rows[0][1])
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   return (

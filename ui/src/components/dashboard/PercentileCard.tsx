@@ -12,11 +12,12 @@ import {
   TableRow,
   Typography,
 } from "@mui/material"
+import { QUERY_PERCENTILE, SQLITE_ROOT } from "../../util/apiEndpoints"
 import {
-  QUERY_PERCENTILE,
-  SQLITE_ROOT,
-} from "../../util/apiEndpoints"
-import { fetchGetUri } from "../../util/helpers"
+  FETCH_ABORT_MSG,
+  fetchAbortWrapper,
+  fetchGetUri,
+} from "../../util/helpers"
 import QueryModal from "./QueryModal"
 import { useChosenDb } from "../App"
 
@@ -34,34 +35,34 @@ export default function PercentileCard() {
   const [headers, setHeaders] = useState<string[]>([])
   const [openModal, setOpenModal] = useState(false)
   const [chosenQueryId, setChosenQueryId] = useState("")
-  const { chosenDb } = useChosenDb()
+  const { chosenDb, triggerRefresh } = useChosenDb()
 
   // const handleRefetch = async () => {
   //   fetchPercentile()
   // }
 
   useEffect(() => {
-    fetchData()
-  }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [chosenDb])
+    return fetchAbortWrapper(fetchData)
+  }, [triggerRefresh])
 
   /****************************************************************************
    ****************************************************************************/
-  const fetchData = async () => {
+  const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const result = await fetchGetUri(`${SQLITE_ROOT}/${QUERY_PERCENTILE}?dbname=${chosenDb}`)
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
+    const result = await fetchGetUri(
+      `${SQLITE_ROOT}/${QUERY_PERCENTILE}?dbname=${chosenDb}`,
+      signal,
+    )
     // console.log(`query percentile response`, result)
 
     if (result.hasError) {
-      setLoadStatus({ ...loadStatus, loading: false, hasError: true })
+      if (result.error !== FETCH_ABORT_MSG)
+        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
       return
     }
     setRows(result.data.rows)
     setHeaders(result.data.headers)
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   return (
@@ -121,7 +122,11 @@ export default function PercentileCard() {
         </CardContent>
       </Card>
 
-      <QueryModal openModal={openModal} setOpenModal={setOpenModal} queryId={chosenQueryId} />
+      <QueryModal
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        queryId={chosenQueryId}
+      />
     </>
   )
 }

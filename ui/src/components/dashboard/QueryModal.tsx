@@ -8,7 +8,11 @@ import {
 } from "@mui/material"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { convertToDataMap, fetchGetUri } from "../../util/helpers"
+import {
+  convertToDataMap,
+  fetchAbortWrapper,
+  fetchGetUri,
+} from "../../util/helpers"
 import { SQLITE_ROOT, QUERY_GET_QUERY_TEXT } from "../../util/apiEndpoints"
 import { useChosenDb } from "../App"
 
@@ -29,18 +33,20 @@ export default function QueryModal({
   const handleCloseModal = () => setOpenModal(false)
 
   useEffect(() => {
-    ;(async function () {
-      if (openModal) {
-        setLoadingQueryText(true)
-        const result = await fetchGetUri(
-          `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${queryId}?dbname=${chosenDb}`,
-        )
-        setLoadingQueryText(false)
-        const datamap = convertToDataMap(result.data.headers, result.data.rows)
-        setModalQryText(datamap[0].query)
-      }
-    })()
+    if (!openModal) return
+    return fetchAbortWrapper(fetchData)
   }, [openModal])
+
+  const fetchData = async (signal: AbortSignal) => {
+    setLoadingQueryText(true)
+    const result = await fetchGetUri(
+      `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${queryId}?dbname=${chosenDb}`,
+      signal, 
+    )
+    const datamap = convertToDataMap(result.data.headers, result.data.rows)
+    setModalQryText(datamap[0].query)
+    setLoadingQueryText(false)
+  }
 
   return (
     <Dialog

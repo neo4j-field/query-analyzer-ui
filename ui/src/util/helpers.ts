@@ -1,5 +1,8 @@
-import { FETCH_ABORT_MSG } from "../components/performanceOverview/TimeGraph"
+export const FETCH_ABORT_MSG = "Abort fetch from unmounting or dependency change"
 
+
+/****************************************************************************
+ ****************************************************************************/
 export const fetchGetUri = async (urlPattern: string, signal?: AbortSignal) => {
   const username = "admin"
   const password = "neo4j"
@@ -42,4 +45,18 @@ export const convertToDataMap = (headers: string[], rows: any[][]) => {
     dataMap.push(mapRow)
   }
   return dataMap
+}
+
+
+/****************************************************************************
+ ****************************************************************************/
+export const fetchAbortWrapper = (fetchData: (signal: AbortSignal) => any) => {
+  const controller = new AbortController()
+  fetchData(controller.signal)
+
+  // Cleanup fetch request on unmount or dependency change
+  // eg if user clicks on another graph type to show, cancel this fetch
+  return () => {
+    controller.abort(FETCH_ABORT_MSG)
+  }
 }

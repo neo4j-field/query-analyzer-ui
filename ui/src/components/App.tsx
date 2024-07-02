@@ -19,6 +19,7 @@ import {
 } from "@mui/material"
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar"
 import AssignmentIcon from "@mui/icons-material/Assignment"
+import CachedIcon from "@mui/icons-material/Cached"
 import MenuIcon from "@mui/icons-material/Menu"
 import { v4 as uuid } from "uuid"
 
@@ -104,6 +105,7 @@ export interface LoadingStatus {
 type ContextType = {
   chosenDb: string
   setChosenDb: Dispatch<SetStateAction<string>>
+  triggerRefresh: boolean
 }
 
 /**
@@ -121,8 +123,9 @@ export function useChosenDb() {
 export default function App() {
   const [open, setOpen] = useState(true)
   const [appBarName, setAppBarName] = useState<string>("")
-  const [dbList, setDbList] = useState<string[]>(["stuff"])
+  const [dbList, setDbList] = useState<string[]>([])
   const [chosenDb, setChosenDb] = useState<string>(import.meta.env.VITE_DEBUG_DB || "")
+  const [triggerRefresh, setTriggerRefresh] = useState<boolean>(false)
 
   const toggleDrawer = () => {
     setOpen(true)
@@ -198,6 +201,9 @@ export default function App() {
               ))}
             </Select>
           </FormControl>
+        <IconButton color="inherit" onClick={(e) => setTriggerRefresh(!triggerRefresh)}>
+          <CachedIcon />
+        </IconButton>
         </Toolbar>
         <Divider />
 
@@ -221,7 +227,7 @@ export default function App() {
 
       {/* Render data pages depending on route */}
       {chosenDb && (
-        <Outlet context={{ chosenDb, setChosenDb } satisfies ContextType} />
+        <Outlet context={{ chosenDb, setChosenDb, triggerRefresh } satisfies ContextType} />
       )}
       {!chosenDb && (
         <Box
