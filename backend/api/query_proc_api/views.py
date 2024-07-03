@@ -25,19 +25,21 @@ logger.basicConfig(
 )
 
 DATABASE_DIRNAME = "databases"
+DATABASE_DIRPATH = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", DATABASE_DIRNAME
+)
 
 
 class ApiMetadataView(APIView):
     def get(self, request, endpoint):
         Response({"data": "stuff"}, status=status.HTTP_200_OK)
-        root_dirpath = os.path.dirname(os.path.realpath(__file__))
-        dirpath = os.path.join(root_dirpath, "..", "..", "..", DATABASE_DIRNAME)
         if endpoint == "dblist":
+            logger.debug(f'dblist at "{DATABASE_DIRPATH}"')
             return Response(
                 {
                     "data": {
                         "dbList": [
-                            x for x in next(os.walk(dirpath))[2] if x != ".DS_Store"
+                            x for x in next(os.walk(DATABASE_DIRPATH))[2] if x != ".DS_Store"
                         ]
                     }
                 }
@@ -46,10 +48,7 @@ class ApiMetadataView(APIView):
 
 class ReadSQLiteView(APIView):
     def get(self, request, endpoint, optional_param=None):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        logger.debug(f"dirpath = {dir_path}")
-        logger.debug(f"filename= {endpoint}")
-
+        logger.debug(request)
         if endpoint not in Q.ENDPOINT_QUERY_DICT:
             msg = f'The requested endpoint "{endpoint}" is not handled'
             print(msg)
@@ -84,7 +83,7 @@ class ReadSQLiteView(APIView):
         #
         # db paths
         #
-        fp = os.path.join(dir_path, "..", "..", DATABASE_DIRNAME, db_file_name)
+        fp = os.path.join(DATABASE_DIRPATH, db_file_name)
         if not os.path.isfile(fp):
             print(f'The specified database path "{fp}" does not exist.')
             return Response(
