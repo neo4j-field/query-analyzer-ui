@@ -1,6 +1,12 @@
-import { Box, Toolbar, Grid } from "@mui/material"
+import {
+  Box,
+  Grid,
+  Typography,
+  Toolbar,
+  CircularProgress,
+  Button,
+} from "@mui/material"
 import GeneralStatsCard from "./GeneralStatsCard"
-import PercentileCard from "./PercentileCard"
 import QueriesExecutedByServerCard from "./QueriesExecutedByServerCard"
 import UniqueQueriesExecutedCard from "./UniqueQueriesExecuted"
 import PlannedCard from "./PlannedCard"
@@ -11,72 +17,160 @@ import {
   QUERY_TOP5_PAGE_FAULTS,
   QUERY_TOP5_ELAPSED_TIME,
 } from "../../util/apiEndpoints"
+import * as React from "react"
+import { styled } from "@mui/material/styles"
+import Drawer from "@mui/material/Drawer"
+import CssBaseline from "@mui/material/CssBaseline"
+import CloseIcon from "@mui/icons-material/Close"
+import { useState } from "react"
+
+const drawerWidth = 240
+
+const Div = styled("div", { shouldForwardProp: (prop) => prop !== "open" })<{
+  open?: boolean
+}>(({ theme, open }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(3),
+  transition: theme.transitions.create("margin", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  marginRight: `-${drawerWidth}px`,
+  ...(open && {
+    transition: theme.transitions.create("margin", {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginRight: 0,
+  }),
+}))
+
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+  justifyContent: "flex-start",
+}))
 
 export default function Dashboard() {
-  return (
-    <Box
-      component="main"
-      sx={{
-        backgroundColor: (theme) =>
-          theme.palette.mode === "light"
-            ? theme.palette.grey[100]
-            : theme.palette.grey[900],
-        flexGrow: 1,
-        height: "100vh",
-        overflow: "auto",
-      }}
-    >
-      <Toolbar />
-      <Grid container spacing={4}>
-        {/* <Grid item xs={12} sm={12} md={12} lg={12} xl={12}> */}
+  // const theme = useTheme()
+  const [open, setOpen] = React.useState(false)
+  const [queryText, setQueryText] = useState<string>("")
+  const [loadingQueryText, setLoadingQueryText] = useState(false)
 
-        {/* LEFT COLUMN  */}
-        <Grid item xs={6}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <UniqueQueriesExecutedCard />
-            </Grid>
-            <Grid item xs={12}>
-              <GeneralStatsCard />
-            </Grid>
-            <Grid item xs={12}>
-              <PlannedCard />
+  const toggleDrawer = (b: boolean) => {
+    if (b === undefined) setOpen(!open)
+    else setOpen(b)
+  }
+
+  return (
+    <Box sx={{ display: "flex" }}>
+      {/* <CssBaseline /> */}
+
+      <Div open={open}>
+        <DrawerHeader />
+
+        <Grid container spacing={4}>
+          {/* LEFT COLUMN  */}
+          <Grid item xs={6}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <UniqueQueriesExecutedCard />
+              </Grid>
+              <Grid item xs={12}>
+                <GeneralStatsCard />
+              </Grid>
+              <Grid item xs={12}>
+                <PlannedCard />
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
 
-        {/* RIGHT COLUMN */}
-        <Grid item xs={6}>
-          <QueriesExecutedByServerCard />
-        </Grid>
+          {/* RIGHT COLUMN */}
+          <Grid item xs={6}>
+            <QueriesExecutedByServerCard />
+          </Grid>
 
-        {/* TOP 5ers*/}
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <Top5Card
-            uriName={QUERY_TOP5_QUERIES_EXECUTED}
-            title={"Top 5 Queries"}
-          />
+          {/* TOP 5ers*/}
+          <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+            <Top5Card
+              uriName={QUERY_TOP5_QUERIES_EXECUTED}
+              title={"Top 5 Queries"}
+              setQueryText={setQueryText}
+              openDrawer={open}
+              setOpenDrawer={setOpen}
+              setLoadingQueryText={setLoadingQueryText}
+            />
+          </Grid>
+          <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+            <Top5Card
+              uriName={QUERY_TOP5_PAGE_HITS}
+              title={"Top 5 Page Hits"}
+              setQueryText={setQueryText}
+              openDrawer={open}
+              setOpenDrawer={setOpen}
+              setLoadingQueryText={setLoadingQueryText}
+            />
+          </Grid>
+          <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+            <Top5Card
+              uriName={QUERY_TOP5_PAGE_FAULTS}
+              title={"Top 5 Page Faults"}
+              setQueryText={setQueryText}
+              openDrawer={open}
+              setOpenDrawer={setOpen}
+              setLoadingQueryText={setLoadingQueryText}
+            />
+          </Grid>
+          <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+            <Top5Card
+              uriName={QUERY_TOP5_ELAPSED_TIME}
+              title={"Top 5 Elapsed Time"}
+              setQueryText={setQueryText}
+              openDrawer={open}
+              setOpenDrawer={setOpen}
+              setLoadingQueryText={setLoadingQueryText}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <Top5Card uriName={QUERY_TOP5_PAGE_HITS} title={"Top 5 Page Hits"} />
-        </Grid>
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <Top5Card
-            uriName={QUERY_TOP5_PAGE_FAULTS}
-            title={"Top 5 Page Faults"}
-          />
-        </Grid>
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <Top5Card
-            uriName={QUERY_TOP5_ELAPSED_TIME}
-            title={"Top 5 Elapsed Time"}
-          />
-        </Grid>
+      </Div>
 
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <PercentileCard />
-        </Grid>
-      </Grid>
+      <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: drawerWidth,
+            boxSizing: "border-box",
+          },
+        }}
+        variant="persistent"
+        anchor="right"
+        open={open}
+      >
+        <CssBaseline />
+        <Toolbar />
+
+        {loadingQueryText && <CircularProgress />}
+        {!loadingQueryText && (
+          <>
+            <Button
+              onClick={() => toggleDrawer(false)}
+            >
+              <CloseIcon />
+            </Button>
+            <Typography
+              sx={{
+                fontFamily: "Courier New, Courier, monospace",
+              }}
+            >
+              {queryText}
+            </Typography>
+          </>
+        )}
+      </Drawer>
     </Box>
   )
 }

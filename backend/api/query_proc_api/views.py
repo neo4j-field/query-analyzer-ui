@@ -48,7 +48,7 @@ class ApiMetadataView(APIView):
 
 class ReadSQLiteView(APIView):
     def get(self, request, endpoint, optional_param=None):
-        logger.debug(request)
+        # logger.debug(request)
         if endpoint not in Q.ENDPOINT_QUERY_DICT:
             msg = f'The requested endpoint "{endpoint}" is not handled'
             print(msg)

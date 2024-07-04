@@ -132,18 +132,7 @@ export default function PerformanceOverview() {
   // console.log("render perfoverview")
 
   return (
-    <Box
-      component="main"
-      sx={{
-        backgroundColor: (theme) =>
-          theme.palette.mode === "light"
-            ? theme.palette.grey[100]
-            : theme.palette.grey[900],
-        flexGrow: 1,
-        height: "100vh",
-        overflow: "auto",
-      }}
-    >
+    <>
       <Toolbar />
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -189,6 +178,6 @@ export default function PerformanceOverview() {
           />
         </Grid>
       </Grid>
-    </Box>
+    </>
   )
 }

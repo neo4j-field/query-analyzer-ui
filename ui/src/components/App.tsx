@@ -32,6 +32,7 @@ const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
 const linkPages: { to: string; displayName: string }[] = [
   { to: "dashboard", displayName: "Dashboard" },
+  { to: "percentiles", displayName: "Percentiles Dashboard" },
   { to: "graphs", displayName: "Performance Overview" },
 ]
 
@@ -110,7 +111,7 @@ type ContextType = {
 
 /**
  * Global db state
- * @returns 
+ * @returns
  */
 export function useChosenDb() {
   return useOutletContext<ContextType>()
@@ -124,7 +125,9 @@ export default function App() {
   const [open, setOpen] = useState(true)
   const [appBarName, setAppBarName] = useState<string>("")
   const [dbList, setDbList] = useState<string[]>([])
-  const [chosenDb, setChosenDb] = useState<string>(import.meta.env.VITE_DEBUG_DB || "")
+  const [chosenDb, setChosenDb] = useState<string>(
+    import.meta.env.VITE_DEBUG_DEFAULT_DB || "",
+  )
   const [triggerRefresh, setTriggerRefresh] = useState<boolean>(false)
 
   const toggleDrawer = () => {
@@ -133,7 +136,9 @@ export default function App() {
 
   useEffect(() => {
     ;(async () => {
-      const result = await fetchGetUri(`${API_METADATA_ROOT}/${DB_LIST}?dbname=${chosenDb}`)
+      const result = await fetchGetUri(
+        `${API_METADATA_ROOT}/${DB_LIST}?dbname=${chosenDb}`,
+      )
 
       if (result.hasError) {
         return
@@ -201,9 +206,12 @@ export default function App() {
               ))}
             </Select>
           </FormControl>
-        <IconButton color="inherit" onClick={(e) => setTriggerRefresh(!triggerRefresh)}>
-          <CachedIcon />
-        </IconButton>
+          <IconButton
+            color="inherit"
+            onClick={(e) => setTriggerRefresh(!triggerRefresh)}
+          >
+            <CachedIcon />
+          </IconButton>
         </Toolbar>
         <Divider />
 
@@ -225,27 +233,32 @@ export default function App() {
         </List>
       </Drawer>
 
-      {/* Render data pages depending on route */}
-      {chosenDb && (
-        <Outlet context={{ chosenDb, setChosenDb, triggerRefresh } satisfies ContextType} />
-      )}
-      {!chosenDb && (
-        <Box
-          component="main"
-          sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === "light"
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
-            flexGrow: 1,
-            height: "100vh",
-            overflow: "auto",
-          }}
-        >
-          <Toolbar />
-          <Typography>Please Choose Database</Typography>
-        </Box>
-      )}
+      <Box
+        component="main"
+        sx={{
+          backgroundColor: (theme) =>
+            theme.palette.mode === "light"
+              ? theme.palette.grey[100]
+              : theme.palette.grey[900],
+          flexGrow: 1,
+          height: "100vh",
+          overflow: "auto",
+        }}
+      >
+        {/* Render data pages depending on route */}
+        {chosenDb ? (
+          <Outlet
+            context={
+              { chosenDb, setChosenDb, triggerRefresh } satisfies ContextType
+            }
+          />
+        ) : (
+          <>
+            <Toolbar />
+            <Typography>Please Choose Database</Typography>
+          </>
+        )}
+      </Box>
     </Box>
   )
 }

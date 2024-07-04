@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
-import { SQLITE_ROOT } from "../../util/apiEndpoints"
+import { QUERY_GET_QUERY_TEXT, SQLITE_ROOT } from "../../util/apiEndpoints"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,
@@ -8,7 +8,6 @@ import {
   fetchGetUri,
 } from "../../util/helpers"
 import { DataGrid, GridEventListener } from "@mui/x-data-grid"
-import QueryModal from "./QueryModal"
 import { useChosenDb } from "../App"
 
 const CARD_PROPERTY = {
@@ -19,20 +18,27 @@ const CARD_PROPERTY = {
 interface Props {
   uriName: string
   title: string
+  openDrawer: boolean
+  setOpenDrawer: Dispatch<SetStateAction<boolean>>
+  setQueryText: Dispatch<SetStateAction<string>>
+  setLoadingQueryText: Dispatch<SetStateAction<boolean>>
 }
 
-export default function Top5Card({ uriName, title }: Props) {
+export default function Top5Card({
+  uriName,
+  title,
+  openDrawer,
+  setOpenDrawer,
+  setQueryText,
+  setLoadingQueryText,
+}: Props) {
   const [loadStatus, setLoadStatus] = useState({
     loading: false,
     hasError: false,
   })
   const [headers, setHeaders] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
-  const [openModal, setOpenModal] = useState(false)
-  const [chosenQueryId, setChosenQueryId] = useState("")
   const { chosenDb, triggerRefresh } = useChosenDb()
-
-  // const handleRefetch = async () => fetchData()
 
   useEffect(() => {
     return fetchAbortWrapper(fetchData)
@@ -64,8 +70,18 @@ export default function Top5Card({ uriName, title }: Props) {
   }
 
   const handleRowDblClick: GridEventListener<"rowClick"> = async (params) => {
-    setOpenModal(true)
-    setChosenQueryId(params.row.query_id)
+    if (!openDrawer) setOpenDrawer(true)
+    fetchQueryText(params.row.query_id)
+  }
+
+  const fetchQueryText = async (queryId: string /*signal: AbortSignal*/) => {
+    setLoadingQueryText(true)
+    const result = await fetchGetUri(
+      `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${queryId}?dbname=${chosenDb}`,
+    )
+    const datamap = convertToDataMap(result.data.headers, result.data.rows)
+    setQueryText(datamap[0].query)
+    setLoadingQueryText(false)
   }
 
   return (
@@ -94,12 +110,6 @@ export default function Top5Card({ uriName, title }: Props) {
           )}
         </CardContent>
       </Card>
-
-      <QueryModal
-        queryId={chosenQueryId}
-        openModal={openModal}
-        setOpenModal={setOpenModal}
-      />
     </>
   )
 }

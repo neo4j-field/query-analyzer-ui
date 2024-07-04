@@ -9,6 +9,7 @@ import "@fontsource/roboto/500.css"
 import "@fontsource/roboto/700.css"
 import Dashboard from "./components/dashboard/Dashboard.tsx"
 import PerformanceOverview from "./components/performanceOverview/PerformanceOverview.tsx"
+import PercentilesDashboard from "./components/percentilesDashboard/PercentilesDashboard.tsx"
 
 const darkTheme = createTheme({
   palette: {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <Dashboard />,
+      },
+      {
+        path: "percentiles",
+        element: <PercentilesDashboard />,
       },
       {
         path: "graphs",
