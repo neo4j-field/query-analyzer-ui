@@ -84,7 +84,7 @@ export default function PercentileCard() {
             apiRef={apiRef}
             autosizeOnMount
             // onRowDoubleClick={handleRowDblClick}
-            hideFooter
+            // hideFooter
             rows={datamap}
             columns={headers.map((s) => {
               const ret: any = { field: s, headerName: s }

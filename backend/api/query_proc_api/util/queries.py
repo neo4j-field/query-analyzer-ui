@@ -102,7 +102,7 @@ FROM query_execution
 # # # # # # # # # # # # # #
 # new
 QUERY_TIME_QUERY_COUNT = """
-SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute,  "All Servers" as server, count(1) as numQueries 
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute,  count(1) as total 
 FROM query_execution 
 GROUP BY timestampMinute 
 ORDER BY timestampMinute
@@ -227,7 +227,7 @@ LIMIT %LIMIT%;
 """
 
 QUERY_PERCENTILE = """
-SELECT query_id, minTime_lower90, maxTime_lower90, avgTime_lower90,minHits_lower90, maxHits_lower90, avgHits_lower90, count_lower90, minTime_upper90, maxTime_upper90, avgTime_upper90, minHits_upper90, maxHits_upper90, avgHits_upper90, count_upper90
+SELECT query_id, minTime_lower90, minTime_upper90, maxTime_lower90, maxTime_upper90, avgTime_lower90, avgTime_upper90, (avgTime_upper90 / avgTime_lower90) as ratio, minHits_lower90, minHits_upper90, maxHits_lower90, maxHits_upper90, avgHits_lower90, avgHits_upper90, count_lower90, count_upper90
 FROM
 (
   SELECT lower90.query_id as query_id, minTime_lower90, maxTime_lower90, avgTime_lower90,minHits_lower90, maxHits_lower90, avgHits_lower90, count_lower90, minTime_upper90, maxTime_upper90, avgTime_upper90, minHits_upper90, maxHits_upper90, avgHits_upper90, count_upper90
@@ -246,9 +246,12 @@ FROM
             ORDER BY elapsedTimeMs ASC
           ) SizePercentRank
         FROM query_execution
-      ) WHERE SizePercentRank < 0.9
-    ) GROUP BY query_id   
+      ) 
+      WHERE SizePercentRank < 0.9
+    ) 
+    GROUP BY query_id
   ) lower90
+  
   LEFT JOIN 
   (
     SELECT query_id, min(elapsedTimeMs) as minTime_upper90, max(elapsedTimeMs) as maxTime_upper90, avg(elapsedTimeMs) as avgTime_upper90, min(pageHits) as minHits_upper90, max(pageHits) as maxHits_upper90, avg(pageHits) as avgHits_upper90, count(1) as count_upper90

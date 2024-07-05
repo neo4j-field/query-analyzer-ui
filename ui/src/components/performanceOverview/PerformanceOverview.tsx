@@ -31,33 +31,15 @@ const graphTypeMap: Record<GraphType, Record<string, any>> = {
     datasetLabel: "All",
     xLabel: "Timestamp",
     yLabel: "Total Count",
-    graphTitle: "Queries Per Minute By Server",
-    dataTransformer: function (rows: any[]) {
-      // partition data by server
-      const datasets: ChartDataset<"line">[] = []
-      const dataByServer: Record<string, { x: string; y: string }[]> = {}
+    graphTitle: "Queries Per Minute",
+    dataTransformer: function statsTransformer(rows: any[], headers: string[]) {
+      const totalDataset = structuredClone(DATASET_BASE)
+      totalDataset.label = "Total"
       for (const row of rows) {
-        const [timestamp, server, count] = row
-        if (!(server in dataByServer)) {
-          dataByServer[server] = []
-        }
-        dataByServer[server].push({ x: timestamp, y: count })
+        const [timestamp, total] = row
+        totalDataset.data.push({ x: timestamp, y: total })
       }
-
-      // Default show only All Servers dataset
-      for (const [server, data] of Object.entries(dataByServer)) {
-        const dataset = structuredClone(DATASET_BASE)
-        dataset.data = data as any
-        dataset.label = server
-        dataset.hidden = server !== "All Servers"
-        if (server === "All Servers") {
-          datasets.unshift(dataset)
-        } else {
-          datasets.push(dataset)
-        }
-      }
-
-      return datasets
+      return [totalDataset]
     },
   },
 
@@ -115,6 +97,34 @@ function statsTransformer(rows: any[], headers: string[]) {
     maxDataset.data.push({ x: timestamp, y: max_ })
   }
   return [totalDataset, avgDataset, minDataset, maxDataset]
+}
+
+function byServerTransformer (rows: any[]) {
+  // partition data by server
+  const datasets: ChartDataset<"line">[] = []
+  const dataByServer: Record<string, { x: string; y: string }[]> = {}
+  for (const row of rows) {
+    const [timestamp, server, count] = row
+    if (!(server in dataByServer)) {
+      dataByServer[server] = []
+    }
+    dataByServer[server].push({ x: timestamp, y: count })
+  }
+
+  // Default show only All Servers dataset
+  for (const [server, data] of Object.entries(dataByServer)) {
+    const dataset = structuredClone(DATASET_BASE)
+    dataset.data = data as any
+    dataset.label = server
+    dataset.hidden = server !== "All Servers"
+    if (server === "All Servers") {
+      datasets.unshift(dataset)
+    } else {
+      datasets.push(dataset)
+    }
+  }
+
+  return datasets
 }
 
 /******************************************************************************
