@@ -39,7 +39,9 @@ class ApiMetadataView(APIView):
                 {
                     "data": {
                         "dbList": [
-                            x for x in next(os.walk(DATABASE_DIRPATH))[2] if x != ".DS_Store"
+                            x
+                            for x in next(os.walk(DATABASE_DIRPATH))[2]
+                            if x != ".DS_Store"
                         ]
                     }
                 }
@@ -67,9 +69,10 @@ class ReadSQLiteView(APIView):
         except:
             db_file_name = None
         if db_file_name is None:
-            print(f'db_file_name "{db_file_name}" is invalid')
+            msg = 'db_file_name "{db_file_name}" is invalid'
+            print(msg)
             return Response(
-                {"error": f"{fp} not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": msg}, status=status.HTTP_404_NOT_FOUND
             )
 
         try:
