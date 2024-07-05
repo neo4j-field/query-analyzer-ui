@@ -58,6 +58,7 @@ export default function Dashboard() {
   // const theme = useTheme()
   const [open, setOpen] = React.useState(false)
   const [queryText, setQueryText] = useState<string>("")
+  const [queryId, setQueryId] = useState<string>("")
   const [loadingQueryText, setLoadingQueryText] = useState(false)
 
   const toggleDrawer = (b: boolean) => {
@@ -94,46 +95,24 @@ export default function Dashboard() {
           </Grid>
 
           {/* TOP 5ers*/}
-          <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-            <Top5Card
-              uriName={QUERY_TOP5_QUERIES_EXECUTED}
-              title={"Top 5 Queries"}
-              setQueryText={setQueryText}
-              openDrawer={open}
-              setOpenDrawer={setOpen}
-              setLoadingQueryText={setLoadingQueryText}
-            />
-          </Grid>
-          <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-            <Top5Card
-              uriName={QUERY_TOP5_PAGE_HITS}
-              title={"Top 5 Page Hits"}
-              setQueryText={setQueryText}
-              openDrawer={open}
-              setOpenDrawer={setOpen}
-              setLoadingQueryText={setLoadingQueryText}
-            />
-          </Grid>
-          <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-            <Top5Card
-              uriName={QUERY_TOP5_PAGE_FAULTS}
-              title={"Top 5 Page Faults"}
-              setQueryText={setQueryText}
-              openDrawer={open}
-              setOpenDrawer={setOpen}
-              setLoadingQueryText={setLoadingQueryText}
-            />
-          </Grid>
-          <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-            <Top5Card
-              uriName={QUERY_TOP5_ELAPSED_TIME}
-              title={"Top 5 Elapsed Time"}
-              setQueryText={setQueryText}
-              openDrawer={open}
-              setOpenDrawer={setOpen}
-              setLoadingQueryText={setLoadingQueryText}
-            />
-          </Grid>
+          {[
+            { uriName: QUERY_TOP5_QUERIES_EXECUTED, title: "Top 5 Queries" },
+            { uriName: QUERY_TOP5_PAGE_HITS, title: "Top 5 Page Hits" },
+            { uriName: QUERY_TOP5_PAGE_FAULTS, title: "Top 5 Page Faults" },
+            { uriName: QUERY_TOP5_ELAPSED_TIME, title: "Top 5 Elapsed Time" },
+          ].map((x) => (
+            <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+              <Top5Card
+                uriName={x.uriName}
+                title={x.title}
+                setQueryText={setQueryText}
+                openDrawer={open}
+                setOpenDrawer={setOpen}
+                setLoadingQueryText={setLoadingQueryText}
+                setQueryId={setQueryId}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Div>
 
@@ -156,11 +135,10 @@ export default function Dashboard() {
         {loadingQueryText && <CircularProgress />}
         {!loadingQueryText && (
           <>
-            <Button
-              onClick={() => toggleDrawer(false)}
-            >
+            <Button onClick={() => toggleDrawer(false)}>
               <CloseIcon />
             </Button>
+            <Typography variant="h5">Query Id: {queryId}</Typography>
             <Typography
               sx={{
                 fontFamily: "Courier New, Courier, monospace",

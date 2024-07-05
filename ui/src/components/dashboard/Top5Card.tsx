@@ -21,6 +21,7 @@ interface Props {
   openDrawer: boolean
   setOpenDrawer: Dispatch<SetStateAction<boolean>>
   setQueryText: Dispatch<SetStateAction<string>>
+  setQueryId: Dispatch<SetStateAction<string>>
   setLoadingQueryText: Dispatch<SetStateAction<boolean>>
 }
 
@@ -30,6 +31,7 @@ export default function Top5Card({
   openDrawer,
   setOpenDrawer,
   setQueryText,
+  setQueryId,
   setLoadingQueryText,
 }: Props) {
   const [loadStatus, setLoadStatus] = useState({
@@ -69,7 +71,7 @@ export default function Top5Card({
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
-  const handleRowDblClick: GridEventListener<"rowClick"> = async (params) => {
+  const handleRowClick: GridEventListener<"rowClick"> = async (params) => {
     if (!openDrawer) setOpenDrawer(true)
     fetchQueryText(params.row.query_id)
   }
@@ -80,6 +82,7 @@ export default function Top5Card({
       `${SQLITE_ROOT}/${QUERY_GET_QUERY_TEXT}/${queryId}?dbname=${chosenDb}`,
     )
     const datamap = convertToDataMap(result.data.headers, result.data.rows)
+    setQueryId(queryId)
     setQueryText(datamap[0].query)
     setLoadingQueryText(false)
   }
@@ -98,7 +101,7 @@ export default function Top5Card({
           {!loadStatus.loading && !loadStatus.hasError && (
             <DataGrid
               autoHeight
-              onRowDoubleClick={handleRowDblClick}
+              onRowClick={handleRowClick}
               hideFooter
               rows={datamap}
               columns={headers.map((s) => {
