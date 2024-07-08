@@ -125,7 +125,9 @@ class ReadSQLiteView(APIView):
             logger.debug(f"Creating Response took {time.time() - start:.3f}")
             return ret
         except sqlite3.Error as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            errorMsg = str(e)
+            logger.error(f'sqlite3.Error: {errorMsg}')
+            return Response({"error": errorMsg}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR

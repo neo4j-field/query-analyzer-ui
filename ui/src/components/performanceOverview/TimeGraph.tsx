@@ -29,21 +29,13 @@ ChartJS.register(
   Legend,
 )
 
-import { SQLITE_ROOT } from "../../util/apiEndpoints"
-import {
-  FETCH_ABORT_MSG,
-  fetchAbortWrapper,
-  fetchGetUri,
-} from "../../util/helpers"
-import { useChosenDb } from "../App"
-
 const CARD_PROPERTY = {
   borderRadius: 3,
   boxShadow: 0,
 }
 
 export const DATASET_BASE: ChartDataset<"line"> = {
-  label: "Datasetlabel",
+  label: "Insert Dataset Label",
   data: [],
   // tension: 0.1,
   borderColor: "rgba(75, 192, 192, 1)",
@@ -127,12 +119,12 @@ const CHART_OPTIONS_BASE: ChartOptions<"line"> = {
 }
 
 interface Props {
-  apiUri: string
-  datasetLabel: string
+  // apiUri: string
+  // datasetLabel: string
   xLabel: string
   yLabel: string
   graphTitle: string
-  dataTransformer?: (rows: any[], headers: string[]) => ChartDataset<"line">[]
+  chartData: ChartData<"line">
 }
 
 /******************************************************************************
@@ -140,64 +132,24 @@ interface Props {
  * @returns
  ******************************************************************************/
 export default function TimeGraph({
-  apiUri,
-  datasetLabel,
   xLabel,
   yLabel,
   graphTitle,
-  dataTransformer,
+  chartData,
 }: Props) {
   const [loadStatus, setLoadStatus] = useState({
     loading: false,
     hasError: false,
   })
-  const [data, setData] = useState<ChartData<"line">>({
-    labels: [],
-    datasets: [],
-  })
   const [options, setOptions] = useState<ChartOptions<"line">>({})
-  const { chosenDb, triggerRefresh } = useChosenDb()
 
   useEffect(() => {
-    return fetchAbortWrapper(fetchData)
-  }, [apiUri, triggerRefresh])
+    updateData()
+  }, [])
 
-  /*********
-   * FETCH *
-   ********/
-  const fetchData = async (signal: AbortSignal) => {
+  const updateData = () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const result = await fetchGetUri(
-      `${SQLITE_ROOT}/${apiUri}?dbname=${chosenDb}`,
-      signal,
-    )
-    console.debug(`Recieved: `, result)
-
-    if (result.hasError) {
-      if (result.error !== FETCH_ABORT_MSG)
-        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
-      return
-    }
-
-    // data transformation
-    const dataTransformed: ChartData<"line"> = { datasets: [] }
-    if (dataTransformer) {
-      dataTransformed.datasets = dataTransformer(
-        result.data.rows,
-        result.data.headers,
-      )
-    } else {
-      const dataset = structuredClone(DATASET_BASE)
-      dataset.data = result.data.rows.map((row: any) => ({
-        x: row[0],
-        y: row[1],
-      }))
-      dataset.label = datasetLabel
-      dataTransformed.datasets.push(dataset)
-    }
-    setData(dataTransformed)
-
-    const options: ChartOptions<"line"> = { ...CHART_OPTIONS_BASE }
+    const options: ChartOptions<"line"> = structuredClone(CHART_OPTIONS_BASE)
     options.scales!.x!.title!.text = xLabel
     options.scales!.y!.title!.text = yLabel
     options.plugins!.title!.text = graphTitle
@@ -216,10 +168,8 @@ export default function TimeGraph({
           <Typography>Error loading</Typography>
         )}
 
-        {/* BAR */}
         {!loadStatus.loading && !loadStatus.hasError && (
-          <Line options={options} data={data} />
-          // <Line options={fakeoptions} data={fakedata} />
+          <Line options={options} data={chartData} />
         )}
       </CardContent>
     </Card>

@@ -102,54 +102,105 @@ FROM query_execution
 # # # # # # # # # # # # # #
 # new
 QUERY_TIME_QUERY_COUNT = """
-SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute,  count(1) as total 
-FROM query_execution 
-GROUP BY timestampMinute 
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, "All Servers" as server_, count(1) as total
+FROM query_execution
+GROUP BY timestampMinute, server_
+UNION
+SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, server as server_, count(1) as total
+FROM query_execution
+GROUP BY timestampMinute, server_
 ORDER BY timestampMinute
 """
 
 QUERY_TIME_PAGE_FAULTS_COUNT = """
 SELECT 
   strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  "All Servers" as server_,
   sum(pageFaults) as total,
   avg(pageFaults) as average,
   min(pageFaults) as minimum,
   max(pageFaults) as maximum
 FROM query_execution
-GROUP BY timestampMinute
+GROUP BY timestampMinute, server_
+UNION
+SELECT
+  strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  server as server_,
+  sum(pageFaults) as total,
+  avg(pageFaults) as average,
+  min(pageFaults) as minimum,
+  max(pageFaults) as maximum
+FROM query_execution
+GROUP BY timestampMinute, server_
 ORDER BY timestampMinute
 """
 
 QUERY_TIME_PAGE_HITS_COUNT = """
-SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+SELECT 
+  strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  "All Servers" as server_,
   sum(pageHits) as total,
   avg(pageHits) as average,
   min(pageHits) as minimum,
   max(pageHits) as maximum
 FROM query_execution
 GROUP BY timestampMinute
+UNION
+SELECT
+  strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  server as server_,
+  sum(pageHits) as total,
+  avg(pageHits) as average,
+  min(pageHits) as minimum,
+  max(pageHits) as maximum
+FROM query_execution
+GROUP BY timestampMinute, server_
 ORDER BY timestampMinute
 """
 
 QUERY_TIME_ELAPSED_TIME_COUNT = """
-SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+SELECT 
+  strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  "All Servers" as server_,
   sum(elapsedTimeMs) as total,
   avg(elapsedTimeMs) as average,
   min(elapsedTimeMs) as minimum,
   max(elapsedTimeMs) as maximum
 FROM query_execution
 GROUP BY timestampMinute
+UNION
+SELECT
+  strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  server as server_,
+  sum(elapsedTimeMs) as total,
+  avg(elapsedTimeMs) as average,
+  min(elapsedTimeMs) as minimum,
+  max(elapsedTimeMs) as maximum
+FROM query_execution
+GROUP BY timestampMinute, server_
 ORDER BY timestampMinute
 """
 
 QUERY_TIME_PLANNING_COUNT = """
-SELECT strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+SELECT 
+  strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  "All Servers" as server_,
   sum(planning) as total,
   avg(planning) as average,
   min(planning) as minimum,
   max(planning) as maximum
 FROM query_execution
 GROUP BY timestampMinute
+UNION
+SELECT
+  strftime('%s', DATETIME((start_timeStamp / 60000) * 60, 'unixepoch')) * 1000 as timestampMinute, 
+  server as server_,
+  sum(planning) as total,
+  avg(planning) as average,
+  min(planning) as minimum,
+  max(planning) as maximum
+FROM query_execution
+GROUP BY timestampMinute, server_
 ORDER BY timestampMinute
 """
 
