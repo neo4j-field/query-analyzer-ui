@@ -1,5 +1,11 @@
-import { useEffect, useState } from "react"
-import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
+import { KeyboardEvent, useEffect, useState } from "react"
+import {
+  Card,
+  CardContent,
+  CircularProgress,
+  TextField,
+  Typography,
+} from "@mui/material"
 import { QUERY_PERCENTILE, SQLITE_ROOT } from "../../util/apiEndpoints"
 import {
   FETCH_ABORT_MSG,
@@ -28,6 +34,7 @@ export default function PercentileCard() {
   })
   const [headers, setHeaders] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
+  const [avgPageHitsThresh, setAvgPageHitsThresh] = useState<number>(100000)
   const { chosenDb, triggerRefresh } = useChosenDb()
   // const apiRef = useGridApiRef()
 
@@ -114,7 +121,7 @@ export default function PercentileCard() {
           }
 
           return clsx("super-app", {
-            orange: params.value > 100000,
+            orange: params.value > avgPageHitsThresh,
           })
         }
       }
@@ -151,6 +158,19 @@ export default function PercentileCard() {
         <Typography gutterBottom variant="h5" component="div">
           90th Percentiles
         </Typography>
+
+        <TextField
+          label="Average Page Hits Threshold"
+          type="number"
+          onKeyUp={(e: KeyboardEvent<HTMLDivElement>) => {
+            if (e.key === "Enter") {
+              setAvgPageHitsThresh(
+                parseInt((e.target as HTMLTextAreaElement).value),
+              )
+            }
+          }}
+        />
+
         {loadStatus.loading && <CircularProgress />}
         {!loadStatus.loading && loadStatus.hasError && (
           <Typography>Error loading</Typography>

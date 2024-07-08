@@ -278,7 +278,7 @@ LIMIT %LIMIT%;
 """
 
 QUERY_PERCENTILE = """
-SELECT query_id, minTime_lower90, minTime_upper90, maxTime_lower90, maxTime_upper90, avgTime_lower90, avgTime_upper90, (avgTime_upper90 / avgTime_lower90) as ratio, minHits_lower90, minHits_upper90, maxHits_lower90, maxHits_upper90, avgHits_lower90, avgHits_upper90, count_lower90, count_upper90
+SELECT query_id, avgHits_lower90, avgHits_upper90, minHits_lower90, minHits_upper90, maxHits_lower90, maxHits_upper90, minTime_lower90, minTime_upper90, maxTime_lower90, maxTime_upper90, avgTime_lower90, avgTime_upper90, (avgTime_upper90 / avgTime_lower90) as ratio, count_lower90, count_upper90
 FROM
 (
   SELECT lower90.query_id as query_id, minTime_lower90, maxTime_lower90, avgTime_lower90,minHits_lower90, maxHits_lower90, avgHits_lower90, count_lower90, minTime_upper90, maxTime_upper90, avgTime_upper90, minHits_upper90, maxHits_upper90, avgHits_upper90, count_upper90
