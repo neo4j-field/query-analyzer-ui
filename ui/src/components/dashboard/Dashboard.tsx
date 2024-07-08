@@ -100,8 +100,8 @@ export default function Dashboard() {
             { uriName: QUERY_TOP5_PAGE_HITS, title: "Top 5 Page Hits" },
             { uriName: QUERY_TOP5_PAGE_FAULTS, title: "Top 5 Page Faults" },
             { uriName: QUERY_TOP5_ELAPSED_TIME, title: "Top 5 Elapsed Time" },
-          ].map((x) => (
-            <Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+          ].map((x, i) => (
+            <Grid key={i} item xs={11} sm={11} md={11} lg={11} xl={11}>
               <Top5Card
                 uriName={x.uriName}
                 title={x.title}

@@ -8,7 +8,13 @@ import {
   fetchGetUri,
 } from "../../util/helpers"
 import { useChosenDb } from "../App"
-import { DataGrid, GridEventListener, useGridApiRef } from "@mui/x-data-grid"
+import {
+  DataGrid,
+  GridCellParams,
+  GridColDef,
+  useGridApiRef,
+} from "@mui/x-data-grid"
+import clsx from "clsx"
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -23,7 +29,7 @@ export default function PercentileCard() {
   const [headers, setHeaders] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
   const { chosenDb, triggerRefresh } = useChosenDb()
-  const apiRef = useGridApiRef()
+  // const apiRef = useGridApiRef()
 
   useEffect(() => {
     return fetchAbortWrapper(fetchData)
@@ -69,9 +75,79 @@ export default function PercentileCard() {
     }),
   )
 
+  const getColDefs = () => {
+    return headers.map((s) => {
+      const ret: GridColDef<Record<string, any>> = {
+        field: s,
+        headerName: s,
+      }
+      ret.align = "right"
+
+      // digits
+      ret.valueFormatter = (x: number) => {
+        if (typeof x !== "number") return x
+        const sLower = s.toLowerCase()
+        let decimalPlaces
+        if (["ratio"].includes(sLower)) {
+          decimalPlaces = 1
+        } else if (
+          [
+            "avgtime_lower90",
+            "avgtime_upper90",
+            "avghits_lower90",
+            "avghits_upper90",
+          ].includes(sLower)
+        ) {
+          decimalPlaces = 2
+        }
+        return x.toLocaleString(undefined, {
+          minimumFractionDigits: decimalPlaces,
+          maximumFractionDigits: decimalPlaces,
+        })
+      }
+
+      // highlighting
+      if (s === "avgHits_lower90") {
+        ret.cellClassName = (params: GridCellParams<any, number>) => {
+          if (params.value == null) {
+            return ""
+          }
+
+          return clsx("super-app", {
+            orange: params.value > 100000,
+          })
+        }
+      }
+      return ret
+    })
+  }
+
   return (
     <Card sx={CARD_PROPERTY}>
-      <CardContent>
+      <CardContent
+        sx={{
+          // "& .super-app-theme--cell": {
+          //   backgroundColor: "rgba(224, 183, 60, 0.55)",
+          //   color: "#1a3e72",
+          //   fontWeight: "600",
+          // },
+          "& .super-app.positive": {
+            backgroundColor: "rgba(157, 255, 118, 0.49)",
+            color: "#1a3e72",
+            fontWeight: "600",
+          },
+          "& .super-app.negative": {
+            backgroundColor: "#d47483",
+            color: "#1a3e72",
+            fontWeight: "600",
+          },
+          "& .super-app.orange": {
+            backgroundColor: "rgb(255, 191, 0)",
+            color: "#1a3e72",
+            fontWeight: "600",
+          },
+        }}
+      >
         <Typography gutterBottom variant="h5" component="div">
           90th Percentiles
         </Typography>
@@ -81,16 +157,12 @@ export default function PercentileCard() {
         )}
         {!loadStatus.loading && !loadStatus.hasError && (
           <DataGrid
-            apiRef={apiRef}
+            // apiRef={apiRef}
             autosizeOnMount
             // onRowDoubleClick={handleRowDblClick}
             // hideFooter
             rows={datamap}
-            columns={headers.map((s) => {
-              const ret: any = { field: s, headerName: s }
-              ret.valueFormatter = (x: number) => x.toLocaleString()
-              return ret
-            })}
+            columns={getColDefs()}
             sx={{
               height: "75vh",
             }}
