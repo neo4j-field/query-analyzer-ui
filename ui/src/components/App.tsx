@@ -216,7 +216,7 @@ export default function App() {
                   sessionStorage.removeItem(k)
                 }
               }
-              setTriggerRefresh(true)
+              setTriggerRefresh(!triggerRefresh)
             }}
           >
             <CachedIcon />

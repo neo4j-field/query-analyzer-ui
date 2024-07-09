@@ -4,8 +4,11 @@ import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 import { API_URIS } from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
+  existsInSession,
   fetchAbortWrapper,
   fetchGetUri,
+  getFromSession,
+  setInSession,
 } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
@@ -30,34 +33,38 @@ export default function PlannedCard() {
   // const handleRefetch = async () => fetchData()
 
   useEffect(() => {
-    return fetchAbortWrapper(fetchData)
+    if (existsInSession(QUERY_GET_PLANNING_PCT)) {
+      processFetchedData(getFromSession(QUERY_GET_PLANNING_PCT))
+    } else {
+      return fetchAbortWrapper(fetchData)
+    }
   }, [triggerRefresh])
 
   /****************************************************************************
    ****************************************************************************/
   const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const results = await Promise.all([
-      fetchGetUri(
-        `${SQLITE_ROOT}/${QUERY_GET_PLANNING_PCT}?dbname=${chosenDb}`,
-      ),
+    const result = await fetchGetUri(
+      `${SQLITE_ROOT}/${QUERY_GET_PLANNING_PCT}?dbname=${chosenDb}`,
       signal,
-    ])
+    )
 
-    let i = 0
-    for (const result of results) {
-      if (result.hasError) {
-        if (result.error !== FETCH_ABORT_MSG) {
-          console.error(`Error for fetch ${i}: ${result}`)
-          setLoadStatus({ ...loadStatus, loading: false, hasError: true })
-        }
-        return
+    if (result.hasError) {
+      if (result.error !== FETCH_ABORT_MSG) {
+        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
       }
-      i++
+      return
     }
-    setPlannedQueriesPct(results[0].data.rows[0][0])
-    setPlanElapsedPct(results[0].data.rows[0][1])
+
+    setInSession(QUERY_GET_PLANNING_PCT, result.data)
+
+    processFetchedData(result.data)
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
+  }
+
+  const processFetchedData = (data: any) => {
+    setPlannedQueriesPct(data.rows[0][0])
+    setPlanElapsedPct(data.rows[0][1])
   }
 
   return (

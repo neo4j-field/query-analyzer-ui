@@ -5,8 +5,11 @@ import { API_URIS } from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,
+  existsInSession,
   fetchAbortWrapper,
   fetchGetUri,
+  getFromSession,
+  setInSession,
 } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
@@ -33,35 +36,38 @@ export default function GeneralStatsCard() {
   const { chosenDb, triggerRefresh } = useChosenDb()
 
   useEffect(() => {
-    return fetchAbortWrapper(fetchData)
+    if (existsInSession(QUERY_GENERAL_STATS)) {
+      processFetchedData(getFromSession(QUERY_GENERAL_STATS))
+    } else {
+      return fetchAbortWrapper(fetchData)
+    }
   }, [triggerRefresh])
 
   /****************************************************************************
    ****************************************************************************/
   const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const results = await Promise.all([
-      fetchGetUri(`${SQLITE_ROOT}/${QUERY_GENERAL_STATS}?dbname=${chosenDb}`),
+    const result = await fetchGetUri(
+      `${SQLITE_ROOT}/${QUERY_GENERAL_STATS}?dbname=${chosenDb}`,
       signal,
-    ])
+    )
 
-    let i = 0
-    for (const result of results) {
-      if (result.hasError) {
-        if (result.error !== FETCH_ABORT_MSG) {
-          console.error(`Error for fetch ${i}: ${result}`)
-          setLoadStatus({ ...loadStatus, loading: false, hasError: true })
-        }
-        return
+    if (result.hasError) {
+      if (result.error !== FETCH_ABORT_MSG) {
+        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
       }
-      i++
+      return
     }
 
+    setInSession(QUERY_GENERAL_STATS, result.data)
+
+    processFetchedData(result.data)
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
+  }
+
+  const processFetchedData = (data: any) => {
     // general stats
-    const datamap = convertToDataMap(
-      results[0].data.headers,
-      results[0].data.rows,
-    )[0]
+    const datamap = convertToDataMap(data.headers, data.rows)[0]
     setFirstStartTimestamp(datamap.firstStartTimestampMs)
     setLastStartTimestamp(datamap.lastStartTimestampMs)
     setLogDuration(datamap.windowDurationMin)
@@ -69,7 +75,6 @@ export default function GeneralStatsCard() {
     setAvgPageFaults(datamap.avgPageFaults)
     setAvgTimeTaken(datamap.avgTimeTaken)
     setNumQueriesExecuted(datamap.numQueriesExecuted)
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   return (

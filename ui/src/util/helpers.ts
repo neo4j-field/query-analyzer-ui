@@ -1,5 +1,5 @@
-export const FETCH_ABORT_MSG = "Abort fetch from unmounting or dependency change"
-
+export const FETCH_ABORT_MSG =
+  "Abort fetch from unmounting or dependency change"
 
 /****************************************************************************
  ****************************************************************************/
@@ -47,7 +47,6 @@ export const convertToDataMap = (headers: string[], rows: any[][]) => {
   return dataMap
 }
 
-
 /****************************************************************************
  ****************************************************************************/
 export const fetchAbortWrapper = (fetchData: (signal: AbortSignal) => any) => {
@@ -59,4 +58,17 @@ export const fetchAbortWrapper = (fetchData: (signal: AbortSignal) => any) => {
   return () => {
     controller.abort(FETCH_ABORT_MSG)
   }
+}
+
+export const setInSession = (k: string, v: any) => {
+  sessionStorage.setItem(k, JSON.stringify(v))
+}
+
+export const getFromSession = (k: string) => {
+  const n = sessionStorage.getItem(k)
+  return n === null ? null : JSON.parse(n)
+}
+
+export const existsInSession = (k: string) => {
+  return sessionStorage.getItem(k) !== null
 }

@@ -4,8 +4,11 @@ import { API_URIS } from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,
+  existsInSession,
+  getFromSession,
   fetchAbortWrapper,
   fetchGetUri,
+  setInSession,
 } from "../../util/helpers"
 import { DataGrid, GridEventListener } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
@@ -45,7 +48,11 @@ export default function Top5Card({
   const { chosenDb, triggerRefresh } = useChosenDb()
 
   useEffect(() => {
-    return fetchAbortWrapper(fetchData)
+    if (existsInSession(uriName)) {
+      processFetchedData(getFromSession(uriName))
+    } else {
+      return fetchAbortWrapper(fetchData)
+    }
   }, [triggerRefresh])
 
   /****************************************************************************
@@ -64,13 +71,19 @@ export default function Top5Card({
       return
     }
 
-    const datamap = convertToDataMap(result.data.headers, result.data.rows)
+    setInSession(uriName, result.data)
+
+    processFetchedData(result.data)
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
+  }
+
+  const processFetchedData = (data: any) => {
+    const datamap = convertToDataMap(data.headers, data.rows)
     for (let i = 0; i < datamap.length; i++) {
       datamap[i].id = i
     }
-    setHeaders(result.data.headers)
+    setHeaders(data.headers)
     setDatamap(datamap)
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   const handleRowClick: GridEventListener<"rowClick"> = async (params) => {

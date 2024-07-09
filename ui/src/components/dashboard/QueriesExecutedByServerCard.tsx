@@ -6,8 +6,11 @@ import { API_URIS } from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,
+  existsInSession,
   fetchAbortWrapper,
   fetchGetUri,
+  getFromSession,
+  setInSession,
 } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
@@ -25,9 +28,7 @@ export default function QueriesExecutedByServer() {
     loading: false,
     hasError: false,
   })
-  // const [queryCountByServerRows, setQueryCountByServerRows] = useState<any[][]>(
-  //   [],
-  // )
+
   const [queryCountByServerHeaders, setQueryCountByServerHeaders] = useState<
     string[]
   >([])
@@ -36,48 +37,44 @@ export default function QueriesExecutedByServer() {
   >([])
   const { chosenDb, triggerRefresh } = useChosenDb()
 
-  // const handleRefetch = async () => {
-  //   fetchData()
-  // }
-
   useEffect(() => {
-    return fetchAbortWrapper(fetchData)
+    if (existsInSession(QUERY_QUERY_COUNT_BY_SERVER)) {
+      processFetchedData(getFromSession(QUERY_QUERY_COUNT_BY_SERVER))
+    } else {
+      return fetchAbortWrapper(fetchData)
+    }
   }, [triggerRefresh])
 
   /****************************************************************************
    ****************************************************************************/
   const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const results = await Promise.all([
-      fetchGetUri(
-        `${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}?dbname=${chosenDb}`,
-      ),
+    const result = await fetchGetUri(
+      `${SQLITE_ROOT}/${QUERY_QUERY_COUNT_BY_SERVER}?dbname=${chosenDb}`,
       signal,
-    ])
+    )
 
-    let i = 0
-    for (const result of results) {
-      if (result.hasError) {
-        if (result.hasError !== FETCH_ABORT_MSG) {
-          console.error(`Error for fetch ${i}: ${result}`)
-          setLoadStatus({ ...loadStatus, loading: false, hasError: true })
-        }
-        return
+    if (result.hasError) {
+      if (result.hasError !== FETCH_ABORT_MSG) {
+        setLoadStatus({ ...loadStatus, loading: false, hasError: true })
       }
-      i++
+      return
     }
+    setInSession(QUERY_QUERY_COUNT_BY_SERVER, result.data)
+    
+    processFetchedData(result.data)
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
+  }
+
+  const processFetchedData = (data: any) => {
     // query count
     // setQueryCountByServerRows(results[0].data.rows)
-    setQueryCountByServerHeaders(results[0].data.headers)
-    const datamap = convertToDataMap(
-      results[0].data.headers,
-      results[0].data.rows,
-    )
+    setQueryCountByServerHeaders(data.headers)
+    const datamap = convertToDataMap(data.headers, data.rows)
     for (let i = 0; i < datamap.length; i++) {
       datamap[i].id = i
     }
     setQueryCountByServerData(datamap)
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   return (

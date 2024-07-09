@@ -11,8 +11,11 @@ import { API_URIS } from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,
+  existsInSession,
   fetchAbortWrapper,
   fetchGetUri,
+  getFromSession,
+  setInSession,
 } from "../../util/helpers"
 import { useChosenDb } from "../App"
 import { DataGrid, GridCellParams, GridColDef } from "@mui/x-data-grid"
@@ -45,9 +48,8 @@ export default function PercentileCard() {
   // const apiRef = useGridApiRef()
 
   useEffect(() => {
-    const dataStoreStr = sessionStorage.getItem(QUERY_PERCENTILE)
-    if (dataStoreStr) {
-      processFetchedData(JSON.parse(dataStoreStr))
+    if (existsInSession(QUERY_PERCENTILE)) {
+      processFetchedData(getFromSession(QUERY_PERCENTILE))
     } else {
       return fetchAbortWrapper(fetchData)
     }
@@ -69,9 +71,10 @@ export default function PercentileCard() {
       return
     }
 
-    sessionStorage.setItem(QUERY_PERCENTILE, JSON.stringify(result.data))
+    setInSession(QUERY_PERCENTILE, result.data)
 
     processFetchedData(result.data)
+    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   const processFetchedData = (data: any) => {
@@ -81,7 +84,6 @@ export default function PercentileCard() {
     }
     setHeaders(data.headers)
     setDatamap(datamap)
-    setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
   const getColDefs = () => {
