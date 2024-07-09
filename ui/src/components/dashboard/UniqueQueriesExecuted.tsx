@@ -5,7 +5,7 @@ import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 import {
   QUERY_COUNT_UNIQUE_QUERIES,
   SQLITE_ROOT,
-} from "../../util/apiEndpoints"
+} from "../../util/constants"
 import { FETCH_ABORT_MSG, fetchAbortWrapper, fetchGetUri } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"

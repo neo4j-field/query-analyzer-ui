@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 
-import { QUERY_GET_PLANNING_PCT, SQLITE_ROOT } from "../../util/apiEndpoints"
+import { QUERY_GET_PLANNING_PCT, SQLITE_ROOT } from "../../util/constants"
 import { FETCH_ABORT_MSG, fetchAbortWrapper, fetchGetUri } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"

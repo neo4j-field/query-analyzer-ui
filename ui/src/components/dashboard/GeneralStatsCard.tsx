@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 
-import { QUERY_GENERAL_STATS, SQLITE_ROOT } from "../../util/apiEndpoints"
+import { QUERY_GENERAL_STATS, SQLITE_ROOT } from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,

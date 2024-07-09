@@ -26,7 +26,8 @@ import { v4 as uuid } from "uuid"
 import CssBaseline from "@mui/material/CssBaseline"
 import { Link, Outlet, useOutletContext } from "react-router-dom"
 import { fetchGetUri } from "../util/helpers"
-import { API_METADATA_ROOT, DB_LIST } from "../util/apiEndpoints"
+import { API_METADATA_ROOT, DB_LIST } from "../util/constants"
+import { SESSION_STORAGE_KEYS } from "../util/constants"
 
 const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
@@ -208,7 +209,12 @@ export default function App() {
           </FormControl>
           <IconButton
             color="inherit"
-            onClick={(e) => setTriggerRefresh(!triggerRefresh)}
+            onClick={(e) => {
+              for (const k of Object.values(SESSION_STORAGE_KEYS)) {
+                sessionStorage.removeItem(k)
+              }
+              setTriggerRefresh(true)
+            }}
           >
             <CachedIcon />
           </IconButton>

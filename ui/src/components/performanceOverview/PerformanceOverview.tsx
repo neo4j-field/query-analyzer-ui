@@ -17,7 +17,7 @@ import {
   QUERY_TIME_PLANNING_COUNT,
   QUERY_TIME_QUERY_COUNT,
   SQLITE_ROOT,
-} from "../../util/apiEndpoints"
+} from "../../util/constants"
 import { ChartDataset } from "chart.js"
 import {
   fetchGetUri,

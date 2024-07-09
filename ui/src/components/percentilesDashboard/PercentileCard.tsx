@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material"
-import { QUERY_PERCENTILE, SQLITE_ROOT } from "../../util/apiEndpoints"
+import { QUERY_PERCENTILE, SQLITE_ROOT } from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,
@@ -22,6 +22,7 @@ import {
   AVG_HITS_UPPER_90,
   AVG_TIME_LOWER_90,
   AVG_TIME_UPPER_90,
+  SESSION_STORAGE_KEYS,
 } from "../../util/constants"
 
 const CARD_PROPERTY = {
@@ -43,7 +44,12 @@ export default function PercentileCard() {
   // const apiRef = useGridApiRef()
 
   useEffect(() => {
-    return fetchAbortWrapper(fetchData)
+    const dataStoreStr = sessionStorage.getItem(SESSION_STORAGE_KEYS.PERCENTILE_STORE)
+    if (dataStoreStr) {
+      processFetchedData(JSON.parse(dataStoreStr))
+    } else {
+      return fetchAbortWrapper(fetchData)
+    }
   }, [triggerRefresh])
 
   /****************************************************************************
@@ -62,11 +68,17 @@ export default function PercentileCard() {
       return
     }
 
-    const datamap = convertToDataMap(result.data.headers, result.data.rows)
+    sessionStorage.setItem(SESSION_STORAGE_KEYS.PERCENTILE_STORE, JSON.stringify(result.data))
+
+    processFetchedData(result.data)
+  }
+
+  const processFetchedData = (data: any) => {
+    const datamap = convertToDataMap(data.headers, data.rows)
     for (let i = 0; i < datamap.length; i++) {
       datamap[i].id = i
     }
-    setHeaders(result.data.headers)
+    setHeaders(data.headers)
     setDatamap(datamap)
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
@@ -93,7 +105,7 @@ export default function PercentileCard() {
           ].includes(s)
         ) {
           decimalPlaces = 1
-        } 
+        }
         // else if ([].includes(s)) {
         //   decimalPlaces = 2
         // }

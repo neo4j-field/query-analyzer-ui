@@ -16,7 +16,7 @@ import {
   QUERY_TOP5_QUERIES_EXECUTED,
   QUERY_TOP5_PAGE_FAULTS,
   QUERY_TOP5_ELAPSED_TIME,
-} from "../../util/apiEndpoints"
+} from "../../util/constants"
 import * as React from "react"
 import { styled } from "@mui/material/styles"
 import Drawer from "@mui/material/Drawer"

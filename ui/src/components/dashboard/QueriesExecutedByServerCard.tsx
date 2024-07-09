@@ -5,7 +5,7 @@ import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 import {
   QUERY_QUERY_COUNT_BY_SERVER,
   SQLITE_ROOT,
-} from "../../util/apiEndpoints"
+} from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,
