@@ -2,13 +2,17 @@ import { useEffect, useState } from "react"
 // import AddIcon from "@mui/icons-material/Add"
 import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 
+import { API_URIS } from "../../util/constants"
 import {
-  QUERY_COUNT_UNIQUE_QUERIES,
-  SQLITE_ROOT,
-} from "../../util/constants"
-import { FETCH_ABORT_MSG, fetchAbortWrapper, fetchGetUri } from "../../util/helpers"
+  FETCH_ABORT_MSG,
+  fetchAbortWrapper,
+  fetchGetUri,
+} from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
+
+const { QUERY_COUNT_UNIQUE_QUERIES, rootName: SQLITE_ROOT } =
+  API_URIS.SQLITE_ROOT
 
 const CARD_PROPERTY = {
   borderRadius: 3,

@@ -26,8 +26,9 @@ import { v4 as uuid } from "uuid"
 import CssBaseline from "@mui/material/CssBaseline"
 import { Link, Outlet, useOutletContext } from "react-router-dom"
 import { fetchGetUri } from "../util/helpers"
-import { API_METADATA_ROOT, DB_LIST } from "../util/constants"
-import { SESSION_STORAGE_KEYS } from "../util/constants"
+import { API_URIS } from "../util/constants"
+
+const { rootName: API_METADATA_ROOT, DB_LIST } = API_URIS.API_METADATA_ROOT
 
 const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
@@ -210,8 +211,10 @@ export default function App() {
           <IconButton
             color="inherit"
             onClick={(e) => {
-              for (const k of Object.values(SESSION_STORAGE_KEYS)) {
-                sessionStorage.removeItem(k)
+              for (const x of Object.values(API_URIS)) {
+                for (const k of Object.values(x)) {
+                  sessionStorage.removeItem(k)
+                }
               }
               setTriggerRefresh(true)
             }}

@@ -11,18 +11,20 @@ import QueriesExecutedByServerCard from "./QueriesExecutedByServerCard"
 import UniqueQueriesExecutedCard from "./UniqueQueriesExecuted"
 import PlannedCard from "./PlannedCard"
 import Top5Card from "./Top5Card"
-import {
-  QUERY_TOP5_PAGE_HITS,
-  QUERY_TOP5_QUERIES_EXECUTED,
-  QUERY_TOP5_PAGE_FAULTS,
-  QUERY_TOP5_ELAPSED_TIME,
-} from "../../util/constants"
+import { API_URIS } from "../../util/constants"
 import * as React from "react"
 import { styled } from "@mui/material/styles"
 import Drawer from "@mui/material/Drawer"
 import CssBaseline from "@mui/material/CssBaseline"
 import CloseIcon from "@mui/icons-material/Close"
 import { useState } from "react"
+
+const {
+  QUERY_TOP5_QUERIES_EXECUTED,
+  QUERY_TOP5_PAGE_HITS,
+  QUERY_TOP5_PAGE_FAULTS,
+  QUERY_TOP5_ELAPSED_TIME,
+} = API_URIS.SQLITE_ROOT
 
 const drawerWidth = 240
 

@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 
-import { QUERY_GET_PLANNING_PCT, SQLITE_ROOT } from "../../util/constants"
-import { FETCH_ABORT_MSG, fetchAbortWrapper, fetchGetUri } from "../../util/helpers"
+import { API_URIS } from "../../util/constants"
+import {
+  FETCH_ABORT_MSG,
+  fetchAbortWrapper,
+  fetchGetUri,
+} from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
+
+const { QUERY_GET_PLANNING_PCT, rootName: SQLITE_ROOT } = API_URIS.SQLITE_ROOT
 
 const CARD_PROPERTY = {
   borderRadius: 3,

@@ -10,14 +10,7 @@ import {
   Typography,
 } from "@mui/material"
 import TimeGraph, { DATASET_BASE } from "./TimeGraph"
-import {
-  QUERY_TIME_ELAPSED_TIME_COUNT,
-  QUERY_TIME_PAGE_FAULTS_COUNT,
-  QUERY_TIME_PAGE_HITS_COUNT,
-  QUERY_TIME_PLANNING_COUNT,
-  QUERY_TIME_QUERY_COUNT,
-  SQLITE_ROOT,
-} from "../../util/constants"
+import { API_URIS } from "../../util/constants"
 import { ChartDataset } from "chart.js"
 import {
   fetchGetUri,
@@ -49,6 +42,15 @@ interface GraphTypeMapObject {
     headers: string[],
   ) => Record<StatType, ChartDataset<"line">[]>
 }
+
+const {
+  QUERY_TIME_ELAPSED_TIME_COUNT,
+  QUERY_TIME_PAGE_FAULTS_COUNT,
+  QUERY_TIME_PAGE_HITS_COUNT,
+  QUERY_TIME_PLANNING_COUNT,
+  QUERY_TIME_QUERY_COUNT,
+  rootName: SQLITE_ROOT,
+} = API_URIS.SQLITE_ROOT
 
 const graphTypeMap: Record<GraphType, GraphTypeMapObject> = {
   queries: {

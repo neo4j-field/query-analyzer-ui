@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CircularProgress, Typography } from "@mui/material"
 
-import { QUERY_GENERAL_STATS, SQLITE_ROOT } from "../../util/constants"
+import { API_URIS } from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,
@@ -10,6 +10,8 @@ import {
 } from "../../util/helpers"
 import { DataGrid } from "@mui/x-data-grid"
 import { useChosenDb } from "../App"
+
+const { QUERY_GENERAL_STATS, rootName: SQLITE_ROOT } = API_URIS.SQLITE_ROOT
 
 const CARD_PROPERTY = {
   borderRadius: 3,

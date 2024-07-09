@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material"
-import { QUERY_PERCENTILE, SQLITE_ROOT } from "../../util/constants"
+import { API_URIS } from "../../util/constants"
 import {
   FETCH_ABORT_MSG,
   convertToDataMap,
@@ -22,8 +22,9 @@ import {
   AVG_HITS_UPPER_90,
   AVG_TIME_LOWER_90,
   AVG_TIME_UPPER_90,
-  SESSION_STORAGE_KEYS,
 } from "../../util/constants"
+
+const { QUERY_PERCENTILE, rootName: SQLITE_ROOT } = API_URIS.SQLITE_ROOT
 
 const CARD_PROPERTY = {
   borderRadius: 3,
@@ -44,7 +45,7 @@ export default function PercentileCard() {
   // const apiRef = useGridApiRef()
 
   useEffect(() => {
-    const dataStoreStr = sessionStorage.getItem(SESSION_STORAGE_KEYS.PERCENTILE_STORE)
+    const dataStoreStr = sessionStorage.getItem(QUERY_PERCENTILE)
     if (dataStoreStr) {
       processFetchedData(JSON.parse(dataStoreStr))
     } else {
@@ -68,7 +69,7 @@ export default function PercentileCard() {
       return
     }
 
-    sessionStorage.setItem(SESSION_STORAGE_KEYS.PERCENTILE_STORE, JSON.stringify(result.data))
+    sessionStorage.setItem(QUERY_PERCENTILE, JSON.stringify(result.data))
 
     processFetchedData(result.data)
   }
