@@ -23,7 +23,8 @@ SELECT query_id,
   sum(pageHits) as "Total Page Hits",
   min(pageHits) as "Min Page Hits",
   max(pageHits) as "Max Page Hits",
-  avg(pageHits) as "Avg Page Hits"
+  avg(pageHits) as "Avg Page Hits",
+  count(query_id) as "Total Queries"
 FROM query_execution qe
 GROUP BY query_id
 ORDER BY sum(pageHits) DESC
