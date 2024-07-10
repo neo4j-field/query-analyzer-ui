@@ -48,6 +48,7 @@ export const convertToDataMap = (headers: string[], rows: any[][]) => {
 }
 
 /****************************************************************************
+ * Wrapper for fetching data to be able to abort fetches
  ****************************************************************************/
 export const fetchAbortWrapper = (fetchData: (signal: AbortSignal) => any) => {
   const controller = new AbortController()

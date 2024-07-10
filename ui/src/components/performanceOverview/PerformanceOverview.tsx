@@ -16,6 +16,9 @@ import {
   fetchGetUri,
   FETCH_ABORT_MSG,
   fetchAbortWrapper,
+  getFromSession,
+  existsInSession,
+  setInSession,
 } from "../../util/helpers"
 import { useChosenDb } from "../App"
 
@@ -169,7 +172,12 @@ export default function PerformanceOverview() {
   const { chosenDb, triggerRefresh } = useChosenDb()
 
   useEffect(() => {
-    return fetchAbortWrapper(fetchData)
+    const { apiUri, dataTransformer } = graphTypeMap[graphType]
+    if (existsInSession(apiUri)) {
+      processFetchedData(getFromSession(apiUri), dataTransformer)
+    } else {
+      return fetchAbortWrapper(fetchData)
+    }
   }, [graphType, triggerRefresh])
 
   /*************************************
@@ -209,14 +217,25 @@ export default function PerformanceOverview() {
       return
     }
 
-    // data transformation
-    setChartDatasetByStat(
-      dataTransformer(result.data.rows, result.data.headers),
-    )
+    setInSession(apiUri, result.data)
+
+    processFetchedData(result.data, dataTransformer)
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
   }
 
-  // console.log("render perfoverview")
+  const processFetchedData = (
+    data: any,
+    dataTransformer: (
+      rows: any[],
+      headers: string[],
+    ) => Record<StatType, ChartDataset<"line">[]>,
+  ) => {
+    /* {
+          total: [ {label:serverName, data:[]}, ... ],
+          avg: [...]
+       }*/
+    setChartDatasetByStat(dataTransformer(data.rows, data.headers))
+  }
 
   return (
     <>
