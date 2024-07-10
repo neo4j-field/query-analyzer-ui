@@ -1,11 +1,4 @@
-import {
-  Box,
-  Grid,
-  Typography,
-  Toolbar,
-  CircularProgress,
-  Button,
-} from "@mui/material"
+import { Box, Grid } from "@mui/material"
 import GeneralStatsCard from "./GeneralStatsCard"
 import QueriesExecutedByServerCard from "./QueriesExecutedByServerCard"
 import UniqueQueriesExecutedCard from "./UniqueQueriesExecuted"
@@ -13,11 +6,8 @@ import PlannedCard from "./PlannedCard"
 import Top5Card from "./Top5Card"
 import { API_URIS } from "../../util/constants"
 import * as React from "react"
-import { styled } from "@mui/material/styles"
-import Drawer from "@mui/material/Drawer"
-import CssBaseline from "@mui/material/CssBaseline"
-import CloseIcon from "@mui/icons-material/Close"
 import { useState } from "react"
+import QueryDrawer from "../parts/QueryDrawer"
 
 const {
   QUERY_TOP5_QUERIES_EXECUTED,
@@ -26,36 +16,6 @@ const {
   QUERY_TOP5_ELAPSED_TIME,
 } = API_URIS.SQLITE_ROOT
 
-const drawerWidth = 240
-
-const Div = styled("div", { shouldForwardProp: (prop) => prop !== "open" })<{
-  open?: boolean
-}>(({ theme, open }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-  transition: theme.transitions.create("margin", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  marginRight: `-${drawerWidth}px`,
-  ...(open && {
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginRight: 0,
-  }),
-}))
-
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-  justifyContent: "flex-start",
-}))
-
 export default function Dashboard() {
   // const theme = useTheme()
   const [open, setOpen] = React.useState(false)
@@ -63,18 +23,17 @@ export default function Dashboard() {
   const [queryId, setQueryId] = useState<string>("")
   const [loadingQueryText, setLoadingQueryText] = useState(false)
 
-  const toggleDrawer = (b: boolean) => {
-    if (b === undefined) setOpen(!open)
-    else setOpen(b)
-  }
-
   return (
     <Box sx={{ display: "flex" }}>
       {/* <CssBaseline /> */}
 
-      <Div open={open}>
-        <DrawerHeader />
-
+      <QueryDrawer
+        open={open}
+        setOpen={setOpen}
+        queryText={queryText}
+        queryId={queryId}
+        loadingQueryText={loadingQueryText}
+      >
         <Grid container spacing={4}>
           {/* LEFT COLUMN  */}
           <Grid item xs={6}>
@@ -116,41 +75,7 @@ export default function Dashboard() {
             </Grid>
           ))}
         </Grid>
-      </Div>
-
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: drawerWidth,
-            boxSizing: "border-box",
-          },
-        }}
-        variant="persistent"
-        anchor="right"
-        open={open}
-      >
-        <CssBaseline />
-        <Toolbar />
-
-        {loadingQueryText && <CircularProgress />}
-        {!loadingQueryText && (
-          <>
-            <Button onClick={() => toggleDrawer(false)}>
-              <CloseIcon />
-            </Button>
-            <Typography variant="h5">Query Id: {queryId}</Typography>
-            <Typography
-              sx={{
-                fontFamily: "Courier New, Courier, monospace",
-              }}
-            >
-              {queryText}
-            </Typography>
-          </>
-        )}
-      </Drawer>
+      </QueryDrawer>
     </Box>
   )
 }
