@@ -41,6 +41,7 @@ export default function PercentileCard() {
   })
   const [headers, setHeaders] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
+  const [avgTimeThresh, setAvgTimeThresh] = useState<number>(1)
   const [avgPageHitsThresh, setAvgPageHitsThresh] = useState<number>(100000)
   const [timeRatioThreshold, setTimeRatioThreshold] = useState<number>(50)
   const [hitsRatioThreshold, setHitsRatioThreshold] = useState<number>(50)
@@ -125,7 +126,11 @@ export default function PercentileCard() {
           return ""
         }
 
-        if (fld === AVG_HITS_LOWER_90) {
+        if (fld === AVG_TIME_LOWER_90) {
+          return clsx("cell-highlight", {
+            yellow: params.value > avgTimeThresh,
+          })
+        } else if (fld === AVG_HITS_LOWER_90) {
           return clsx("cell-highlight", {
             orange: params.value > avgPageHitsThresh,
           })
@@ -174,16 +179,26 @@ export default function PercentileCard() {
             color: "#1a3e72",
             fontWeight: "600",
           },
+          "& .cell-highlight.yellow": {
+            backgroundColor: "#FFEA00",
+            color: "#1a3e72",
+            fontWeight: "600",
+          },
         }}
       >
-        <Typography gutterBottom variant="h5" component="div">
-          90th Percentiles
-        </Typography>
 
         <Stack direction={"column"} spacing={2}>
           <Stack direction={"row"} spacing={2}>
             <TextField
-              label="Avg Page Hits Threshold"
+              label="Avg Time Lower 90 Threshold"
+              type="number"
+              value={avgTimeThresh}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setAvgTimeThresh(parseInt((e.target as HTMLInputElement).value))
+              }}
+            />
+            <TextField
+              label="Avg Page Hits Upper 90 Threshold"
               type="number"
               value={avgPageHitsThresh}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -193,7 +208,7 @@ export default function PercentileCard() {
               }}
             />
             <TextField
-              label="Avg Time Ratio Threshold"
+              label="Avg Time Upper 90 Ratio Threshold"
               type="number"
               value={timeRatioThreshold}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -203,7 +218,7 @@ export default function PercentileCard() {
               }}
             />
             <TextField
-              label="Avg Hits Ratio Threshold"
+              label="Avg Hits Upper 90 Ratio Threshold"
               type="number"
               value={hitsRatioThreshold}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
