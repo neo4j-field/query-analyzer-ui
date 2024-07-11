@@ -38,6 +38,7 @@ class ApiMetadataView(APIView):
             return Response(
                 {
                     "data": {
+                        "dbDirectory": os.path.abspath(DATABASE_DIRPATH),
                         "dbList": [
                             x
                             for x in next(os.walk(DATABASE_DIRPATH))[2]
