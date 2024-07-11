@@ -80,7 +80,7 @@ export default function QueriesExecutedByServer() {
   return (
     <Card sx={CARD_PROPERTY}>
       <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
+        <Typography gutterBottom variant="h6" component="div">
           Queries Executed By Server
         </Typography>
 

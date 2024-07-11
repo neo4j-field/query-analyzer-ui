@@ -34,7 +34,7 @@ const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
 const linkPages: { to: string; displayName: string }[] = [
   { to: "dashboard", displayName: "Dashboard" },
-  { to: "percentiles", displayName: "Percentiles Dashboard" },
+  { to: "percentiles", displayName: "Percentiles" },
   { to: "graphs", displayName: "Performance Overview" },
 ]
 
@@ -124,17 +124,16 @@ export function useChosenDb() {
  * @returns
  *****************************************************************************/
 export default function App() {
-  const [open, setOpen] = useState(true)
-  const [appBarName, setAppBarName] = useState<string>("")
   const [dbList, setDbList] = useState<string[]>([])
   const [chosenDb, setChosenDb] = useState<string>(
     import.meta.env.VITE_DEBUG_DEFAULT_DB || "",
   )
+  const [localDbPath, setLocalDbPath] = useState<string>()
   const [triggerRefresh, setTriggerRefresh] = useState<boolean>(false)
 
-  const toggleDrawer = () => {
-    setOpen(true)
-  }
+  // const toggleDrawer = () => {
+  //   setOpen(true)
+  // }
 
   useEffect(() => {
     ;(async () => {
@@ -146,6 +145,7 @@ export default function App() {
         return
       }
       setDbList(result.data.dbList)
+      setLocalDbPath(result.data.dbDirectory)
     })()
   }, [])
 
@@ -153,37 +153,19 @@ export default function App() {
     <Box style={{ display: "flex", height: CONTENT_AREA_HEIGHT }}>
       <CssBaseline />
 
-      <AppBar position="absolute" open={open}>
+      <AppBar position="absolute" open>
         <Toolbar
           sx={{
             pr: "24px", // keep right padding when drawer closed
           }}
         >
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            onClick={toggleDrawer}
-            sx={{
-              marginRight: "36px",
-              ...(open && { display: "none" }),
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography
-            component="h1"
-            variant="h6"
-            color="inherit"
-            noWrap
-            sx={{ flexGrow: 1 }}
-          >
-            {appBarName}
-          </Typography>
+          <Typography variant={"button"}>Database Directory</Typography>
+          <Typography>&nbsp;&nbsp;</Typography>
+          <Typography variant={"caption"}>{localDbPath}</Typography>
         </Toolbar>
       </AppBar>
 
-      <Drawer variant="permanent" open={open}>
+      <Drawer variant="permanent" open>
         <Toolbar
           sx={{
             display: "flex",
@@ -231,7 +213,6 @@ export default function App() {
               key={uuid()}
               component={Link}
               to={to}
-              onClick={() => setAppBarName(displayName)}
             >
               <ListItemIcon>
                 <AssignmentIcon />

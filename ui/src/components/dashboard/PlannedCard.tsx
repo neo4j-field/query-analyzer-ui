@@ -70,7 +70,7 @@ export default function PlannedCard() {
   return (
     <Card sx={CARD_PROPERTY}>
       <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
+        <Typography gutterBottom variant="h6" component="div">
           Planning
         </Typography>
         {loadStatus.loading && <CircularProgress />}

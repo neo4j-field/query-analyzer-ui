@@ -195,6 +195,7 @@ export default function PercentileCard() {
       queryId={queryId}
       loadingQueryText={loadingQueryText}
     >
+      <Typography variant={"h4"}>Percentiles</Typography>
       <Card sx={CARD_PROPERTY}>
         <CardContent
           sx={{

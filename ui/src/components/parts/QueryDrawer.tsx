@@ -94,7 +94,7 @@ export default function QueryDrawer({
             <Button onClick={() => toggleDrawer(false)}>
               <CloseIcon />
             </Button>
-            <Typography variant="h5">Query Id: {queryId}</Typography>
+            <Typography variant="h6">Query Id: {queryId}</Typography>
             <Typography
               sx={{
                 fontFamily: "Courier New, Courier, monospace",

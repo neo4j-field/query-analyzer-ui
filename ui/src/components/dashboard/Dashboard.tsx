@@ -1,4 +1,4 @@
-import { Box, Grid } from "@mui/material"
+import { Box, Grid, Typography } from "@mui/material"
 import GeneralStatsCard from "./GeneralStatsCard"
 import QueriesExecutedByServerCard from "./QueriesExecutedByServerCard"
 import UniqueQueriesExecutedCard from "./UniqueQueriesExecuted"
@@ -34,6 +34,7 @@ export default function Dashboard() {
         queryId={queryId}
         loadingQueryText={loadingQueryText}
       >
+        <Typography variant={"h4"}>Dashboard</Typography>
         <Grid container spacing={4}>
           {/* LEFT COLUMN  */}
           <Grid item xs={6}>

@@ -106,7 +106,7 @@ export default function Top5Card({
     <>
       <Card sx={CARD_PROPERTY}>
         <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
+          <Typography gutterBottom variant="h6" component="div">
             {title}
           </Typography>
           {loadStatus.loading && <CircularProgress />}
