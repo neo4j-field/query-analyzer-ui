@@ -18,6 +18,7 @@ jobs:
         instance_name: 'hltest-qau-ui'
         zone: 'us-east1-b'
         ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
+        user: 'henrylin'
         command: 'ls -al'
 
     # Example of using the output
