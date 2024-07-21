@@ -2,6 +2,7 @@ import logging as logger
 import os
 import sqlite3
 import time
+import traceback
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User
@@ -24,10 +25,17 @@ logger.basicConfig(
     level=getattr(settings, "LOG_LEVEL", logger.DEBUG),
 )
 
-DATABASE_DIRNAME = "databases"
 DATABASE_DIRPATH = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", DATABASE_DIRNAME
+    os.path.dirname(os.path.realpath(__file__)),
+    "..",
+    "..",
+    "..",
+    os.environ["DATABASE_DIRNAME"],
 )
+
+CACHE_SIZE = 10000
+PAGE_SIZE = 4096
+JOURNAL_MODE = "wal"
 
 
 class ApiMetadataView(APIView):
@@ -43,7 +51,7 @@ class ApiMetadataView(APIView):
                             x
                             for x in next(os.walk(DATABASE_DIRPATH))[2]
                             if x != ".DS_Store"
-                        ]
+                        ],
                     }
                 }
             )
@@ -72,9 +80,7 @@ class ReadSQLiteView(APIView):
         if db_file_name is None:
             msg = 'db_file_name "{db_file_name}" is invalid'
             print(msg)
-            return Response(
-                {"error": msg}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": msg}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             limit = request.GET.get("limit")
@@ -97,42 +103,57 @@ class ReadSQLiteView(APIView):
         #
         # QUERY DATABASE
         #
+        logger.debug(f"params={params}")
+        logger.debug(f"query={query}")
         try:
             conn = sqlite3.connect(fp)
             cursor = conn.cursor()
 
-            start = time.time()
+            for pragma_qry, targ_val in [
+                ("PRAGMA cache_size", CACHE_SIZE),
+                ("PRAGMA page_size", PAGE_SIZE),
+                ("PRAGMA journal_mode", JOURNAL_MODE),
+            ]:
+                execute_query(cursor, pragma_qry)
+                curr = cursor.fetchall()[0][0]
+                if curr != targ_val:
+                    execute_query(cursor, f"{pragma_qry} = {targ_val}")
 
-            # cursor.execute(QUERY_COUNT)
-            logger.debug(f"params={params}")
-            logger.debug(f"query={query}")
-            logger.debug("Executing...")
-            cursor.execute(query, params)
-            logger.debug(f"execute took {time.time() - start:.3f}")
+            start = time.time()
+            execute_query(cursor, query, params)
+            logger.debug(f"...took {time.time() - start:.3f}")
 
             headers = [x[0] for x in cursor.description]
             start = time.time()
             rows = cursor.fetchall()
             logger.debug(f"fetchall took {time.time() - start:.3f}")
 
-            # Close the connection
-            start = time.time()
-            conn.close()
-            logger.debug(f"close connection took {time.time() - start:.3f}")
-
             data = {"headers": headers, "rows": rows}
             start = time.time()
+            logger.debug("Creating Response object...")
             ret = Response({"data": data}, status=status.HTTP_200_OK)
-            logger.debug(f"Creating Response took {time.time() - start:.3f}")
+            logger.debug(f"...took {time.time() - start:.3f}")
             return ret
         except sqlite3.Error as e:
             errorMsg = str(e)
-            logger.error(f'sqlite3.Error: {errorMsg}')
+            logger.error(f"sqlite3.Error: {errorMsg}")
+            traceback.format_exc()
             return Response({"error": errorMsg}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            errorMsg = str(e)
+            e.with_traceback()
+            logger.error(f"Exception: {errorMsg}")
+            traceback.format_exc()
             return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": errorMsg}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+def execute_query(cursor, query, params={}):
+    logger.debug(f"params={params}")
+    logger.debug(f"query={query}")
+    logger.debug("Executing...")
+    cursor.execute(query, params)
 
 
 class ReadDb(viewsets.ModelViewSet):

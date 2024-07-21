@@ -138,7 +138,7 @@ export default function App() {
   useEffect(() => {
     ;(async () => {
       const result = await fetchGetUri(
-        `${API_METADATA_ROOT}/${DB_LIST}?dbname=${chosenDb}`,
+        `${API_METADATA_ROOT}/${DB_LIST}`,
       )
 
       if (result.hasError) {
