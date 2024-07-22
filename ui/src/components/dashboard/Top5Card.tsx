@@ -64,7 +64,7 @@ export default function Top5Card({
     )
 
     if (result.hasError) {
-      if (result.hasError !== FETCH_ABORT_MSG) {
+      if (result.error !== FETCH_ABORT_MSG) {
         console.error(`Error for fetch: ${result}`)
         setLoadStatus({ ...loadStatus, loading: false, hasError: true })
       }

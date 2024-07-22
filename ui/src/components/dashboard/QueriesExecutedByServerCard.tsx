@@ -55,7 +55,7 @@ export default function QueriesExecutedByServer() {
     )
 
     if (result.hasError) {
-      if (result.hasError !== FETCH_ABORT_MSG) {
+      if (result.error !== FETCH_ABORT_MSG) {
         setLoadStatus({ ...loadStatus, loading: false, hasError: true })
       }
       return
