@@ -103,8 +103,6 @@ class ReadSQLiteView(APIView):
         #
         # QUERY DATABASE
         #
-        logger.debug(f"params={params}")
-        logger.debug(f"query={query}")
         try:
             conn = sqlite3.connect(fp)
             cursor = conn.cursor()
@@ -150,9 +148,9 @@ class ReadSQLiteView(APIView):
 
 
 def execute_query(cursor, query, params={}):
-    logger.debug(f"params={params}")
-    logger.debug(f"query={query}")
-    logger.debug("Executing...")
+    # logger.debug(f"params={params}")
+    # logger.debug(f"query={query}")
+    logger.debug("Executing query...")
     cursor.execute(query, params)
 
 
