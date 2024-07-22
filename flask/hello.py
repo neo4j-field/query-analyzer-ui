@@ -1,15 +1,19 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.sql import text
 from sqlalchemy import engine
+
 import queries_flask as Q
 
 # this variable, db, will be used for all SQLAlchemy commands
-
 db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
+
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 # change string to the name of your database; add path if necessary
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///query_db2.db'
@@ -89,49 +93,16 @@ def read_queries(endpoint):
     query = Q.ENDPOINT_QUERY_DICT[endpoint]
     params = {}
 
+    limit = request.args.get("limit", default="")
+    if limit:
+        query = query.replace("%LIMIT%", str(limit))
+
     try:
-        a = db.session.execute(db.select(Query).filter_by(id=2)).first()
-        b = [x for x in db.session.execute(db.select(QueryExecution).filter_by(db_query_id=441525)).first()]
-        c = [x for x in QueryExecution.query.limit(10).all()]
         print(f"Executing '{endpoint}' query...")
-        result = db.session.execute(text(query))
-    
-        # Map the results to column names
-        rows = []
-        for row in result:
-            row_dict = dict(zip(result.keys(), row))
-            rows.append(row_dict)
-        print(f'{len(rows)} rows')
-        return "whatever"
-        # rows = QueryExecution.query.limit(10).all()
-        # result = []
-        # for row in rows:
-        #     result.append({
-        #         'db_query_id': row.db_query_id,
-        #         'db_transaction_id': row.db_transaction_id,
-        #         'server': row.server,
-        #         'query_id': row.query_id,
-        #         'database': row.database,
-        #         'db_id': row.db_id,
-        #         'authenticatedUser': row.authenticatedUser,
-        #         'executedUser': row.executedUser,
-        #         'elapsedTimeMs': row.elapsedTimeMs,
-        #         'pageFaults': row.pageFaults,
-        #         'pageHits': row.pageHits,
-        #         'planning': row.planning,
-        #         'waiting': row.waiting,
-        #         'start_timeStamp': row.start_timeStamp,
-        #         'end_timeStamp': row.end_timeStamp,
-        #         'allocatedBytes': row.allocatedBytes,
-        #         'client': row.client,
-        #         'server_hostname': row.server_hostname,
-        #         'failed': row.failed,
-        #         'stacktrace': row.stacktrace,
-        #         'lang_driver': row.lang_driver,
-        #         'driver_version': row.driver_version,
-        #         'query_type': row.query_type
-        #     })
-        # return jsonify(result)
+        result = db.session.execute(text(query), params)
+        headers = [x for x in result.keys()]
+        rows = [[y for y in x] for x in result.fetchall()]
+        return jsonify({"data": {"headers": headers, "rows": rows}})
     except Exception as e:
         # e holds description of the error
         error_text = "<p>The error:<br>" + str(e) + "</p>"
