@@ -1,3 +1,4 @@
+import os
 import traceback
 
 from flask import Flask, jsonify, request
@@ -7,10 +8,20 @@ from sqlalchemy.sql import text
 
 import queries_flask as Q
 
+from dotenv import load_dotenv
+load_dotenv()
 
 CACHE_SIZE = 10000
 PAGE_SIZE = 4096
 JOURNAL_MODE = "wal"
+
+DATABASE_DIRPATH = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    "..",
+    os.environ["DATABASE_DIRNAME"],
+)
+if not os.path.isdir(DATABASE_DIRPATH):
+    exit(f"{DATABASE_DIRPATH} does not exist")
 
 # this variable, db, will be used for all SQLAlchemy commands
 db = SQLAlchemy()
@@ -21,6 +32,20 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///query_db2.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 db.init_app(app)
 
+@app.route("/apimetadata/dblist")
+def get_db_list():
+    return jsonify(
+        {
+            "data": {
+                "dbDirectory": os.path.abspath(DATABASE_DIRPATH),
+                "dbList": [
+                    x
+                    for x in next(os.walk(DATABASE_DIRPATH))[2]
+                    if x != ".DS_Store"
+                ],
+            }
+        }
+    )
 
 @app.route("/read-sqlite/getquerytext/<query_id>")
 def get_query_text(query_id):
@@ -34,7 +59,10 @@ def get_query_text(query_id):
         text(Q.ENDPOINT_QUERY_DICT["getquerytext"]),
         {"query_id": query_id},
     )
-    return jsonify({"data": dict(zip(result.keys(), result.first()))})
+
+    headers = [x for x in result.keys()]
+    rows = [[y for y in x] for x in result.fetchall()]
+    return jsonify({"data": {"headers": headers, "rows": rows}})
 
 
 @app.route("/read-sqlite/<endpoint>")
