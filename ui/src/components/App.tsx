@@ -137,9 +137,7 @@ export default function App() {
 
   useEffect(() => {
     ;(async () => {
-      const result = await fetchGetUri(
-        `${API_METADATA_ROOT}/${DB_LIST}`,
-      )
+      const result = await fetchGetUri(`${API_METADATA_ROOT}/${DB_LIST}`)
 
       if (result.hasError) {
         return
@@ -159,23 +157,9 @@ export default function App() {
             pr: "24px", // keep right padding when drawer closed
           }}
         >
-          <Typography variant={"button"}>Database Directory</Typography>
-          <Typography>&nbsp;&nbsp;</Typography>
-          <Typography variant={"caption"}>{localDbPath}</Typography>
-        </Toolbar>
-      </AppBar>
-
-      <Drawer variant="permanent" open>
-        <Toolbar
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            px: [1],
-          }}
-        >
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Databases</InputLabel>
+          {/* DATABASE DROPDOWN */}
+          <FormControl sx={{ width: "30vh" }}>
+            <InputLabel>Databases</InputLabel>
             <Select
               value={chosenDb}
               label="Databases"
@@ -203,17 +187,37 @@ export default function App() {
           >
             <CachedIcon />
           </IconButton>
+
+          {/* DATABASE DIRECTORY DISPLAY */}
+          <Typography>&nbsp;&nbsp;</Typography>
+          <Typography variant={"button"}>Database Directory</Typography>
+          <Typography>&nbsp;&nbsp;</Typography>
+          <Typography variant={"caption"}>{localDbPath}</Typography>
+        </Toolbar>
+      </AppBar>
+
+      <Drawer variant="permanent" open>
+        <Toolbar
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            px: [1],
+          }}
+        >
+          <Box
+            component="img"
+            src="src/assets/neo4j-long.svg"
+            alt="logo"
+            sx={{ height: 40, mr: 2 }}
+          />
         </Toolbar>
         <Divider />
 
         {/* Sidebar links */}
         <List component="nav">
           {linkPages.map(({ to, displayName }, i) => (
-            <ListItemButton
-              key={uuid()}
-              component={Link}
-              to={to}
-            >
+            <ListItemButton key={uuid()} component={Link} to={to}>
               <ListItemIcon>
                 <AssignmentIcon />
               </ListItemIcon>
