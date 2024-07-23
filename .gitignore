@@ -3,3 +3,6 @@ databases/
 .vscode/
 gha-creds-*.json
 .env
+**/__pycache__/
+**/.venv/
+flask/instance/

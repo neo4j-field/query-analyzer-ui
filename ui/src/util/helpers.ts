@@ -20,11 +20,13 @@ export const fetchGetUri = async (urlPattern: string, signal?: AbortSignal) => {
     if (signal) options.signal = signal
     const response = await fetch(url, options)
 
+    const json = await response.json()
     if (!response.ok) {
-      throw new Error("Network response was not ok")
+      console.error(json)
+      throw new Error(`Network response returned error`)
     }
 
-    return response.json()
+    return json
   } catch (error) {
     if (error === FETCH_ABORT_MSG) console.debug(error)
     else console.error(error)
