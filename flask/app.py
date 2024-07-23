@@ -69,9 +69,7 @@ def get_query_text(query_id):
     
     engine = get_db_engine(db_file_name, db, app)
     print(f"Executing 'getquerytext' query...")
-    result = execute_query(engine, Q.ENDPOINT_QUERY_DICT["getquerytext"], {"query_id": query_id})
-    headers = [x for x in result.keys()]
-    rows = [[y for y in x] for x in result.fetchall()]
+    headers, rows = execute_query(engine, Q.ENDPOINT_QUERY_DICT["getquerytext"], {"query_id": query_id})
     return jsonify({"data": {"headers": headers, "rows": rows}})
 
 
@@ -101,28 +99,41 @@ def read_queries(endpoint):
             ("PRAGMA page_size", PAGE_SIZE),
             ("PRAGMA journal_mode", JOURNAL_MODE),
         ]:
-            result = execute_query(engine, pragma_qry)
-            curr = result.first()[0]
+            _, rows = execute_query(engine, pragma_qry)
+            curr = rows[0][0]
             if curr != targ_val:
                 print(f"Executing {pragma_qry} = {targ_val}")
                 execute_query(engine, f"{pragma_qry} = {targ_val}")
 
         print(f"Executing '{endpoint}' query...")
-        result = execute_query(engine, query, params)
-        headers = [x for x in result.keys()]
-        rows = [[y for y in x] for x in result.fetchall()]
+        headers, rows = execute_query(engine, query, params)
         return jsonify({"data": {"headers": headers, "rows": rows}})
     except Exception as e:
+        print(f"Error for endpoint={endpoint}")
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
 
 def execute_query(engine: Engine, query, params=None):
+    """
+    Returns: Tuple of (headers: List[str], rows: any[][])
+    """
     with engine.connect() as conn:
         if params is not None:
-            return conn.execute(text(query), params)
+            result = conn.execute(text(query), params)
         else:
-            return conn.execute(text(query))
+            result = conn.execute(text(query))
+        
+        # try catch if result ends up being closed 
+        try:
+            headers = [x for x in result.keys()]
+        except:
+            headers = []
+        try:
+            rows = [[y for y in x] for x in result.fetchall()]
+        except:
+            rows = []
+        return headers, rows
 
 def get_db_engine(dbname: str, db_: SQLAlchemy, app_: Flask):
     if dbname not in db_.engines:
