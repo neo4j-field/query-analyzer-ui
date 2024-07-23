@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DB_EXTENSION_WHITELIST = {".db", ".sqlite", ".sqlite3"}
+
 CACHE_SIZE = 10000
 PAGE_SIZE = 4096
 JOURNAL_MODE = "wal"
@@ -31,7 +33,7 @@ app = Flask(__name__)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 for fn in next(os.walk(DATABASE_DIRPATH))[2]:
-    if os.path.splitext(fn)[1].lower() not in {".db", ".sqlite", ".sqlite3"}:
+    if os.path.splitext(fn)[1].lower() not in DB_EXTENSION_WHITELIST:
         continue
     if "SQLALCHEMY_BINDS" not in app.config:
         app.config["SQLALCHEMY_BINDS"] = {}
@@ -50,7 +52,7 @@ def get_db_list():
             "data": {
                 "dbDirectory": os.path.abspath(DATABASE_DIRPATH),
                 "dbList": [
-                    x for x in next(os.walk(DATABASE_DIRPATH))[2] if x != ".DS_Store"
+                    x for x in next(os.walk(DATABASE_DIRPATH))[2] if x != ".DS_Store" and os.path.splitext(x)[1] in DB_EXTENSION_WHITELIST
                 ],
             }
         }
