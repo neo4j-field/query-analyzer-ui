@@ -1,4 +1,5 @@
 import os
+import time
 import traceback
 
 from flask import Flask, jsonify, request
@@ -8,9 +9,9 @@ from sqlalchemy.sql import text
 from sqlalchemy import Engine, create_engine
 
 import queries_flask as Q
+from util import format_seconds
 
 from dotenv import load_dotenv
-
 load_dotenv()
 
 DB_EXTENSION_WHITELIST = {".db", ".sqlite", ".sqlite3"}
@@ -52,7 +53,10 @@ def get_db_list():
             "data": {
                 "dbDirectory": os.path.abspath(DATABASE_DIRPATH),
                 "dbList": [
-                    x for x in next(os.walk(DATABASE_DIRPATH))[2] if x != ".DS_Store" and os.path.splitext(x)[1] in DB_EXTENSION_WHITELIST
+                    x
+                    for x in next(os.walk(DATABASE_DIRPATH))[2]
+                    if x != ".DS_Store"
+                    and os.path.splitext(x)[1] in DB_EXTENSION_WHITELIST
                 ],
             }
         }
@@ -66,10 +70,12 @@ def get_query_text(query_id):
         msg = 'db_file_name "{db_file_name}" is invalid'
         print(msg)
         return jsonify({"error": msg}), 404
-    
+
     engine = get_db_engine(db_file_name, db, app)
     print(f"Executing 'getquerytext' query...")
-    headers, rows = execute_query(engine, Q.ENDPOINT_QUERY_DICT["getquerytext"], {"query_id": query_id})
+    headers, rows = execute_query(
+        engine, Q.ENDPOINT_QUERY_DICT["getquerytext"], {"query_id": query_id}
+    )
     return jsonify({"data": {"headers": headers, "rows": rows}})
 
 
@@ -106,7 +112,11 @@ def read_queries(endpoint):
                 execute_query(engine, f"{pragma_qry} = {targ_val}")
 
         print(f"Executing '{endpoint}' query...")
+        start = time.time()
         headers, rows = execute_query(engine, query, params)
+        print(
+            f"...'{endpoint}' took {format_seconds(time.time() - start)}s, {len(rows)} rows"
+        )
         return jsonify({"data": {"headers": headers, "rows": rows}})
     except Exception as e:
         print(f"Error for endpoint={endpoint}")
@@ -123,8 +133,8 @@ def execute_query(engine: Engine, query, params=None):
             result = conn.execute(text(query), params)
         else:
             result = conn.execute(text(query))
-        
-        # try catch if result ends up being closed 
+
+        # try catch if result ends up being closed
         try:
             headers = [x for x in result.keys()]
         except:
@@ -135,11 +145,12 @@ def execute_query(engine: Engine, query, params=None):
             rows = []
         return headers, rows
 
+
 def get_db_engine(dbname: str, db_: SQLAlchemy, app_: Flask):
     if dbname not in db_.engines:
         print(f"Adding new db '{dbname}' to engines and conf")
         conn_str = "sqlite:///" + os.path.join(DATABASE_DIRPATH, dbname)
-        db_.engines[dbname] = create_engine(conn_str)
+        db_.engines[dbname] = create_engine(conn_str)  # type: ignore
         app_.config["SQLALCHEMY_BINDS"][dbname] = conn_str
     return db_.engines[dbname]
 
