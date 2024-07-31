@@ -1,14 +1,4 @@
 services:
-  # backend:
-  #   container_name: query-analyzer-api-cnt
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - ./databases:/databases
-
   flask:
     container_name: query-analyzer-apiflask-cnt
     build:
