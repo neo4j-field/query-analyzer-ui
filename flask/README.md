@@ -3,13 +3,8 @@ python3.11
 
 ## Install
 ```bash
-# create python venv environment
 python -m venv .venv
-
-# enter into it
 source .venv/bin/activate
-
-# install dependencies
 (.venv) python -m pip install -r requirements.txt
 ```
 

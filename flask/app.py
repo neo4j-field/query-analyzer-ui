@@ -12,6 +12,7 @@ import queries_flask as Q
 from util import format_seconds
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 DB_EXTENSION_WHITELIST = {".db", ".sqlite", ".sqlite3"}
@@ -20,10 +21,13 @@ CACHE_SIZE = 10000
 PAGE_SIZE = 4096
 JOURNAL_MODE = "wal"
 
+DATABASE_DIRNAME = (
+    os.environ["DATABASE_DIRNAME"] if "DATABASE_DIRNAME" in os.environ else "databases"
+)
 DATABASE_DIRPATH = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
-    os.environ["DATABASE_DIRNAME"],
+    DATABASE_DIRNAME,
 )
 if not os.path.isdir(DATABASE_DIRPATH):
     exit(f"{DATABASE_DIRPATH} does not exist")

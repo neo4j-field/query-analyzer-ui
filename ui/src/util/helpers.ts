@@ -15,7 +15,8 @@ export const fetchGetUri = async (urlPattern: string, signal?: AbortSignal) => {
   })
 
   try {
-    const url = `${import.meta.env.VITE_API_URI}/${urlPattern}`
+    const baseUri = import.meta.env.VITE_API_URI || "http://127.0.0.1:8000"
+    const url = `${baseUri}/${urlPattern}`
     const options: RequestInit = { method: "GET", headers }
     if (signal) options.signal = signal
     const response = await fetch(url, options)

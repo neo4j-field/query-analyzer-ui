@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY public ./public
 COPY src ./src
-COPY .env.template ./.env.devlocal.local
+COPY .env ./.env
 COPY index.html ./
 COPY package*.json ./
 COPY tsconfig*.json ./
