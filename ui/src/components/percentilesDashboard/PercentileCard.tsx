@@ -1,5 +1,6 @@
 import { ChangeEvent, useEffect, useState } from "react"
 import {
+  Box,
   Card,
   CardContent,
   CircularProgress,
@@ -14,6 +15,7 @@ import {
   existsInSession,
   fetchAbortWrapper,
   fetchGetUri,
+  fetchPostUri,
   getFromSession,
   setInSession,
 } from "../../util/helpers"
@@ -32,6 +34,7 @@ import {
   AVG_TIME_UPPER_90,
 } from "../../util/constants"
 import QueryDrawer from "../parts/QueryDrawer"
+import Markdown from "react-markdown"
 
 const {
   QUERY_GET_QUERY_TEXT,
@@ -49,6 +52,11 @@ export default function PercentileCard() {
     loading: false,
     hasError: false,
   })
+  const [openaiLoadStatus, setOpenaiLoadStatus] = useState({
+    loading: false,
+    hasError: false,
+  })
+  const [openaiContent, setOpenaiContent] = useState("<OpenAI Response>")
   const [headers, setHeaders] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
   const [avgTimeThresh, setAvgTimeThresh] = useState<number>(1)
@@ -76,7 +84,8 @@ export default function PercentileCard() {
    ****************************************************************************/
   const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    const result = await fetchGetUri(
+    setOpenaiContent("<OpenAI Response>")
+    let result = await fetchGetUri(
       `${SQLITE_ROOT}/${QUERY_PERCENTILE}?dbname=${chosenDb}`,
       signal,
     )
@@ -92,6 +101,12 @@ export default function PercentileCard() {
 
     processFetchedData(result.data)
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
+
+    setOpenaiLoadStatus({ loading: true, hasError: false })
+    result = await fetchPostUri(`openai/percentile`, result.data, signal)
+
+    setOpenaiContent(result.data.message)
+    setOpenaiLoadStatus({ loading: false, hasError: false })
   }
 
   const processFetchedData = (data: any) => {
@@ -196,6 +211,17 @@ export default function PercentileCard() {
       loadingQueryText={loadingQueryText}
     >
       <Typography variant={"h4"}>Percentiles</Typography>
+
+      {openaiLoadStatus.loading && (<>Generating summary text...<CircularProgress /></>)}
+      {!openaiLoadStatus.loading && openaiLoadStatus.hasError && (
+        <Typography>Error loading</Typography>
+      )}
+      {!openaiLoadStatus.loading && !openaiLoadStatus.hasError && (
+        <Box width={"70vw"}>
+          <Markdown>{openaiContent}</Markdown>
+        </Box>
+      )}
+
       <Card sx={CARD_PROPERTY}>
         <CardContent
           sx={{
@@ -270,7 +296,7 @@ export default function PercentileCard() {
               />
             </Stack>
 
-            <Stack sx={{ height: "75vh" }}>
+            <Stack width="70vw" sx={{ height: "75vh" }}>
               {loadStatus.loading && <CircularProgress />}
               {!loadStatus.loading && loadStatus.hasError && (
                 <Typography>Error loading</Typography>

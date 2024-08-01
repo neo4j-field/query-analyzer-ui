@@ -5,15 +5,17 @@ import traceback
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from openai import OpenAI, OpenAIError
 from sqlalchemy.sql import text
 from sqlalchemy import Engine, create_engine
 
-import queries_flask as Q
-from util import format_seconds
-
 from dotenv import load_dotenv
 
+from util import format_seconds, openai_percentile_question
+
 load_dotenv()
+
+import queries_flask as Q
 
 DB_EXTENSION_WHITELIST = {".db", ".sqlite", ".sqlite3"}
 
@@ -49,6 +51,18 @@ for fn in next(os.walk(DATABASE_DIRPATH))[2]:
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 db.init_app(app)
 
+openai_client = None
+try:
+    openai_client = OpenAI()
+    openai_client.models.list()
+except OpenAIError as e:
+    openai_client = None
+    print(repr(e))
+
+###############################################################################
+###############################################################################
+###############################################################################
+
 
 @app.route("/apimetadata/dblist")
 def get_db_list():
@@ -80,6 +94,7 @@ def get_query_text(query_id):
     headers, rows = execute_query(
         engine, Q.ENDPOINT_QUERY_DICT["getquerytext"], {"query_id": query_id}
     )
+    print(f"'getquerytext' query came back with {len(rows)} rows")
     return jsonify({"data": {"headers": headers, "rows": rows}})
 
 
@@ -124,6 +139,23 @@ def read_queries(endpoint):
         return jsonify({"data": {"headers": headers, "rows": rows}})
     except Exception as e:
         print(f"Error for endpoint={endpoint}")
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/openai/percentile", methods=["POST"])
+def create_aura():
+    if not openai_client:
+        return jsonify({"error": "Unable to send to OpenAI"})
+
+    try:
+        data = request.get_json()
+        content = openai_percentile_question(
+            openai_client, data["headers"], data["rows"]
+        )
+        return jsonify({"data": {"message": content}}), 200
+    except Exception as e:
+        print(f"Error:")
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 

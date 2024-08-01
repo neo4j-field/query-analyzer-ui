@@ -1,23 +1,60 @@
 export const FETCH_ABORT_MSG =
   "Abort fetch from unmounting or dependency change"
 
-/****************************************************************************
- ****************************************************************************/
-export const fetchGetUri = async (urlPattern: string, signal?: AbortSignal) => {
+const BASE_URI = import.meta.env.VITE_API_URI || "http://127.0.0.1:8000"
+
+const getBaseHeaders = () => {
   const username = "admin"
   const password = "neo4j"
   const credentials = btoa(`${username}:${password}`)
-
-  // Set up the headers
-  const headers = new Headers({
+  return new Headers({
     Accept: "application/json; indent=2",
     Authorization: `Basic ${credentials}`,
   })
+}
+
+/****************************************************************************
+ ****************************************************************************/
+export const fetchGetUri = async (urlPattern: string, signal?: AbortSignal) => {
+  const headers = getBaseHeaders()
 
   try {
-    const baseUri = import.meta.env.VITE_API_URI || "http://127.0.0.1:8000"
-    const url = `${baseUri}/${urlPattern}`
+    const url = `${BASE_URI}/${urlPattern}`
     const options: RequestInit = { method: "GET", headers }
+    if (signal) options.signal = signal
+    const response = await fetch(url, options)
+
+    const json = await response.json()
+    if (!response.ok) {
+      console.error(json)
+      throw new Error(`Network response returned error`)
+    }
+
+    return json
+  } catch (error) {
+    if (error === FETCH_ABORT_MSG) console.debug(error)
+    else console.error(error)
+    return { hasError: true, error }
+  }
+}
+
+/****************************************************************************
+ ****************************************************************************/
+export const fetchPostUri = async (
+  urlPattern: string,
+  body: any,
+  signal?: AbortSignal,
+) => {
+  const headers = getBaseHeaders()
+  headers.append("Content-type", "application/json")
+
+  try {
+    const url = `${BASE_URI}/${urlPattern}`
+    const options: RequestInit = {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    }
     if (signal) options.signal = signal
     const response = await fetch(url, options)
 
