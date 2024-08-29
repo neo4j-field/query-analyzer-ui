@@ -16,6 +16,7 @@ import {
   InputLabel,
   MenuItem,
   SelectChangeEvent,
+  useTheme,
 } from "@mui/material"
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar"
 import AssignmentIcon from "@mui/icons-material/Assignment"
@@ -130,6 +131,7 @@ export default function App() {
   )
   const [localDbPath, setLocalDbPath] = useState<string>()
   const [triggerRefresh, setTriggerRefresh] = useState<boolean>(false)
+  const { palette } = useTheme()
 
   // const toggleDrawer = () => {
   //   setOpen(true)
@@ -207,7 +209,11 @@ export default function App() {
         >
           <Box
             component="img"
-            src="src/assets/neo4j-long.svg"
+            src={
+              palette.mode === "dark"
+                ? "src/assets/neo4j-long-white.svg"
+                : "src/assets/neo4j-long.svg"
+            }
             alt="logo"
             sx={{ height: 40, mr: 2 }}
           />
@@ -218,9 +224,6 @@ export default function App() {
         <List component="nav">
           {linkPages.map(({ to, displayName }, i) => (
             <ListItemButton key={uuid()} component={Link} to={to}>
-              <ListItemIcon>
-                <AssignmentIcon />
-              </ListItemIcon>
               <ListItemText primary={displayName} />
             </ListItemButton>
           ))}
