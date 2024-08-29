@@ -134,7 +134,7 @@ def openai_percentile_question(
         ],
     )
     print(f"... took {time.time() - start:.3f} seconds")
-    time.sleep(1)
+    time.sleep(0.5)
 
     content = completion.choices[0].message.content
     # print(f"\n{content}")

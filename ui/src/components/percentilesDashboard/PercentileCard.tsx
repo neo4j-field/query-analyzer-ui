@@ -1,9 +1,11 @@
 import { ChangeEvent, useEffect, useState } from "react"
 import {
   Box,
+  Button,
   Card,
   CardContent,
   CircularProgress,
+  LinearProgress,
   Stack,
   TextField,
   Typography,
@@ -56,7 +58,8 @@ export default function PercentileCard() {
     loading: false,
     hasError: false,
   })
-  const [openaiContent, setOpenaiContent] = useState("<OpenAI Response>")
+  const [openaiContent, setOpenaiContent] = useState("")
+  const [disableOpenaiSummarize, setDisableOpenaiSummarize] = useState(true)
   const [headers, setHeaders] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
   const [avgTimeThresh, setAvgTimeThresh] = useState<number>(1)
@@ -74,7 +77,9 @@ export default function PercentileCard() {
 
   useEffect(() => {
     if (existsInSession(QUERY_PERCENTILE)) {
+      setDisableOpenaiSummarize(true)
       processFetchedData(getFromSession(QUERY_PERCENTILE))
+      setDisableOpenaiSummarize(false)
     } else {
       return fetchAbortWrapper(fetchData)
     }
@@ -84,8 +89,9 @@ export default function PercentileCard() {
    ****************************************************************************/
   const fetchData = async (signal: AbortSignal) => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
-    setOpenaiContent("<OpenAI Response>")
-    let result = await fetchGetUri(
+    setOpenaiContent("")
+    setDisableOpenaiSummarize(true)
+    const result = await fetchGetUri(
       `${SQLITE_ROOT}/${QUERY_PERCENTILE}?dbname=${chosenDb}`,
       signal,
     )
@@ -102,13 +108,14 @@ export default function PercentileCard() {
     processFetchedData(result.data)
     setLoadStatus({ ...loadStatus, loading: false, hasError: false })
 
-    setOpenaiLoadStatus({ loading: true, hasError: false })
-    result = await fetchPostUri(`openai/percentile`, result.data, signal)
-
-    setOpenaiContent(result.data.message)
-    setOpenaiLoadStatus({ loading: false, hasError: false })
+    // enable button to summarize table grid with OpenAI
+    setDisableOpenaiSummarize(false)
   }
 
+  /*****************************************************************************
+   * Process data into headers and datamap for display on table grid
+   * @param data
+   *****************************************************************************/
   const processFetchedData = (data: any) => {
     const datamap = convertToDataMap(data.headers, data.rows)
     for (let i = 0; i < datamap.length; i++) {
@@ -202,6 +209,17 @@ export default function PercentileCard() {
     setLoadingQueryText(false)
   }
 
+  const handleSummarizeOpenai = async () => {
+    setOpenaiLoadStatus({ loading: true, hasError: false })
+    const result = await fetchPostUri(
+      `openai/percentile`,
+      getFromSession(QUERY_PERCENTILE),
+    )
+
+    setOpenaiContent(result.data.message)
+    setOpenaiLoadStatus({ loading: false, hasError: false })
+  }
+
   return (
     <QueryDrawer
       open={openDrawer}
@@ -212,7 +230,12 @@ export default function PercentileCard() {
     >
       <Typography variant={"h4"}>Percentiles</Typography>
 
-      {openaiLoadStatus.loading && (<>Generating summary text...<CircularProgress /></>)}
+      {openaiLoadStatus.loading && (
+        <>
+          Generating summary text...
+          <LinearProgress />
+        </>
+      )}
       {!openaiLoadStatus.loading && openaiLoadStatus.hasError && (
         <Typography>Error loading</Typography>
       )}
@@ -253,6 +276,16 @@ export default function PercentileCard() {
           }}
         >
           <Stack direction={"column"} spacing={2}>
+            <Stack direction={"row"} spacing={2}>
+              <Button
+                disabled={disableOpenaiSummarize}
+                onClick={() => handleSummarizeOpenai()}
+                variant="contained"
+              >
+                Summarize
+              </Button>
+            </Stack>
+
             <Stack direction={"row"} spacing={2}>
               <TextField
                 label="Avg Time Lower 90 Threshold"
