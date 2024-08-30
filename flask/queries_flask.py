@@ -279,13 +279,14 @@ LIMIT %LIMIT%;
 """
 
 QUERY_PERCENTILE = """
-SELECT query_id, avgHits_lower90, avgHits_upper90, minHits_lower90, minHits_upper90, maxHits_lower90, maxHits_upper90, minTime_lower90, minTime_upper90, maxTime_lower90, maxTime_upper90, avgTime_lower90, avgTime_upper90, (avgTime_upper90 / avgTime_lower90) as ratio, count_lower90, count_upper90
+SELECT query_id, avgHits_L90, avgHits_U90, (avgHits_U90 / avgHits_L90) as avgHitsRatio,minHits_L90, minHits_U90, maxHits_L90, maxHits_U90, 
+  minTime_L90, minTime_U90, maxTime_L90, maxTime_U90, avgTime_L90, avgTime_U90, (avgTime_U90 / avgTime_L90) as avgTimeRatio, count_L90, count_U90
 FROM
 (
-  SELECT lower90.query_id as query_id, minTime_lower90, maxTime_lower90, avgTime_lower90,minHits_lower90, maxHits_lower90, avgHits_lower90, count_lower90, minTime_upper90, maxTime_upper90, avgTime_upper90, minHits_upper90, maxHits_upper90, avgHits_upper90, count_upper90
+  SELECT L90.query_id as query_id, minTime_L90, maxTime_L90, avgTime_L90,minHits_L90, maxHits_L90, avgHits_L90, count_L90, minTime_U90, maxTime_U90, avgTime_U90, minHits_U90, maxHits_U90, avgHits_U90, count_U90
   FROM 
   ( 
-    SELECT query_id, min(elapsedTimeMs) as minTime_lower90, max(elapsedTimeMs) as maxTime_lower90, avg(elapsedTimeMs) as avgTime_lower90,  min(pageHits) as minHits_lower90, max(pageHits) as maxHits_lower90, avg(pageHits) as avgHits_lower90, count(1) as count_lower90
+    SELECT query_id, min(elapsedTimeMs) as minTime_L90, max(elapsedTimeMs) as maxTime_L90, avg(elapsedTimeMs) as avgTime_L90,  min(pageHits) as minHits_L90, max(pageHits) as maxHits_L90, avg(pageHits) as avgHits_L90, count(1) as count_L90
     FROM (
       SELECT query_id, elapsedTimeMs, pageHits, SizePercentRank
       FROM (
@@ -302,11 +303,11 @@ FROM
       WHERE SizePercentRank < 0.9
     ) 
     GROUP BY query_id
-  ) lower90
+  ) L90
   
   LEFT JOIN 
   (
-    SELECT query_id, min(elapsedTimeMs) as minTime_upper90, max(elapsedTimeMs) as maxTime_upper90, avg(elapsedTimeMs) as avgTime_upper90, min(pageHits) as minHits_upper90, max(pageHits) as maxHits_upper90, avg(pageHits) as avgHits_upper90, count(1) as count_upper90
+    SELECT query_id, min(elapsedTimeMs) as minTime_U90, max(elapsedTimeMs) as maxTime_U90, avg(elapsedTimeMs) as avgTime_U90, min(pageHits) as minHits_U90, max(pageHits) as maxHits_U90, avg(pageHits) as avgHits_U90, count(1) as count_U90
     FROM (
         SELECT query_id, elapsedTimeMs, pageHits, SizePercentRank
         FROM (
@@ -322,7 +323,7 @@ FROM
         query_execution
       ) WHERE SizePercentRank >=0.9
     ) GROUP BY query_id 
-  ) upper90 ON lower90.query_id=upper90.query_id 
+  ) U90 ON L90.query_id=U90.query_id 
 ) percData
 WHERE query_id in (SELECT DISTINCT query_id from query_annotation)
 """

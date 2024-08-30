@@ -74,13 +74,15 @@ export const fetchPostUri = async (
 
 /****************************************************************************
  ****************************************************************************/
-export const convertToDataMap = (headers: string[], rows: any[][]) => {
+export const convertToDataMap = (headers: string[], rows: any[][], headerFilter: string[] = []) => {
   const dataMap: Record<string, any>[] = []
   for (const row of rows) {
     const mapRow: any = {}
     for (let i = 0; i < headers.length; i++) {
       const header = headers[i]
-      mapRow[header] = row[i] === null ? "NULL" : row[i]
+      if (!headerFilter.length || headerFilter.includes(header)) {
+        mapRow[header] = row[i] === null ? "NULL" : row[i]
+      }
     }
     dataMap.push(mapRow)
   }

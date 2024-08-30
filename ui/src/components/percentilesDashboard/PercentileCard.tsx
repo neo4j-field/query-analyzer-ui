@@ -49,6 +49,30 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
+const HEADERS_L90 = [
+  "query_id",
+  "avgHits_L90",
+  "minHits_L90",
+  "maxHits_L90",
+  "minTime_L90",
+  "maxTime_L90",
+  "avgTime_L90",
+  "count_L90",
+]
+
+const HEADERS_U90 = [
+  "query_id",
+  "avgHits_U90",
+  "avgHitsRatio",
+  "minHits_U90",
+  "maxHits_U90",
+  "minTime_U90",
+  "maxTime_U90",
+  "avgTime_U90",
+  "avgTimeRatio",
+  "count_U90",
+]
+
 export default function PercentileCard() {
   const [loadStatus, setLoadStatus] = useState({
     loading: false,
@@ -60,7 +84,8 @@ export default function PercentileCard() {
   })
   const [openaiContent, setOpenaiContent] = useState("")
   const [disableOpenaiSummarize, setDisableOpenaiSummarize] = useState(true)
-  const [headers, setHeaders] = useState<string[]>([])
+  const [headersL90, setHeadersL90] = useState<string[]>([])
+  const [headersU90, setHeadersU90] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
   const [avgTimeThresh, setAvgTimeThresh] = useState<number>(1)
   const [avgPageHitsThresh, setAvgPageHitsThresh] = useState<number>(100000)
@@ -121,12 +146,20 @@ export default function PercentileCard() {
     for (let i = 0; i < datamap.length; i++) {
       datamap[i].id = i
     }
-    setHeaders(data.headers)
     setDatamap(datamap)
+    
+    const headersL90ToSet: string[] = []
+    const headersU90ToSet: string[] = []
+    for (const h of data.headers) {
+      if (HEADERS_L90.includes(h)) headersL90ToSet.push(h)
+      if (HEADERS_U90.includes(h)) headersU90ToSet.push(h)
+    }
+    setHeadersL90(headersL90ToSet)
+    setHeadersU90(headersU90ToSet)
   }
 
-  const getColDefs = () => {
-    return headers.map((s) => {
+  const getColDefs = (headersToMap: string[]) => {
+    return headersToMap.map((s) => {
       const ret: GridColDef<Record<string, any>> = {
         field: s,
         headerName: s,
@@ -139,7 +172,8 @@ export default function PercentileCard() {
         let decimalPlaces
         if (
           [
-            "ratio",
+            "avgHitsRatio",
+            "avgTimeRatio",
             AVG_TIME_LOWER_90,
             AVG_TIME_UPPER_90,
             AVG_HITS_LOWER_90,
@@ -172,17 +206,15 @@ export default function PercentileCard() {
           return clsx("cell-highlight", {
             orange: params.value > avgPageHitsThresh,
           })
-        } else if (fld === AVG_TIME_UPPER_90) {
+        } else if (fld === "avgTimeRatio") {
           return clsx("cell-highlight", {
             negative:
-              params.value / params.row[AVG_TIME_LOWER_90] >=
-              timeRatioThreshold,
+              params.value >= timeRatioThreshold,
           })
-        } else if (fld === AVG_HITS_UPPER_90) {
+        } else if (fld === "avgHitsRatio") {
           return clsx("cell-highlight", {
             negative:
-              params.value / params.row[AVG_HITS_LOWER_90] >=
-              hitsRatioThreshold,
+              params.value >= hitsRatioThreshold,
           })
         } else {
           return ""
@@ -228,7 +260,9 @@ export default function PercentileCard() {
       queryId={queryId}
       loadingQueryText={loadingQueryText}
     >
-      <Typography variant={"h4"}>Percentiles</Typography>
+      <Typography variant={"h4"} gutterBottom>
+        Percentiles
+      </Typography>
 
       {openaiLoadStatus.loading && (
         <>
@@ -286,19 +320,12 @@ export default function PercentileCard() {
               </Button>
             </Stack>
 
+            <Typography variant="h5" gutterBottom>
+              Lower 90
+            </Typography>
             <Stack direction={"row"} spacing={2}>
               <TextField
-                label="Avg Time Lower 90 Threshold"
-                type="number"
-                value={avgTimeThresh}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setAvgTimeThresh(
-                    parseInt((e.target as HTMLInputElement).value),
-                  )
-                }}
-              />
-              <TextField
-                label="Avg Page Hits Upper 90 Threshold"
+                label="Avg Hits Threshold"
                 type="number"
                 value={avgPageHitsThresh}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -308,21 +335,11 @@ export default function PercentileCard() {
                 }}
               />
               <TextField
-                label="Avg Time Upper 90 Ratio Threshold"
+                label="Avg Time Threshold"
                 type="number"
-                value={timeRatioThreshold}
+                value={avgTimeThresh}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setTimeRatioThreshold(
-                    parseInt((e.target as HTMLInputElement).value),
-                  )
-                }}
-              />
-              <TextField
-                label="Avg Hits Upper 90 Ratio Threshold"
-                type="number"
-                value={hitsRatioThreshold}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setHitsRatioThreshold(
+                  setAvgTimeThresh(
                     parseInt((e.target as HTMLInputElement).value),
                   )
                 }}
@@ -340,7 +357,48 @@ export default function PercentileCard() {
                   autosizeOnMount
                   onRowClick={handleRowClick}
                   rows={datamap}
-                  columns={getColDefs()}
+                  columns={getColDefs(headersL90)}
+                />
+              )}
+            </Stack>
+
+            <Typography variant="h5" gutterBottom>
+              Upper 90
+            </Typography>
+            <Stack direction={"row"} spacing={2}>
+              <TextField
+                label="Avg Hits Upper2Lower Ratio"
+                type="number"
+                value={hitsRatioThreshold}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setHitsRatioThreshold(
+                    parseInt((e.target as HTMLInputElement).value),
+                  )
+                }}
+              />
+              <TextField
+                label="Avg Time Upper2Lower Ratio"
+                type="number"
+                value={timeRatioThreshold}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setTimeRatioThreshold(
+                    parseInt((e.target as HTMLInputElement).value),
+                  )
+                }}
+              />
+            </Stack>
+
+            <Stack width="70vw" sx={{ height: "75vh" }}>
+              {loadStatus.loading && <CircularProgress />}
+              {!loadStatus.loading && loadStatus.hasError && (
+                <Typography>Error loading</Typography>
+              )}
+              {!loadStatus.loading && !loadStatus.hasError && (
+                <DataGrid
+                  autosizeOnMount
+                  onRowClick={handleRowClick}
+                  rows={datamap}
+                  columns={getColDefs(headersU90)}
                 />
               )}
             </Stack>
