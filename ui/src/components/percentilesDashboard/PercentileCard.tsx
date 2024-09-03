@@ -308,15 +308,17 @@ export default function PercentileCard() {
           }}
         >
           <Stack direction={"column"} spacing={2}>
-            <Stack direction={"row"} spacing={2}>
-              <Button
-                disabled={disableOpenaiSummarize}
-                onClick={() => handleSummarizeOpenai()}
-                variant="contained"
-              >
-                Summarize
-              </Button>
-            </Stack>
+            {import.meta.env.VITE_ENABLE_GENAI === "true" && (
+              <Stack direction={"row"} spacing={2}>
+                <Button
+                  disabled={disableOpenaiSummarize}
+                  onClick={() => handleSummarizeOpenai()}
+                  variant="contained"
+                >
+                  Summarize
+                </Button>
+              </Stack>
+            )}
 
             <Typography sx={{ fontWeight: "bold" }} variant="h5" gutterBottom>
               Lower 90
