@@ -125,7 +125,8 @@ function statsTransformer(rows: any[], headers: string[]) {
     // {"x": 1709229540000, "total":6, "avg":0.0276, "min":0, "max":1 }
     if (data[0].total !== NO_COLUMN) {
       const totalDataset = structuredClone(DATASET_BASE)
-      totalDataset.borderColor = generateRandomColor()
+      if (server !== ALL_SERVERS)
+        totalDataset.borderColor = generateRandomColor()
       totalDataset.label = server
       totalDataset.data = data.map((n) => ({ x: n.x, y: n.total })) as any
       ret.total.push(totalDataset)
@@ -133,7 +134,7 @@ function statsTransformer(rows: any[], headers: string[]) {
 
     if (data[0].avg !== NO_COLUMN) {
       const avgDataset = structuredClone(DATASET_BASE)
-      avgDataset.borderColor = generateRandomColor()
+      if (server !== ALL_SERVERS) avgDataset.borderColor = generateRandomColor()
       avgDataset.label = server
       avgDataset.data = data.map((n) => ({ x: n.x, y: n.avg })) as any
       ret.avg.push(avgDataset)
@@ -141,7 +142,7 @@ function statsTransformer(rows: any[], headers: string[]) {
 
     if (data[0].min !== NO_COLUMN) {
       const minDataset = structuredClone(DATASET_BASE)
-      minDataset.borderColor = generateRandomColor()
+      if (server !== ALL_SERVERS) minDataset.borderColor = generateRandomColor()
       minDataset.label = server
       minDataset.data = data.map((n) => ({ x: n.x, y: n.min })) as any
       ret.min.push(minDataset)
@@ -149,7 +150,7 @@ function statsTransformer(rows: any[], headers: string[]) {
 
     if (data[0].max !== NO_COLUMN) {
       const maxDataset = structuredClone(DATASET_BASE)
-      maxDataset.borderColor = generateRandomColor()
+      if (server !== ALL_SERVERS) maxDataset.borderColor = generateRandomColor()
       maxDataset.label = server
       maxDataset.data = data.map((n) => ({ x: n.x, y: n.max })) as any
       ret.max.push(maxDataset)
