@@ -4,11 +4,13 @@ import {
   Toolbar,
   CircularProgress,
   Button,
+  Stack,
 } from "@mui/material"
 import { styled } from "@mui/material/styles"
 import Drawer from "@mui/material/Drawer"
 import CssBaseline from "@mui/material/CssBaseline"
 import CloseIcon from "@mui/icons-material/Close"
+import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import { Dispatch, ReactNode, SetStateAction } from "react"
 
 const DRAWER_WIDTH = 240
@@ -63,6 +65,10 @@ export default function QueryDrawer({
     else setOpen(b)
   }
 
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(queryText)
+  }
+
   return (
     <Box sx={{ display: "flex" }}>
       {/* <CssBaseline /> */}
@@ -91,9 +97,15 @@ export default function QueryDrawer({
         {loadingQueryText && <CircularProgress />}
         {!loadingQueryText && (
           <>
-            <Button onClick={() => toggleDrawer(false)}>
-              <CloseIcon />
-            </Button>
+            <Stack direction={"row-reverse"}>
+              <Button onClick={() => toggleDrawer(false)}>
+                <CloseIcon />
+              </Button>
+
+              <Button onClick={copyToClipboard}>
+                <ContentCopyIcon />
+              </Button>
+            </Stack>
             <Typography variant="h6">Query Id: {queryId}</Typography>
             <Typography
               sx={{

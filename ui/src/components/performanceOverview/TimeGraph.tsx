@@ -145,7 +145,7 @@ export default function TimeGraph({
 
   useEffect(() => {
     updateData()
-  }, [])
+  }, [xLabel, yLabel, graphTitle])
 
   const updateData = () => {
     setLoadStatus({ ...loadStatus, loading: true, hasError: false })
