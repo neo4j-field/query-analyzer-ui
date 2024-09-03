@@ -54,9 +54,9 @@ const HEADERS_L90 = [
   "avgHits_L90",
   "minHits_L90",
   "maxHits_L90",
+  "avgTime_L90",
   "minTime_L90",
   "maxTime_L90",
-  "avgTime_L90",
   "count_L90",
 ]
 
@@ -66,10 +66,10 @@ const HEADERS_U90 = [
   "avgHitsRatio",
   "minHits_U90",
   "maxHits_U90",
-  "minTime_U90",
-  "maxTime_U90",
   "avgTime_U90",
   "avgTimeRatio",
+  "minTime_U90",
+  "maxTime_U90",
   "count_U90",
 ]
 

@@ -280,7 +280,7 @@ LIMIT %LIMIT%;
 
 QUERY_PERCENTILE = """
 SELECT query_id, avgHits_L90, avgHits_U90, (avgHits_U90 / avgHits_L90) as avgHitsRatio,minHits_L90, minHits_U90, maxHits_L90, maxHits_U90, 
-  minTime_L90, minTime_U90, maxTime_L90, maxTime_U90, avgTime_L90, avgTime_U90, (avgTime_U90 / avgTime_L90) as avgTimeRatio, count_L90, count_U90
+  avgTime_U90, (avgTime_U90 / avgTime_L90) as avgTimeRatio, minTime_L90, minTime_U90, maxTime_L90, maxTime_U90, avgTime_L90, count_L90, count_U90
 FROM
 (
   SELECT L90.query_id as query_id, minTime_L90, maxTime_L90, avgTime_L90,minHits_L90, maxHits_L90, avgHits_L90, count_L90, minTime_U90, maxTime_U90, avgTime_U90, minHits_U90, maxHits_U90, avgHits_U90, count_U90
