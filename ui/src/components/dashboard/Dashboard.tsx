@@ -34,7 +34,9 @@ export default function Dashboard() {
         queryId={queryId}
         loadingQueryText={loadingQueryText}
       >
-        <Typography variant={"h4"}>Dashboard</Typography>
+        <Typography sx={{ fontWeight: "bold" }} variant={"h4"}>
+          Dashboard
+        </Typography>
         <Grid container spacing={4}>
           {/* LEFT COLUMN  */}
           <Grid item xs={6}>

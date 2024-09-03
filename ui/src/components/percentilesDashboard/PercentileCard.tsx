@@ -147,7 +147,7 @@ export default function PercentileCard() {
       datamap[i].id = i
     }
     setDatamap(datamap)
-    
+
     const headersL90ToSet: string[] = []
     const headersU90ToSet: string[] = []
     for (const h of data.headers) {
@@ -208,13 +208,11 @@ export default function PercentileCard() {
           })
         } else if (fld === "avgTimeRatio") {
           return clsx("cell-highlight", {
-            negative:
-              params.value >= timeRatioThreshold,
+            negative: params.value >= timeRatioThreshold,
           })
         } else if (fld === "avgHitsRatio") {
           return clsx("cell-highlight", {
-            negative:
-              params.value >= hitsRatioThreshold,
+            negative: params.value >= hitsRatioThreshold,
           })
         } else {
           return ""
@@ -260,7 +258,7 @@ export default function PercentileCard() {
       queryId={queryId}
       loadingQueryText={loadingQueryText}
     >
-      <Typography variant={"h4"} gutterBottom>
+      <Typography sx={{ fontWeight: "bold" }} variant={"h4"} gutterBottom>
         Percentiles
       </Typography>
 

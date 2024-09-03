@@ -8,6 +8,7 @@ import {
   RadioGroup,
   CircularProgress,
   Typography,
+  styled,
 } from "@mui/material"
 import TimeGraph, { DATASET_BASE } from "./TimeGraph"
 import { API_URIS } from "../../util/constants"
@@ -163,8 +164,15 @@ function generateRandomColor() {
   const g = Math.floor(Math.random() * (255 + 1))
   const b = Math.floor(Math.random() * (255 + 1))
   const a = 1
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
+  return `rgba(${r}, ${g}, ${b}, ${a})`
 }
+
+const Div = styled("div", { shouldForwardProp: (prop) => prop !== "open" })<{
+  open?: boolean
+}>(({ theme, open }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(3),
+}))
 
 /******************************************************************************
  * PERFORMANCE OVERVIEW COMPONENT
@@ -251,9 +259,11 @@ export default function PerformanceOverview() {
   }
 
   return (
-    <>
+    <Div>
       <Toolbar />
-      <Typography variant={"h4"}>Performance Overview</Typography>
+      <Typography sx={{ fontWeight: "bold" }} variant={"h4"} gutterBottom>
+        Performance Overview
+      </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <FormControl>
@@ -366,6 +376,6 @@ export default function PerformanceOverview() {
           )}
         </Grid>
       </Grid>
-    </>
+    </Div>
   )
 }
