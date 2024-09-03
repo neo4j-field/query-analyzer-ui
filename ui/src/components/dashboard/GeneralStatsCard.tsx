@@ -115,17 +115,17 @@ export default function GeneralStatsCard() {
               },
               {
                 id: 6,
-                col1: "Avg Time Taken",
+                col1: "Avg time taken per execution",
                 col2: `${avgTimeTaken.toFixed(1)} ms`,
               },
               {
                 id: 4,
-                col1: "Avg Page Hits",
+                col1: "Avg page hits per execution",
                 col2: `${avgPageHits.toFixed(1)} hits`,
               },
               {
                 id: 5,
-                col1: "Avg Page Faults",
+                col1: "Avg page faults per execution",
                 col2: `${avgPageFaults.toFixed(1)} faults`,
               },
             ]}

@@ -60,10 +60,10 @@ export default function Dashboard() {
 
           {/* TOP 5ers*/}
           {[
-            { uriName: QUERY_TOP5_QUERIES_EXECUTED, title: "Top 5 Queries" },
-            { uriName: QUERY_TOP5_PAGE_HITS, title: "Top 5 Page Hits" },
-            { uriName: QUERY_TOP5_PAGE_FAULTS, title: "Top 5 Page Faults" },
-            { uriName: QUERY_TOP5_ELAPSED_TIME, title: "Top 5 Elapsed Time" },
+            { uriName: QUERY_TOP5_QUERIES_EXECUTED, title: "Top Queries by Executions" },
+            { uriName: QUERY_TOP5_ELAPSED_TIME, title: "Top Queries by Elapsed Time" },
+            { uriName: QUERY_TOP5_PAGE_HITS, title: "Top Queries by Page Hits" },
+            { uriName: QUERY_TOP5_PAGE_FAULTS, title: "Top Queries by Page Faults" },
           ].map((x, i) => (
             <Grid key={i} item xs={11} sm={11} md={11} lg={11} xl={11}>
               <Top5Card
