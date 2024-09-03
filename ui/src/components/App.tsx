@@ -6,7 +6,6 @@ import {
   IconButton,
   List,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
   Toolbar,
   styled,
@@ -19,13 +18,11 @@ import {
   useTheme,
 } from "@mui/material"
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar"
-import AssignmentIcon from "@mui/icons-material/Assignment"
 import CachedIcon from "@mui/icons-material/Cached"
-import MenuIcon from "@mui/icons-material/Menu"
 import { v4 as uuid } from "uuid"
 
 import CssBaseline from "@mui/material/CssBaseline"
-import { Link, Outlet, useOutletContext } from "react-router-dom"
+import { Link, Outlet, useOutletContext, useLocation } from "react-router-dom"
 import { fetchGetUri } from "../util/helpers"
 import { API_URIS } from "../util/constants"
 
@@ -33,7 +30,8 @@ const { rootName: API_METADATA_ROOT, DB_LIST } = API_URIS.API_METADATA_ROOT
 
 const CONTENT_AREA_HEIGHT = import.meta.env.VITE_CONTENT_AREA_HEIGHT || "62vh"
 
-const linkPages: { to: string; displayName: string }[] = [
+const linkPages: { to: string; displayName: string; ignore?: boolean }[] = [
+  { ignore: true, to: "", displayName: "Dashboard" },
   { to: "dashboard", displayName: "Dashboard" },
   { to: "percentiles", displayName: "Percentiles" },
   { to: "graphs", displayName: "Performance Overview" },
@@ -125,6 +123,7 @@ export function useChosenDb() {
  * @returns
  *****************************************************************************/
 export default function App() {
+  const { hash, pathname: currentPathname, search } = useLocation()
   const [dbList, setDbList] = useState<string[]>([])
   const [chosenDb, setChosenDb] = useState<string>(
     import.meta.env.VITE_DEBUG_DEFAULT_DB || "",
@@ -148,6 +147,13 @@ export default function App() {
       setLocalDbPath(result.data.dbDirectory)
     })()
   }, [])
+
+  const isSelected = (itemDisplayName: string) => {
+    const currentDisplayName = linkPages.filter(
+      (x) => `/${x.to}` === currentPathname,
+    )[0].displayName
+    return currentDisplayName === itemDisplayName
+  }
 
   return (
     <Box style={{ display: "flex", height: CONTENT_AREA_HEIGHT }}>
@@ -222,11 +228,18 @@ export default function App() {
 
         {/* Sidebar links */}
         <List component="nav">
-          {linkPages.map(({ to, displayName }, i) => (
-            <ListItemButton key={uuid()} component={Link} to={to}>
-              <ListItemText primary={displayName} />
-            </ListItemButton>
-          ))}
+          {linkPages.map(({ to, displayName, ignore }, i) =>
+            ignore ? null : (
+              <ListItemButton
+                key={uuid()}
+                component={Link}
+                to={to}
+                selected={isSelected(displayName)}
+              >
+                <ListItemText primary={displayName} />
+              </ListItemButton>
+            ),
+          )}
         </List>
       </Drawer>
 
