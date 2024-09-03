@@ -318,7 +318,7 @@ export default function PercentileCard() {
               </Button>
             </Stack>
 
-            <Typography variant="h5" gutterBottom>
+            <Typography sx={{ fontWeight: "bold" }} variant="h5" gutterBottom>
               Lower 90
             </Typography>
             <Stack direction={"row"} spacing={2}>
@@ -360,7 +360,7 @@ export default function PercentileCard() {
               )}
             </Stack>
 
-            <Typography variant="h5" gutterBottom>
+            <Typography sx={{ fontWeight: "bold" }} variant="h5" gutterBottom>
               Upper 90
             </Typography>
             <Stack direction={"row"} spacing={2}>
