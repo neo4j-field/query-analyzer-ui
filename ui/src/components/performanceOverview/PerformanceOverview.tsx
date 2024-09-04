@@ -85,7 +85,7 @@ const graphTypeMap: Record<GraphType, GraphTypeMapObject> = {
     apiUri: QUERY_TIME_ELAPSED_TIME_COUNT,
     xLabel: "Timestamp",
     yLabel: "Total (ms)",
-    graphTitle: "Execution Time Per Minute",
+    graphTitle: "Elapsed Time Per Minute",
     dataTransformer: statsTransformer,
   },
 
@@ -286,7 +286,7 @@ export default function PerformanceOverview() {
               />
               <FormControlLabel
                 value="execution"
-                label="Execution Time"
+                label="Elapsed Time"
                 control={<Radio />}
               />
               <FormControlLabel

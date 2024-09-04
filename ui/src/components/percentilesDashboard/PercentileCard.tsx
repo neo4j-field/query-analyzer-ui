@@ -49,6 +49,27 @@ const CARD_PROPERTY = {
   boxShadow: 0,
 }
 
+const HEADER_DISPLAY_MAP: Record<string, any> = {
+  query_id: { displayName: "query_id" },
+  avgHits_L90: { displayName: "Avg Hits" },
+  minHits_L90: { displayName: "Min Hits" },
+  maxHits_L90: { displayName: "Max Hits" },
+  avgTime_L90: { displayName: "Avg Elapsed (ms)" },
+  minTime_L90: { displayName: "Min Elapsed (ms)" },
+  maxTime_L90: { displayName: "Max Elapsed (ms)" },
+  count_L90: { displayName: "Executions" },
+
+  avgHits_U90: { displayName: "Avg Hits" },
+  minHits_U90: { displayName: "Min Hits" },
+  maxHits_U90: { displayName: "Max Hits" },
+  avgHitsRatio: { displayName: "Hits U90:L90 Ratio" },
+  avgTime_U90: { displayName: "Avg Elapsed (ms)" },
+  minTime_U90: { displayName: "Min Elapsed (ms)" },
+  maxTime_U90: { displayName: "Max Elapsed (ms)" },
+  avgTimeRatio: { displayName: "Elapsed U90:L90 Ratio" },
+  count_U90: { displayName: "Executions" },
+}
+
 const HEADERS_L90 = [
   "query_id",
   "avgHits_L90",
@@ -59,17 +80,16 @@ const HEADERS_L90 = [
   "maxTime_L90",
   "count_L90",
 ]
-
 const HEADERS_U90 = [
   "query_id",
   "avgHits_U90",
-  "avgHitsRatio",
   "minHits_U90",
   "maxHits_U90",
+  "avgHitsRatio",
   "avgTime_U90",
-  "avgTimeRatio",
   "minTime_U90",
   "maxTime_U90",
+  "avgTimeRatio",
   "count_U90",
 ]
 
@@ -162,7 +182,7 @@ export default function PercentileCard() {
     return headersToMap.map((s) => {
       const ret: GridColDef<Record<string, any>> = {
         field: s,
-        headerName: s,
+        headerName: HEADER_DISPLAY_MAP[s].displayName,
       }
       ret.align = "right"
 
@@ -259,7 +279,7 @@ export default function PercentileCard() {
       loadingQueryText={loadingQueryText}
     >
       <Typography sx={{ fontWeight: "bold" }} variant={"h4"} gutterBottom>
-        Percentiles
+        Percentiles by Elapsed Time
       </Typography>
 
       {openaiLoadStatus.loading && (
@@ -325,21 +345,21 @@ export default function PercentileCard() {
             </Typography>
             <Stack direction={"row"} spacing={2}>
               <TextField
-                label="Avg Hits Threshold"
-                type="number"
-                value={avgPageHitsThresh}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setAvgPageHitsThresh(
-                    parseInt((e.target as HTMLInputElement).value),
-                  )
-                }}
-              />
-              <TextField
                 label="Avg Time Threshold"
                 type="number"
                 value={avgTimeThresh}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   setAvgTimeThresh(
+                    parseInt((e.target as HTMLInputElement).value),
+                  )
+                }}
+              />
+              <TextField
+                label="Avg Hits Threshold"
+                type="number"
+                value={avgPageHitsThresh}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setAvgPageHitsThresh(
                     parseInt((e.target as HTMLInputElement).value),
                   )
                 }}
@@ -367,21 +387,21 @@ export default function PercentileCard() {
             </Typography>
             <Stack direction={"row"} spacing={2}>
               <TextField
-                label="Avg Hits Upper2Lower Ratio"
+                label="Elapsed U90:L90 Ratio"
                 type="number"
-                value={hitsRatioThreshold}
+                value={timeRatioThreshold}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setHitsRatioThreshold(
+                  setTimeRatioThreshold(
                     parseInt((e.target as HTMLInputElement).value),
                   )
                 }}
               />
               <TextField
-                label="Avg Time Upper2Lower Ratio"
+                label="Hits U90:L90 Ratio"
                 type="number"
-                value={timeRatioThreshold}
+                value={hitsRatioThreshold}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setTimeRatioThreshold(
+                  setHitsRatioThreshold(
                     parseInt((e.target as HTMLInputElement).value),
                   )
                 }}
