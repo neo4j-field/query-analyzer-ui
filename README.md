@@ -1,7 +1,7 @@
 # Query Analyzer Interface
 ## Dashboard and chart visualizations for the Query Analysis tool https://github.com/ravi-anthapu/Neo4jqueryprocessor by reading in the Sqlite files output from the tool.
-![](/1.png)
-![](/2.png)
+![](/assets/1.png)
+![](/assets/2.png)
 * Simply choose a log database from the dropdown to view statistics of a Neo4j query log at its given time window, like the number of queries, estimated time taken, page hits and page faults.
 
 ### To build and run the application using Docker:
