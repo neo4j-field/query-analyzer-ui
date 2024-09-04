@@ -71,7 +71,7 @@ export default function PlannedCard() {
     <Card sx={CARD_PROPERTY}>
       <CardContent>
         <Typography gutterBottom variant="h6" component="div">
-          Query Executions and Planning Time
+          Planning Time in Query Executions
         </Typography>
         {loadStatus.loading && <CircularProgress />}
         {!loadStatus.loading && loadStatus.hasError && (
@@ -90,7 +90,7 @@ export default function PlannedCard() {
               },
               {
                 id: 2,
-                col1: "% of total elapsed",
+                col1: "% of total elapsed time",
                 col2: `${planElapsedPct.toFixed(2)} %`,
               },
             ]}

@@ -223,10 +223,10 @@ ORDER BY timestampMinute
 
 # -- num servers
 QUERY_QUERY_COUNT_BY_SERVER = """
-SELECT server, count(1) as "Number of Queries Run"
+SELECT server as Server, count(1) as "Number of Executions"
 FROM query_execution 
 GROUP by server
-ORDER BY "Number of Queries Run" DESC
+ORDER BY "Number of Executions" DESC
 """
 
 # # -- time+server counts where planning > 100

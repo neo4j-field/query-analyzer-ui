@@ -111,7 +111,7 @@ export default function GeneralStatsCard() {
               {
                 id: 7,
                 col1: "Queries Executed",
-                col2: `${numQueriesExecuted.toLocaleString()} queries`,
+                col2: `${numQueriesExecuted.toLocaleString()}`,
               },
               {
                 id: 6,
@@ -121,12 +121,12 @@ export default function GeneralStatsCard() {
               {
                 id: 4,
                 col1: "Avg page hits per execution",
-                col2: `${avgPageHits.toFixed(1)} hits`,
+                col2: `${avgPageHits.toFixed(1)}`,
               },
               {
                 id: 5,
                 col1: "Avg page faults per execution",
-                col2: `${avgPageFaults.toFixed(1)} faults`,
+                col2: `${avgPageFaults.toFixed(1)}`,
               },
             ]}
             columns={[

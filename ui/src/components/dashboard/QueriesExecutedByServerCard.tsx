@@ -97,7 +97,7 @@ export default function QueriesExecutedByServer() {
             rows={queryCountByServerData}
             columns={queryCountByServerHeaders.map((s) => {
               const ret: any = { field: s, headerName: s, flex: 1 }
-              if (s === "Number of Queries Run") {
+              if (s === "Number of Executions") {
                 ret.valueFormatter = (x: number) => x.toLocaleString()
               }
               return ret
