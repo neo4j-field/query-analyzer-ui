@@ -107,8 +107,10 @@ export default function PercentileCard() {
   const [headersL90, setHeadersL90] = useState<string[]>([])
   const [headersU90, setHeadersU90] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
-  const [avgTimeThresh, setAvgTimeThresh] = useState<number>(1)
-  const [avgPageHitsThresh, setAvgPageHitsThresh] = useState<number>(100000)
+  const [avgTimeLThresh, setAvgTimeLThresh] = useState<number>(1)
+  const [avgPageHitsLThresh, setAvgPageHitsLThresh] = useState<number>(100000)
+  const [avgTimeUThresh, setAvgTimeUThresh] = useState<number>(100)
+  const [avgPageHitsUThresh, setAvgPageHitsUThresh] = useState<number>(100000)
   const [timeRatioThreshold, setTimeRatioThreshold] = useState<number>(50)
   const [hitsRatioThreshold, setHitsRatioThreshold] = useState<number>(50)
   const { chosenDb, triggerRefresh } = useChosenDb()
@@ -188,6 +190,7 @@ export default function PercentileCard() {
 
       // digits
       ret.valueFormatter = (x: number) => {
+        if (s === "query_id") return x
         if (typeof x !== "number") return x
         let decimalPlaces
         if (
@@ -220,11 +223,19 @@ export default function PercentileCard() {
 
         if (fld === AVG_TIME_LOWER_90) {
           return clsx("cell-highlight", {
-            yellow: params.value > avgTimeThresh,
+            yellow: params.value > avgTimeLThresh,
           })
         } else if (fld === AVG_HITS_LOWER_90) {
           return clsx("cell-highlight", {
-            orange: params.value > avgPageHitsThresh,
+            orange: params.value > avgPageHitsLThresh,
+          })
+        } else if (fld === AVG_TIME_UPPER_90) {
+          return clsx("cell-highlight", {
+            yellow: params.value > avgTimeUThresh,
+          })
+        } else if (fld === AVG_HITS_UPPER_90) {
+          return clsx("cell-highlight", {
+            orange: params.value > avgPageHitsUThresh,
           })
         } else if (fld === "avgTimeRatio") {
           return clsx("cell-highlight", {
@@ -345,21 +356,25 @@ export default function PercentileCard() {
             </Typography>
             <Stack direction={"row"} spacing={2}>
               <TextField
-                label="Avg Time Threshold"
+                label={
+                  HEADER_DISPLAY_MAP.avgTime_L90.displayName + " Threshold"
+                }
                 type="number"
-                value={avgTimeThresh}
+                value={avgTimeLThresh}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setAvgTimeThresh(
+                  setAvgTimeLThresh(
                     parseInt((e.target as HTMLInputElement).value),
                   )
                 }}
               />
               <TextField
-                label="Avg Hits Threshold"
+                label={
+                  HEADER_DISPLAY_MAP.avgHits_L90.displayName + " Threshold"
+                }
                 type="number"
-                value={avgPageHitsThresh}
+                value={avgPageHitsLThresh}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setAvgPageHitsThresh(
+                  setAvgPageHitsLThresh(
                     parseInt((e.target as HTMLInputElement).value),
                   )
                 }}
@@ -386,6 +401,30 @@ export default function PercentileCard() {
               Upper 90
             </Typography>
             <Stack direction={"row"} spacing={2}>
+              <TextField
+                label={
+                  HEADER_DISPLAY_MAP.avgTime_U90.displayName + " Threshold"
+                }
+                type="number"
+                value={avgTimeUThresh}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setAvgTimeUThresh(
+                    parseInt((e.target as HTMLInputElement).value),
+                  )
+                }}
+              />
+              <TextField
+                label={
+                  HEADER_DISPLAY_MAP.avgTime_U90.displayName + " Threshold"
+                }
+                type="number"
+                value={avgPageHitsUThresh}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setAvgPageHitsUThresh(
+                    parseInt((e.target as HTMLInputElement).value),
+                  )
+                }}
+              />
               <TextField
                 label="Elapsed U90:L90 Ratio"
                 type="number"
