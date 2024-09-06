@@ -51,26 +51,26 @@ const CARD_PROPERTY = {
 
 const HEADER_DISPLAY_MAP: Record<string, any> = {
   query_id: { displayName: "query_id" },
-  avgHits_L90: { displayName: "Avg Hits" },
-  minHits_L90: { displayName: "Min Hits" },
-  maxHits_L90: { displayName: "Max Hits" },
-  avgTime_L90: { displayName: "Avg Elapsed (ms)" },
-  minTime_L90: { displayName: "Min Elapsed (ms)" },
-  maxTime_L90: { displayName: "Max Elapsed (ms)" },
-  count_L90: { displayName: "Executions" },
+  avgHits_L90: { displayName: "Avg Hits L90" },
+  minHits_L90: { displayName: "Min Hits L90" },
+  maxHits_L90: { displayName: "Max Hits L90" },
+  avgTime_L90: { displayName: "Avg Elapsed (ms) L90" },
+  minTime_L90: { displayName: "Min Elapsed (ms) L90" },
+  maxTime_L90: { displayName: "Max Elapsed (ms) L90" },
+  count_L90: { displayName: "Executions L90" },
 
-  avgHits_U90: { displayName: "Avg Hits" },
-  minHits_U90: { displayName: "Min Hits" },
-  maxHits_U90: { displayName: "Max Hits" },
-  avgHitsRatio: { displayName: "Hits U90:L90 Ratio" },
-  avgTime_U90: { displayName: "Avg Elapsed (ms)" },
-  minTime_U90: { displayName: "Min Elapsed (ms)" },
-  maxTime_U90: { displayName: "Max Elapsed (ms)" },
-  avgTimeRatio: { displayName: "Elapsed U90:L90 Ratio" },
-  count_U90: { displayName: "Executions" },
+  avgHits_U90: { displayName: "Avg Hits U10" },
+  minHits_U90: { displayName: "Min Hits U10" },
+  maxHits_U90: { displayName: "Max Hits U10" },
+  avgHitsRatio: { displayName: "Hits U10:L90 Ratio" },
+  avgTime_U90: { displayName: "Avg Elapsed (ms) U10" },
+  minTime_U90: { displayName: "Min Elapsed (ms) U10" },
+  maxTime_U90: { displayName: "Max Elapsed (ms) U10" },
+  avgTimeRatio: { displayName: "Elapsed U10:L90 Ratio" },
+  count_U90: { displayName: "Executions U10" },
 }
 
-const HEADERS_L90 = [
+const HEADERS = [
   "query_id",
   "avgHits_L90",
   "minHits_L90",
@@ -79,9 +79,6 @@ const HEADERS_L90 = [
   "minTime_L90",
   "maxTime_L90",
   "count_L90",
-]
-const HEADERS_U90 = [
-  "query_id",
   "avgHits_U90",
   "minHits_U90",
   "maxHits_U90",
@@ -104,8 +101,7 @@ export default function PercentileCard() {
   })
   const [openaiContent, setOpenaiContent] = useState("")
   const [disableOpenaiSummarize, setDisableOpenaiSummarize] = useState(true)
-  const [headersL90, setHeadersL90] = useState<string[]>([])
-  const [headersU90, setHeadersU90] = useState<string[]>([])
+  const [headers, setHeaders] = useState<string[]>([])
   const [datamap, setDatamap] = useState<Record<string, any>[]>([])
   const [avgTimeLThresh, setAvgTimeLThresh] = useState<number>(1)
   const [avgPageHitsLThresh, setAvgPageHitsLThresh] = useState<number>(100000)
@@ -170,14 +166,11 @@ export default function PercentileCard() {
     }
     setDatamap(datamap)
 
-    const headersL90ToSet: string[] = []
-    const headersU90ToSet: string[] = []
+    const headersToSet: string[] = []
     for (const h of data.headers) {
-      if (HEADERS_L90.includes(h)) headersL90ToSet.push(h)
-      if (HEADERS_U90.includes(h)) headersU90ToSet.push(h)
+      if (HEADERS.includes(h)) headersToSet.push(h)
     }
-    setHeadersL90(headersL90ToSet)
-    setHeadersU90(headersU90ToSet)
+    setHeaders(headersToSet)
   }
 
   const getColDefs = (headersToMap: string[]) => {
@@ -185,6 +178,7 @@ export default function PercentileCard() {
       const ret: GridColDef<Record<string, any>> = {
         field: s,
         headerName: HEADER_DISPLAY_MAP[s].displayName,
+        headerAlign: "right",
       }
       ret.align = "right"
 
@@ -290,7 +284,7 @@ export default function PercentileCard() {
       loadingQueryText={loadingQueryText}
     >
       <Typography sx={{ fontWeight: "bold" }} variant={"h4"} gutterBottom>
-        Percentiles by Elapsed Time
+        90th Percentiles by Elapsed Time
       </Typography>
 
       {openaiLoadStatus.loading && (
@@ -351,9 +345,6 @@ export default function PercentileCard() {
               </Stack>
             )}
 
-            <Typography sx={{ fontWeight: "bold" }} variant="h5" gutterBottom>
-              Lower 90
-            </Typography>
             <Stack direction={"row"} spacing={2}>
               <TextField
                 label={
@@ -381,25 +372,6 @@ export default function PercentileCard() {
               />
             </Stack>
 
-            <Stack width="70vw" sx={{ height: "75vh" }}>
-              {loadStatus.loading && <CircularProgress />}
-              {!loadStatus.loading && loadStatus.hasError && (
-                <Typography>Error loading</Typography>
-              )}
-              {!loadStatus.loading && !loadStatus.hasError && (
-                <DataGrid
-                  // apiRef={apiRef}
-                  autosizeOnMount
-                  onRowClick={handleRowClick}
-                  rows={datamap}
-                  columns={getColDefs(headersL90)}
-                />
-              )}
-            </Stack>
-
-            <Typography sx={{ fontWeight: "bold" }} variant="h5" gutterBottom>
-              Upper 90
-            </Typography>
             <Stack direction={"row"} spacing={2}>
               <TextField
                 label={
@@ -457,7 +429,7 @@ export default function PercentileCard() {
                   autosizeOnMount
                   onRowClick={handleRowClick}
                   rows={datamap}
-                  columns={getColDefs(headersU90)}
+                  columns={getColDefs(headers)}
                 />
               )}
             </Stack>

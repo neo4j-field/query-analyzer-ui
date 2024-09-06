@@ -40,7 +40,7 @@ export const DATASET_BASE: ChartDataset<"line"> = {
   // tension: 0.1,
   borderColor: "rgba(75, 192, 192, 1)",
   borderWidth: 1,
-  pointRadius: 1, // Set to 0 to hide the points
+  pointRadius: 2, // Set to 0 to hide the points
   // fill: {
   //   target: 'origin',
   //   above: 'rgb(255, 0, 0)',   // Area will be red above the origin
