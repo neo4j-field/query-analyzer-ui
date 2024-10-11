@@ -335,7 +335,10 @@ FROM
     ) GROUP BY query_id 
   ) U90 ON L90.query_id=U90.query_id 
 ) percData
-WHERE query_id in (SELECT DISTINCT query_id from query_annotation)
+
+--
+-- comment this out, seems to only look for queries with corresponding graphql id 
+--WHERE query_id in (SELECT DISTINCT query_id from query_annotation)
 """
 
 ENDPOINT_QUERY_DICT = {
