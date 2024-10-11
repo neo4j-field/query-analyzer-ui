@@ -387,7 +387,7 @@ export default function PercentileCard() {
               />
               <TextField
                 label={
-                  HEADER_DISPLAY_MAP.avgTime_U90.displayName + " Threshold"
+                  HEADER_DISPLAY_MAP.avgHits_U90.displayName + " Threshold"
                 }
                 type="number"
                 value={avgPageHitsUThresh}
@@ -398,7 +398,7 @@ export default function PercentileCard() {
                 }}
               />
               <TextField
-                label="Elapsed U90:L90 Ratio"
+                label="Elapsed Ratio"
                 type="number"
                 value={timeRatioThreshold}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -408,7 +408,7 @@ export default function PercentileCard() {
                 }}
               />
               <TextField
-                label="Hits U90:L90 Ratio"
+                label="Hits Ratio"
                 type="number"
                 value={hitsRatioThreshold}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
