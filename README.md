@@ -5,9 +5,15 @@
 * Simply choose a log database from the dropdown to view statistics of a Neo4j query log at its given time window, like the number of queries, estimated time taken, page hits and page faults.
 
 ### To build and run the application using Docker:
-* Create a `databases` directory here (alongside `ui` and `backend`) and place your Query Analysis sqlite files.
-* Run the below:
 ```sh
+# Create a `databases` directory here (alongside `ui` and `flask`) and place your Query Analysis sqlite files.
+mkdir database
+
+#  For both `ui` and `flask` diretories, create `.env` file based on their respective `.env.template`
+cp ui/.env.template ui/.env
+cp flask/.env.template ui/.env
+
+# Finally build and run the docker container
 docker compose build
 docker compose up -d
 ```
